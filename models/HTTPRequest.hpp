@@ -1,12 +1,14 @@
-#ifndef HTTP_REQUEST_MODEL_HPP
-#define HTTP_REQUEST_MODEL_HPP
+#ifndef HTTP_REQUEST_HPP
+#define HTTP_REQUEST_HPP
 
 #include <string>
 
-class HTTPRequestModel
+// - Representa solicitações HTTP.
+// - Encapsula informações, como método HTTP, URI, cabeçalhos e corpo.
+class HTTPRequest
 {
 public:
-    HTTPRequestModel(std::string rawData); // TODO: Validar atributos
+    HTTPRequest(std::string rawData); // TODO: Validar atributos
     std::string getMethod() const;
     std::string getPath() const;
     std::string getHeader() const;
@@ -21,4 +23,4 @@ private:
     std::string host;
 };
 
-#endif // !HTTP_REQUEST_MODEL_HPP
+#endif // !HTTP_REQUEST_HPP

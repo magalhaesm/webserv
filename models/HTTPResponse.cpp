@@ -1,8 +1,8 @@
-#include "HTTPRespondeModel.hpp"
+#include "HTTPResponse.hpp"
 
 #include <sstream>
 
-std::string HTTPResponseModel::HTTPResponseModel::toString() const
+std::string HTTPResponse::HTTPResponse::toString() const
 {
     std::ostringstream oss;
     oss << "HTTP/1.1 " << statusCode << " " << contentType << "\r\n";

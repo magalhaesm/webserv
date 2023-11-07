@@ -1,9 +1,8 @@
 #ifndef REQUEST_CONTROLLER_HPP
 #define REQUEST_CONTROLLER_HPP
 
-#include "HTTPRequestModel.hpp"
-#include "HTTPResponseModel.hpp"
-#include "CGIScriptController.hpp"
+#include "HTTPRequest.hpp"
+#include "HTTPResponse.hpp"
 
 class RequestController
 {
@@ -13,7 +12,7 @@ public:
     }
 
     // Método para lidar com uma solicitação HTTP
-    void handleRequest(HTTPRequestModel& request, HTTPResponseModel& response)
+    void handleRequest(const HTTPRequest& request, HTTPResponse& response)
     {
         // Verifica o método HTTP (GET, POST, DELETE)
         std::string method = request.getMethod();
@@ -41,20 +40,20 @@ public:
 
 private:
     // Manipulador para solicitações GET
-    void handleGetRequest(const HTTPRequestModel& request, HTTPResponseModel& response)
+    void handleGetRequest(const HTTPRequest& request, HTTPResponse& response)
     {
         // Lógica para manipular solicitações GET
         // Pode incluir leitura de arquivos estáticos, geração dinâmica de conteúdo, etc.
     }
 
     // Manipulador para solicitações POST
-    void handlePostRequest(const HTTPRequestModel& request, HTTPResponseModel& response)
+    void handlePostRequest(const HTTPRequest& request, HTTPResponse& response)
     {
         // Lógica para manipular solicitações POST
     }
 
     // Manipulador para solicitações DELETE
-    void handleDeleteRequest(const HTTPRequestModel& request, HTTPResponseModel& response)
+    void handleDeleteRequest(const HTTPRequest& request, HTTPResponse& response)
     {
         // Lógica para manipular solicitações DELETE
     }
