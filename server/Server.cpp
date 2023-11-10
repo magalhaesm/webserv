@@ -42,6 +42,16 @@ void Server::listen()
     }
 }
 
+void Server::receive(const std::string& request)
+{
+    std::cout << "Recebido: \n" << request << std::endl;
+}
+
+void Server::send(const std::string& response)
+{
+    std::cout << "Enviado: \n" << response << std::endl;
+}
+
 #include <stdio.h>
 // TODO: ler e escrever no socket
 void Server::handleIncomingData(Connection* conn)

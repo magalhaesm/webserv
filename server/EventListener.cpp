@@ -25,7 +25,6 @@ EventListener::~EventListener()
     close(m_epollFd);
 }
 
-// TODO: iniciar um socket aqui
 void EventListener::subscribe(Server* target)
 {
     int socket = target->getSocket();
@@ -33,18 +32,6 @@ void EventListener::subscribe(Server* target)
     watchSocket(socket);
 }
 
-void EventListener::test(struct epoll_event* event)
-{
-    std::cout << "EVENT: " << event->data.fd << std::endl;
-}
-
-class Dispatcher
-{
-    // private:
-    //     void* connections[SOMAXCONN];
-};
-
-// toda leitura/escrita deve ser monitorada
 void EventListener::start()
 {
     startServers();
@@ -54,26 +41,30 @@ void EventListener::start()
         int eventCount = epoll_wait(m_epollFd, m_events, MAX_EVENTS, -1);
         for (int idx = 0; idx < eventCount; ++idx)
         {
-            // Se a conexão ainda não existe, cria-se uma
             int socket = m_events[idx].data.fd;
-            Server* server = findServerBySocket(socket);
-            if (server)
+            Server* associatedServer = findServerBySocket(socket);
+            if (associatedServer)
             {
-                // struct epoll_event event;
-                Connection* client = m_manager.connect(server);
-                watchSocket(client->getSocket());
+                createConnection(associatedServer, &m_events[idx]);
             }
-            // se existe, trata-se
             else
             {
-                Connection* conn = m_manager.getConnection(socket);
-                conn->notifyServer();
-
-                // TODO:
-                // conn->onRead()
+                handleConnection(socket); // dispatcher.notify(socket)
             }
         }
     }
+}
+
+void EventListener::createConnection(Server* server, struct epoll_event* event)
+{
+    Connection* client = m_manager.connect(server, event);
+    watchSocket(client->getSocket());
+}
+
+void EventListener::handleConnection(int socket)
+{
+    Connection* conn = m_manager.getConnection(socket);
+    conn->notifyEvent();
 }
 
 void EventListener::startServers()
@@ -84,17 +75,6 @@ void EventListener::startServers()
         Server* server = it->second;
         server->listen();
     }
-}
-
-inline void EventListener::onIncomingConnection(Server* server)
-{
-    int clientSocket = m_manager.connect(server)->getSocket();
-    watchSocket(clientSocket);
-}
-
-inline void EventListener::onDataReceived(int socket)
-{
-    m_manager.getConnection(socket)->notifyServer();
 }
 
 void EventListener::watchSocket(int socket)

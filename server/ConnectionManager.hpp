@@ -2,17 +2,19 @@
 #define CONNECTION_MANAGER_HPP
 
 #include <map>
+#include <sys/epoll.h>
 
 #include "Server.hpp"
 #include "Connection.hpp"
 
-// Responsável apenas iniciar e fechar conexões
+// Responsável por apenas iniciar e fechar conexões
+// TODO: renomear para Dispatcher
 class ConnectionManager
 {
 public:
     ConnectionManager();
     ~ConnectionManager();
-    Connection* connect(Server* server);
+    Connection* connect(Server* server, struct epoll_event* m_event);
     void close(Connection* connection);
     Connection* getConnection(int socket);
 

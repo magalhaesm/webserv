@@ -11,7 +11,6 @@
 
 // - Gerencia o único `poll()` para todas as operações de I/O no servidor.
 // - Realiza verificações de leitura e escrita simultaneamente.
-// EventListener que monitorar eventos no sockets de conexão.
 // Quando um evento ocorre é função da classe criar uma nova conexão entre
 // cliente e servidor e se a conexão já existe, a classe notifica o servidor
 // de uma ação do cliente.
@@ -36,7 +35,8 @@ private:
     void onDataReceived(int socket);
     void watchSocket(int socket);
     Server* findServerBySocket(int socket);
-    void test(struct epoll_event* event);
+    void createConnection(Server* server, struct epoll_event* event);
+    void handleConnection(int socket);
 };
 
 #endif // !EVENT_LISTENER_HPP

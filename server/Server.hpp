@@ -43,6 +43,8 @@ public:
     Server(const ConfigSpec& cfg);
     ~Server();
     void listen();
+    void receive(const std::string& request);
+    void send(const std::string& response);
     void handleIncomingData(Connection* conn);
     int getSocket() const;
 

@@ -13,13 +13,9 @@ ConnectionManager::~ConnectionManager()
     }
 }
 
-// NOTE: subcribe manager
-// criar a conexão no eventListener
-// eu preciso desta classe?
-/* Open a new connection to the server */
-Connection* ConnectionManager::connect(Server* server)
+Connection* ConnectionManager::connect(Server* server, struct epoll_event* event)
 {
-    Connection* connection = new Connection(server, this);
+    Connection* connection = new Connection(server, this, event);
 
     int clientSocket = connection->getSocket();
     active[clientSocket] = connection;
