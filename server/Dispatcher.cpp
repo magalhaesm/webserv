@@ -29,7 +29,6 @@ Connection* Dispatcher::connect(Server* server)
     return connection;
 }
 
-/* Close the connection */
 void Dispatcher::close(Connection* conn)
 {
     std::map<int, Connection*>::iterator it = active.find(conn->getSocket());
