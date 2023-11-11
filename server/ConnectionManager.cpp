@@ -13,9 +13,9 @@ ConnectionManager::~ConnectionManager()
     }
 }
 
-Connection* ConnectionManager::connect(Server* server, struct epoll_event* event)
+Connection* ConnectionManager::connect(Server* server)
 {
-    Connection* connection = new Connection(server, this, event);
+    Connection* connection = new Connection(server, this);
 
     int clientSocket = connection->getSocket();
     active[clientSocket] = connection;

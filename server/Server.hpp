@@ -43,9 +43,10 @@ public:
     Server(const ConfigSpec& cfg);
     ~Server();
     void listen();
-    void receive(const std::string& request);
-    void send(const std::string& response);
-    void handleIncomingData(Connection* conn);
+    bool read(Connection* conn);
+    bool write(Connection* conn);
+    // std::string send();
+    // int accept();
     int getSocket() const;
 
 private:
@@ -54,8 +55,6 @@ private:
     int m_port;
     int m_socket;
 
-    // NOTE: o server não precisa iniciar o socket
-    // retorna sua porta para EventListener e lá um socket é criado
     int createSocket();
 };
 

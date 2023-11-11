@@ -1,7 +1,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/socket.h>
-#include <sys/epoll.h>
 
 class Server;
 
@@ -16,35 +15,40 @@ Connection::Connection(Server* server, ConnectionManager* manager)
     m_clientSocket = accept(server->getSocket(), NULL, NULL);
 }
 
-Connection::Connection(Server* server, ConnectionManager* manager, struct epoll_event* event)
-    : m_server(server)
-    , m_manager(manager)
-    , m_event(event)
-{
-    // m_clientSocket = server->connect();
-    m_clientSocket = accept(server->getSocket(), NULL, NULL);
-}
-
 Connection::~Connection()
 {
     ::close(m_clientSocket);
 }
 
-void Connection::notifyEvent()
+std::string* Connection::getRequest()
 {
-    if (m_event->events & EPOLLIN)
+    return &m_request;
+}
+
+std::string* Connection::getResponse()
+{
+    return &m_response;
+}
+
+void Connection::notify(struct epoll_event* event)
+{
+    if (event->events & EPOLLIN)
     {
-        // HTTPRequest req = new HTTPRequest(read());
-        // m_server->receive(request, response);
-        m_server->receive(read());
+        bool finished = m_server->read(this);
+        if (finished)
+        {
+            event->events = EPOLLOUT | EPOLLET;
+        }
     }
-    else if (m_event->events & EPOLLOUT)
+    if (event->events & EPOLLOUT)
     {
-        m_server->send("entrada de teste");
-        // m_server->send(request, response);
+        bool finished = m_server->write(this);
+        this->write(m_response);
+        if (finished)
+        {
+            this->close();
+        }
     }
-    // m_server->handleRequest(request, response);
-    m_server->handleIncomingData(this);
 }
 
 void Connection::close()

@@ -1,24 +1,20 @@
 #include <cerrno>
+#include <string>
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
+#include <iostream>
 #include <unistd.h>
 #include <stdexcept>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-#include <iostream> // TODO: remover
-
 #include "Server.hpp"
 #include "Connection.hpp"
 
-void fatalError(const std::string& errMsg)
-{
-    std::cerr << errMsg << ": " << strerror(errno) << std::endl;
-    exit(EXIT_FAILURE);
-}
-
 const int BACKLOG = 10;
+
+static void fatalError(const std::string& errMsg);
 
 Server::Server(const ConfigSpec& cfg)
     : m_name(cfg.getServerName())
@@ -42,52 +38,21 @@ void Server::listen()
     }
 }
 
-void Server::receive(const std::string& request)
+bool Server::read(Connection* conn)
 {
-    std::cout << "Recebido: \n" << request << std::endl;
+    std::cout << "Recebido: \n" << conn->read() << std::endl;
+    return true;
 }
 
-void Server::send(const std::string& response)
+bool Server::write(Connection* conn)
 {
-    std::cout << "Enviado: \n" << response << std::endl;
-}
-
-#include <stdio.h>
-// TODO: ler e escrever no socket
-void Server::handleIncomingData(Connection* conn)
-{
-    // conn.request.status;
-    // conn.response.status;
-
-    int socket = conn->getSocket();
-    char data[1024];
-    ssize_t nBytes = read(socket, data, sizeof(data));
-    if (nBytes <= 0) // Navegador fechou a conexão
-    {
-        printf("Conexão fechada: %d\n", socket);
-        conn->close();
-    }
-    else
-    {
-        const char* response = "HTTP/1.1 200 OK\r\n"
-                               "Content-Type: text/html\r\n"
-                               "\r\n"
-                               "<html><body><h1>Hello, World!</h1></body></html>";
-
-        ssize_t response_size = strlen(response);
-        ssize_t bytes_sent = write(socket, response, response_size);
-
-        if (bytes_sent < 0)
-        {
-            perror("Erro ao enviar resposta");
-        }
-        else
-        {
-            printf("Resposta enviada com sucesso: %s\n", m_name.c_str());
-        }
-
-        conn->close();
-    }
+    std::string* response = conn->getResponse();
+    const char* html = "HTTP/1.1 200 OK\r\n"
+                       "Content-Type: text/html\r\n"
+                       "\r\n"
+                       "<html><body><h1>Hello, World!</h1></body></html>";
+    *response = html;
+    return true;
 }
 
 int Server::getSocket() const
@@ -117,4 +82,10 @@ int Server::createSocket()
     }
 
     return fd;
+}
+
+void fatalError(const std::string& errMsg)
+{
+    std::cerr << errMsg << ": " << strerror(errno) << std::endl;
+    exit(EXIT_FAILURE);
 }

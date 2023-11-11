@@ -31,11 +31,9 @@ private:
     ConnectionManager m_manager;
 
     void startServers();
-    void onIncomingConnection(Server* server);
-    void onDataReceived(int socket);
-    void watchSocket(int socket);
-    Server* findServerBySocket(int socket);
-    void createConnection(Server* server, struct epoll_event* event);
+    void watch(int socket);
+    Server* findReceiver(int socket);
+    void acceptConnection(Server* server);
     void handleConnection(int socket);
 };
 

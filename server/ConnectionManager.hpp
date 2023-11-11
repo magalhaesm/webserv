@@ -2,7 +2,6 @@
 #define CONNECTION_MANAGER_HPP
 
 #include <map>
-#include <sys/epoll.h>
 
 #include "Server.hpp"
 #include "Connection.hpp"
@@ -14,7 +13,7 @@ class ConnectionManager
 public:
     ConnectionManager();
     ~ConnectionManager();
-    Connection* connect(Server* server, struct epoll_event* m_event);
+    Connection* connect(Server* server);
     void close(Connection* connection);
     Connection* getConnection(int socket);
 

@@ -29,7 +29,7 @@ void EventListener::subscribe(Server* target)
 {
     int socket = target->getSocket();
     m_servers[socket] = target;
-    watchSocket(socket);
+    watch(socket);
 }
 
 void EventListener::start()
@@ -42,29 +42,25 @@ void EventListener::start()
         for (int idx = 0; idx < eventCount; ++idx)
         {
             int socket = m_events[idx].data.fd;
-            Server* associatedServer = findServerBySocket(socket);
-            if (associatedServer)
+            Server* server = findReceiver(socket);
+            if (server)
             {
-                createConnection(associatedServer, &m_events[idx]);
+                acceptConnection(server);
             }
             else
             {
-                handleConnection(socket); // dispatcher.notify(socket)
+                // m_dispatcher.notify(m_events[idx]);
+                Connection* conn = m_manager.getConnection(socket);
+                conn->notify(&m_events[idx]);
             }
         }
     }
 }
 
-void EventListener::createConnection(Server* server, struct epoll_event* event)
+void EventListener::acceptConnection(Server* server)
 {
-    Connection* client = m_manager.connect(server, event);
-    watchSocket(client->getSocket());
-}
-
-void EventListener::handleConnection(int socket)
-{
-    Connection* conn = m_manager.getConnection(socket);
-    conn->notifyEvent();
+    Connection* client = m_manager.connect(server);
+    watch(client->getSocket());
 }
 
 void EventListener::startServers()
@@ -77,7 +73,7 @@ void EventListener::startServers()
     }
 }
 
-void EventListener::watchSocket(int socket)
+void EventListener::watch(int socket)
 {
     struct epoll_event m_event;
     m_event.events = EPOLLIN | EPOLLET;
@@ -85,7 +81,7 @@ void EventListener::watchSocket(int socket)
     epoll_ctl(m_epollFd, EPOLL_CTL_ADD, socket, &m_event);
 }
 
-inline Server* EventListener::findServerBySocket(int socket)
+inline Server* EventListener::findReceiver(int socket)
 {
     std::map<int, Server*>::iterator it = m_servers.find(socket);
     if (it != m_servers.end())

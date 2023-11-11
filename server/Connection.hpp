@@ -13,20 +13,25 @@ class Connection
 {
 public:
     Connection(Server* server, ConnectionManager* manager);
-    Connection(Server* server, ConnectionManager* manager, struct epoll_event* event);
     ~Connection();
-    void notifyEvent();
-    void close();
-    int getSocket() const;
+    void notify(struct epoll_event* event);
     std::string read();
     void write(const std::string& response);
-    void switchMode(int op);
+    void close();
+    int getSocket() const;
+
+    // TEST:
+    std::string* getRequest();
+    std::string* getResponse();
 
 private:
     int m_clientSocket;
     Server* m_server;
     ConnectionManager* m_manager;
-    struct epoll_event* m_event;
+
+    // TEST:
+    std::string m_request;
+    std::string m_response;
 };
 
 #endif // !CONNECTION_HPP
