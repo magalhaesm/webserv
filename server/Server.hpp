@@ -43,10 +43,9 @@ public:
     Server(const ConfigSpec& cfg);
     ~Server();
     void listen();
+    int accept();
     bool read(Connection* conn);
     bool write(Connection* conn);
-    // std::string send();
-    // int accept();
     int getSocket() const;
 
 private:

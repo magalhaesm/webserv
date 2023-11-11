@@ -38,6 +38,11 @@ void Server::listen()
     }
 }
 
+int Server::accept()
+{
+    return ::accept(m_socket, NULL, NULL);
+}
+
 bool Server::read(Connection* conn)
 {
     std::cout << "Recebido: \n" << conn->read() << std::endl;

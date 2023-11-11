@@ -11,8 +11,7 @@ Connection::Connection(Server* server, ConnectionManager* manager)
     : m_server(server)
     , m_manager(manager)
 {
-    // m_clientSocket = server->connect();
-    m_clientSocket = accept(server->getSocket(), NULL, NULL);
+    m_clientSocket = server->accept();
 }
 
 Connection::~Connection()
