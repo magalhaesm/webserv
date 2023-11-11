@@ -5,11 +5,11 @@
 class Server;
 
 #include "Connection.hpp"
-#include "ConnectionManager.hpp"
+#include "Dispatcher.hpp"
 
-Connection::Connection(Server* server, ConnectionManager* manager)
+Connection::Connection(Server* server, Dispatcher* dispatcher)
     : m_server(server)
-    , m_manager(manager)
+    , m_dispatcher(dispatcher)
 {
     m_clientSocket = server->accept();
 }
@@ -52,7 +52,7 @@ void Connection::notify(struct epoll_event* event)
 
 void Connection::close()
 {
-    m_manager->close(this);
+    m_dispatcher->close(this);
 }
 
 // TODO: throw error

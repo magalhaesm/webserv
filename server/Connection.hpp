@@ -5,14 +5,14 @@
 #include <sys/epoll.h>
 
 class Server;
-class ConnectionManager;
+class Dispatcher;
 
 // - Representa uma conexão entre um servidor e um cliente.
 // - Lida com o controle de estados da conexão e pode descartar a conexão se necessário.
 class Connection
 {
 public:
-    Connection(Server* server, ConnectionManager* manager);
+    Connection(Server* server, Dispatcher* dispatcher);
     ~Connection();
     void notify(struct epoll_event* event);
     std::string read();
@@ -27,7 +27,7 @@ public:
 private:
     int m_clientSocket;
     Server* m_server;
-    ConnectionManager* m_manager;
+    Dispatcher* m_dispatcher;
 
     // TEST:
     std::string m_request;

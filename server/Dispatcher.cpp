@@ -1,10 +1,10 @@
-#include "ConnectionManager.hpp"
+#include "Dispatcher.hpp"
 
-ConnectionManager::ConnectionManager()
+Dispatcher::Dispatcher()
 {
 }
 
-ConnectionManager::~ConnectionManager()
+Dispatcher::~Dispatcher()
 {
     std::map<int, Connection*>::iterator it;
     for (it = active.begin(); it != active.end(); ++it)
@@ -13,7 +13,13 @@ ConnectionManager::~ConnectionManager()
     }
 }
 
-Connection* ConnectionManager::connect(Server* server)
+void Dispatcher::notify(struct epoll_event* event)
+{
+    Connection* conn = get(event->data.fd);
+    conn->notify(event);
+}
+
+Connection* Dispatcher::connect(Server* server)
 {
     Connection* connection = new Connection(server, this);
 
@@ -24,7 +30,7 @@ Connection* ConnectionManager::connect(Server* server)
 }
 
 /* Close the connection */
-void ConnectionManager::close(Connection* conn)
+void Dispatcher::close(Connection* conn)
 {
     std::map<int, Connection*>::iterator it = active.find(conn->getSocket());
     if (it != active.end())
@@ -34,7 +40,7 @@ void ConnectionManager::close(Connection* conn)
     }
 }
 
-Connection* ConnectionManager::getConnection(int socket)
+inline Connection* Dispatcher::get(int socket)
 {
     std::map<int, Connection*>::iterator it = active.find(socket);
     if (it != active.end())

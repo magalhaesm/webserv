@@ -1,11 +1,11 @@
-#include <errno.h>
+#include <csignal>
 #include <cstdlib>
 #include <cstring>
-#include <sys/socket.h>
+#include <errno.h>
 #include <unistd.h>
 #include <iostream>
 #include <stdexcept>
-#include <csignal>
+#include <sys/socket.h>
 
 #include "Connection.hpp"
 #include "EventListener.hpp"
@@ -41,25 +41,22 @@ void EventListener::start()
         int eventCount = epoll_wait(m_epollFd, m_events, MAX_EVENTS, -1);
         for (int idx = 0; idx < eventCount; ++idx)
         {
-            int socket = m_events[idx].data.fd;
-            Server* server = findReceiver(socket);
+            Server* server = findReceiver(m_events[idx].data.fd);
             if (server)
             {
-                acceptConnection(server);
+                this->accept(server);
             }
             else
             {
-                // m_dispatcher.notify(m_events[idx]);
-                Connection* conn = m_manager.getConnection(socket);
-                conn->notify(&m_events[idx]);
+                m_dispatcher.notify(&m_events[idx]);
             }
         }
     }
 }
 
-void EventListener::acceptConnection(Server* server)
+inline void EventListener::accept(Server* server)
 {
-    Connection* client = m_manager.connect(server);
+    Connection* client = m_dispatcher.connect(server);
     watch(client->getSocket());
 }
 

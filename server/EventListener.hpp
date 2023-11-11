@@ -7,7 +7,7 @@
 
 #include "Server.hpp"
 #include "Connection.hpp"
-#include "ConnectionManager.hpp"
+#include "Dispatcher.hpp"
 
 // - Gerencia o único `poll()` para todas as operações de I/O no servidor.
 // - Realiza verificações de leitura e escrita simultaneamente.
@@ -28,13 +28,12 @@ private:
     int m_epollFd;
     struct epoll_event m_events[MAX_EVENTS];
     std::map<int, Server*> m_servers;
-    ConnectionManager m_manager;
+    Dispatcher m_dispatcher;
 
     void startServers();
     void watch(int socket);
     Server* findReceiver(int socket);
-    void acceptConnection(Server* server);
-    void handleConnection(int socket);
+    void accept(Server* server);
 };
 
 #endif // !EVENT_LISTENER_HPP
