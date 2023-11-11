@@ -1,2 +1,17 @@
-// Inicia o servidor, lê a configuração, cria as instâncias
-// apropriadas para as classes e gerencia a execução do programa.
+#include "Server.hpp"
+#include "EventListener.hpp"
+
+int main(void)
+{
+    EventListener listener;
+
+    ConfigSpec config(8080, "TestServer1");
+    Server server(config);
+    listener.subscribe(&server);
+
+    ConfigSpec config2(8081, "TestServer2");
+    Server server2(config2);
+    listener.subscribe(&server2);
+
+    listener.start();
+}
