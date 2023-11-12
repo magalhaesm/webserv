@@ -36,28 +36,28 @@ void EventListener::start()
 {
     startServers();
     setSignalHandler();
+
     while (g_running)
     {
-        int eventCount = epoll_wait(m_epollFd, m_events, MAX_EVENTS, -1);
-        for (int idx = 0; idx < eventCount; ++idx)
-        {
-            Server* server = findReceiver(m_events[idx].data.fd);
-            if (server)
-            {
-                this->accept(server);
-            }
-            else
-            {
-                m_dispatcher.notify(&m_events[idx]);
-            }
-        }
+        waitAndHandleEvents();
     }
 }
 
-inline void EventListener::accept(Server* server)
+inline void EventListener::waitAndHandleEvents()
 {
-    Connection* client = m_dispatcher.connect(server);
-    watch(client->getSocket());
+    int eventCount = epoll_wait(m_epollFd, m_events, MAX_EVENTS, -1);
+    for (int idx = 0; idx < eventCount; ++idx)
+    {
+        Server* server = findReceiver(m_events[idx].data.fd);
+        if (server)
+        {
+            this->accept(server);
+        }
+        else
+        {
+            m_dispatcher.notify(&m_events[idx]);
+        }
+    }
 }
 
 void EventListener::startServers()
@@ -86,6 +86,12 @@ inline Server* EventListener::findReceiver(int socket)
         return it->second;
     }
     return NULL;
+}
+
+inline void EventListener::accept(Server* server)
+{
+    Connection* client = m_dispatcher.connect(server);
+    watch(client->getSocket());
 }
 
 void sigIntHandler(int)

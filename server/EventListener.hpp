@@ -54,6 +54,11 @@ private:
     Dispatcher m_dispatcher;                 /** Dispatcher for managing connections. */
 
     /**
+     * @brief Waits for and handles events, creating new connections or
+     * notifying events on existing ones.
+     */
+    void waitAndHandleEvents();
+    /**
      * @brief Starts the subscribed servers.
      */
     void startServers();
