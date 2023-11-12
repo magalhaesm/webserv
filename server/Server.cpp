@@ -11,6 +11,8 @@
 
 #include "Server.hpp"
 #include "Connection.hpp"
+#include "HTTPRequest.hpp"
+#include "HTTPResponse.hpp"
 
 const int BACKLOG = 10;
 
@@ -45,18 +47,20 @@ int Server::accept()
 
 bool Server::read(Connection* conn)
 {
-    std::cout << "Recebido: \n" << conn->read() << std::endl;
+    HTTPRequest* request = conn->request();
+    std::cout << "Recebido: " << request->method() << std::endl;
+    std::cout << "Host: " << request->get("Host") << std::endl;
+    std::cout << "User-Agent: " << request->get("User-Agent") << std::endl;
     return true;
 }
 
 bool Server::write(Connection* conn)
 {
-    std::string* response = conn->getResponse();
-    const char* html = "HTTP/1.1 200 OK\r\n"
-                       "Content-Type: text/html\r\n"
-                       "\r\n"
-                       "<html><body><h1>Hello, World!</h1></body></html>";
-    *response = html;
+    HTTPResponse* response = conn->response();
+    const std::string html = "<html><body><h1>Hello, World!</h1></body></html>";
+    response->setStatus(200);
+    response->set("Content-Type", "text/html");
+    response->setBody(html);
     return true;
 }
 

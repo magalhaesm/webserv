@@ -2,31 +2,43 @@
 #include <unistd.h>
 #include <sys/socket.h>
 
-class Server;
-
 #include "Connection.hpp"
 #include "Dispatcher.hpp"
+#include "HTTPRequest.hpp"
+#include "HTTPResponse.hpp"
 
 Connection::Connection(Server* server, Dispatcher* dispatcher)
     : m_server(server)
     , m_dispatcher(dispatcher)
+    , m_request(NULL)
+    , m_response(NULL)
 {
     m_clientSocket = server->accept();
 }
 
 Connection::~Connection()
 {
+    delete m_request;
+    delete m_response;
     ::close(m_clientSocket);
 }
 
-std::string* Connection::getRequest()
+HTTPRequest* Connection::request()
 {
-    return &m_request;
+    if (m_request == NULL)
+    {
+        m_request = new HTTPRequest(this);
+    }
+    return m_request;
 }
 
-std::string* Connection::getResponse()
+HTTPResponse* Connection::response()
 {
-    return &m_response;
+    if (m_response == NULL)
+    {
+        m_response = new HTTPResponse(this);
+    }
+    return m_response;
 }
 
 void Connection::notify(struct epoll_event* event)
@@ -42,7 +54,7 @@ void Connection::notify(struct epoll_event* event)
     if (event->events & EPOLLOUT)
     {
         bool finished = m_server->write(this);
-        this->write(m_response);
+        this->write(m_response->toString());
         if (finished)
         {
             this->close();
@@ -55,7 +67,7 @@ void Connection::close()
     m_dispatcher->close(this);
 }
 
-// TODO: throw error
+// TODO: handle errors
 std::string Connection::read()
 {
     std::string request;
@@ -64,7 +76,7 @@ std::string Connection::read()
     return request;
 }
 
-// TODO: throw error
+// TODO: handle errors
 void Connection::write(const std::string& response)
 {
     ::write(m_clientSocket, &response[0], response.size());
