@@ -9,7 +9,7 @@
 
 /**
  * @class Dispatcher
- * @brief Responsible for opening, closing, and notifying events in connections.
+ * @brief Responsible for opening, closing, and notifying events on connections.
  */
 class Dispatcher
 {
