@@ -58,6 +58,7 @@ private:
      * notifying events on existing ones.
      */
     void waitAndHandleEvents();
+
     /**
      * @brief Starts the subscribed servers.
      */

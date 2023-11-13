@@ -45,8 +45,8 @@ void EventListener::start()
 
 inline void EventListener::waitAndHandleEvents()
 {
-    int eventCount = epoll_wait(m_epollFd, m_events, MAX_EVENTS, -1);
-    for (int idx = 0; idx < eventCount; ++idx)
+    int ready = epoll_wait(m_epollFd, m_events, MAX_EVENTS, -1);
+    for (int idx = 0; idx < ready; ++idx)
     {
         Server* server = findReceiver(m_events[idx].data.fd);
         if (server)
@@ -73,7 +73,7 @@ void EventListener::startServers()
 void EventListener::watch(int socket)
 {
     struct epoll_event m_event;
-    m_event.events = EPOLLIN | EPOLLET;
+    m_event.events = EPOLLIN;
     m_event.data.fd = socket;
     epoll_ctl(m_epollFd, EPOLL_CTL_ADD, socket, &m_event);
 }
