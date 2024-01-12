@@ -3,39 +3,40 @@
 
 #include <map>
 #include <string>
+#include "ConfigSpec.hpp"
 
 class Connection;
 
-class ConfigSpec
-{
-public:
-    ConfigSpec(int port, std::string name)
-        : m_port(port)
-        , m_name(name)
-    {
-    }
+// class ConfigSpec
+// {
+// public:
+//     ConfigSpec(int port, std::string name)
+//         : m_port(port)
+//         , m_name(name)
+//     {
+//     }
 
-    int getPort() const
-    {
-        return m_port;
-    }
-    std::string getServerName() const
-    {
-        return m_name;
-    }
-    std::string getHostName() const
-    {
-        return "www.42sp.com.br";
-    }
-    int getBodySizeLimit() const
-    {
-        return 1024;
-    }
+//     int getPort() const
+//     {
+//         return m_port;
+//     }
+//     std::string getServerName() const
+//     {
+//         return m_name;
+//     }
+//     std::string getHostName() const
+//     {
+//         return "www.42sp.com.br";
+//     }
+//     int getBodySizeLimit() const
+//     {
+//         return 1024;
+//     }
 
-private:
-    int m_port;
-    std::string m_name;
-};
+// private:
+//     int m_port;
+//     std::string m_name;
+// };
 
 class Server
 {

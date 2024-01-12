@@ -1,5 +1,11 @@
 #include "ConfigParser.hpp"
-#include "ConfigSpec.hpp"
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <stack>
+#include <functional>
+#include <algorithm>
 
 ConfigParser::ConfigParser(void)
 {

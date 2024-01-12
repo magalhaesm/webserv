@@ -19,9 +19,9 @@ const int BACKLOG = 10;
 static void fatalError(const std::string& errMsg);
 
 Server::Server(const ConfigSpec& cfg)
-    : m_name(cfg.getServerName())
-    , m_host(cfg.getHostName())
-    , m_port(cfg.getPort())
+    // : m_name(cfg.getServerName())
+    // , m_host(cfg.getHostName())
+    : m_port(cfg.getPort())
 {
     m_socket = createSocket();
 }

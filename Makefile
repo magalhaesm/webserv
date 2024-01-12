@@ -13,9 +13,11 @@ vpath %.cpp $(DIRS)
 
 HEADERS := Server.hpp EventListener.hpp Connection.hpp
 HEADERS += Dispatcher.hpp HTTPRequest.hpp HTTPResponse.hpp
+HEADERS += ConfigParser.hpp ConfigSpec.hpp
 
 SOURCES := main.cpp Server.cpp EventListener.cpp Connection.cpp
 SOURCES += Dispatcher.cpp HTTPRequest.cpp HTTPResponse.cpp
+SOURCES += ConfigParser.cpp ConfigSpec.cpp
 
 OBJS     := $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
 CXXFLAGS := -Wall -Werror -Wextra $(addprefix -I,$(DIRS))

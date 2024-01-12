@@ -1,7 +1,9 @@
 #ifndef ConfigSpec_HPP
 #define ConfigSpec_HPP
 
-#include "Libs.hpp"
+#include <map>
+#include <string>
+#include <vector>
 
 class ConfigSpec
 {
@@ -25,6 +27,7 @@ class ConfigSpec
         //getters:
         std::vector<std::string> getDirective(const std::string& key) const;
         bool getLocationBlock(const std::string& path, std::map<std::string, std::string>& blockConfig) const;
+        int getPort() const;
 
         //debug:
         void printParsedDirectives(void) const;

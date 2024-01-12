@@ -1,5 +1,6 @@
 #include "ConfigSpec.hpp"
-
+#include <iostream>
+#include <sstream>
 
 ConfigSpec::ConfigSpec(void)
 {
@@ -41,6 +42,28 @@ void ConfigSpec::setLocationBlocks(const std::map<std::string, std::map<std::str
 {
     this->_locationBlocks = locationBlocks;
 }
+
+int ConfigSpec::getPort() const
+{
+    // std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("listen");
+
+    // if (it != _directives.end())
+    // {
+
+    //     std::cout << "dentro do if" << std::endl;
+
+    //     std::stringstream listenValue(it->second[0]);
+    //     int port;
+    //     std::cout << "Porta" << port << std::endl;
+    //     listenValue >> port;
+    //     return port;
+    // }
+    // throw std::runtime_error("Erro na funcao getPort");
+
+   return 8080;
+}
+
+
 
 
 /*
