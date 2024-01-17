@@ -397,11 +397,37 @@ void ConfigParser::parseDirectivesInLocation(const std::string &block)
 }
 
 
-/* getter */
+/* getters */
+
+std::vector<int> ConfigParser::getListenDirectives()
+{
+    std::vector<int> listenPorts;
+
+    for (size_t i = 0; i < _configSpecs.size(); ++i)
+    {
+        std::vector<std::string> directives = _configSpecs[i].getDirectiveValues("listen");
+
+        for (size_t j = 0; j < directives.size(); ++j)
+        {
+            int port = atoi(directives[j].c_str());
+            listenPorts.push_back(port);
+        }
+    }
+    return listenPorts;
+}
+
+
 const std::vector<ConfigSpec>& ConfigParser::getConfigSpecs() const
 {
+
+
+
     return _configSpecs;
 }
+
+
+
+
 
 /* DEBUG */
 

@@ -37,6 +37,8 @@ class ConfigParser
 
         //getter:
         const std::vector<ConfigSpec>& getConfigSpecs() const;
+        std::vector<int> getListenDirectives();
+
 
         //debug:
         void printExtractedServerBlocks(void) const;

@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
+#include "ConfigParser.hpp"
 #include "Server.hpp"
 #include "Connection.hpp"
 #include "HTTPRequest.hpp"
@@ -18,9 +19,7 @@ const int BACKLOG = 10;
 
 static void fatalError(const std::string& errMsg);
 
-Server::Server(const ConfigSpec& cfg)
-    // : m_name(cfg.getServerName())
-    // , m_host(cfg.getHostName())
+Server::Server(ConfigSpec& cfg)
     : m_port(cfg.getPort())
 {
     m_socket = createSocket();
@@ -79,6 +78,8 @@ int Server::createSocket()
 
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
+
+    std::cout << "createSocket: m_port: " << m_port <<std::endl;
     addr.sin_port = htons(m_port);
     addr.sin_addr.s_addr = INADDR_ANY;
 
