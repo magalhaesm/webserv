@@ -52,21 +52,99 @@ std::vector<std::string> ConfigSpec::getDirectiveValues(const std::string& direc
     if (it != _directives.end())
     {
         values = it->second;
+        return values;
     }
-    return values;
+    else
+        return std::vector<std::string>();
 };
 
 int ConfigSpec::getPort() const
 {
     std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("listen");
 
-    return std::atoi(it->second[0].c_str());
+    if (it != _directives.end())
+        return std::atoi(it->second[0].c_str());
+    else
+        return -1;
 }
 
+std::vector<std::string> ConfigSpec::getServerName() const
+{
+    std::vector<std::string> listenValues;
 
+    std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("server_name");
+    
+    if (it != _directives.end())
+    {
+        for(size_t i = 0; i < it->second.size(); ++i)
+            listenValues.push_back(it->second[i]);
+        return listenValues;
+    }
+    else
+        return std::vector<std::string>();
+}
 
+std::string ConfigSpec::getIndex() const
+{
+    std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("index");
 
+    if (it != _directives.end())
+        return it->second[0];
+    else
+        return " ";
+}
 
+std::string ConfigSpec::getRoot() const
+{
+    std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("root");
+
+    if (it != _directives.end())
+        return it->second[0];
+    else
+        return " ";
+}
+
+std::string ConfigSpec::getAutoindex() const
+{
+    std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("autoindex");
+
+    if (it != _directives.end())
+        return it->second[0];
+    else
+        return " ";
+}
+
+std::vector<std::string> ConfigSpec::getErrorPage() const
+{
+    std::vector<std::string> errorPage;
+
+    std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("error_page");
+    
+    if (it != _directives.end())
+    {
+        for(size_t i = 0; i < it->second.size(); ++i)
+            errorPage.push_back(it->second[i]);
+        return errorPage;
+    }
+    else
+        return std::vector<std::string>();
+}
+
+std::vector<std::string> ConfigSpec::getCgi() const
+{
+    std::vector<std::string> cgi;
+
+    std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("cgi");
+    
+    if (it != _directives.end())
+    {
+        for(size_t i = 0; i < it->second.size(); ++i)
+            cgi.push_back(it->second[i]);
+        return cgi;
+    }
+    else
+        return std::vector<std::string>();
+}
 
 
 //void ConfigSpec::setDirectives(const std::map<std::string, std::string> &parsedDirectives)

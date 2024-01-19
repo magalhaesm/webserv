@@ -50,7 +50,7 @@ void ConfigParser::handleConfigFile(char *filePath)
     if (!configFile.is_open())
         throw std::runtime_error("Failed to open file: " + std::string(filePath)); //no catch block yet
 
-    std::cout << "File opened successfully!" << std::endl;
+    std::cout << "Config file opened successfully!" << std::endl;
 
     // read the file content
     content << configFile.rdbuf();
@@ -61,13 +61,11 @@ void ConfigParser::handleConfigFile(char *filePath)
     if (!validateServerBlock() || !checkBracketsMatch())
         throw std::runtime_error("syntax error detected on input file");
 
-    std::cout << "Everything seens OK" << std::endl;
-
     extractServerBlocks();
     parseServerBlocks();
 
     //DEBUG
-    printAllConfigSpecs();
+    //printAllConfigSpecs();
 }
 
 
@@ -166,7 +164,7 @@ void ConfigParser::extractServerBlocks(void)
         }
     } 
     // DEGUB:
-    printExtractedServerBlocks();
+    //printExtractedServerBlocks();
 }
 
 
@@ -399,29 +397,8 @@ void ConfigParser::parseDirectivesInLocation(const std::string &block)
 
 /* getters */
 
-std::vector<int> ConfigParser::getListenDirectives()
-{
-    std::vector<int> listenPorts;
-
-    for (size_t i = 0; i < _configSpecs.size(); ++i)
-    {
-        std::vector<std::string> directives = _configSpecs[i].getDirectiveValues("listen");
-
-        for (size_t j = 0; j < directives.size(); ++j)
-        {
-            int port = atoi(directives[j].c_str());
-            listenPorts.push_back(port);
-        }
-    }
-    return listenPorts;
-}
-
-
 const std::vector<ConfigSpec>& ConfigParser::getConfigSpecs() const
 {
-
-
-
     return _configSpecs;
 }
 

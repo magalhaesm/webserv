@@ -24,10 +24,15 @@ class ConfigSpec
         void setDirectives(const std::map<std::string, std::vector<std::string> > &directives);
         void setLocationBlocks(const std::map<std::string, std::map<std::string, std::string> > &locationBlocks);
 
-        //getters:
+        //directive getters:
         std::vector<std::string> getDirectiveValues(const std::string& directiveName);
         int getPort() const;
-
+        std::vector<std::string> getServerName() const;
+        std::string getIndex() const;
+        std::string getRoot() const;
+        std::string getAutoindex() const;
+        std::vector<std::string> getErrorPage() const;
+        std::vector<std::string> getCgi() const;
 
         //debug:
         void printParsedDirectives(void) const;

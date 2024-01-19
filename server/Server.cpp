@@ -79,7 +79,7 @@ int Server::createSocket()
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
 
-    std::cout << "createSocket: m_port: " << m_port <<std::endl;
+//    std::cout << "createSocket: m_port: " << m_port <<std::endl;
     addr.sin_port = htons(m_port);
     addr.sin_addr.s_addr = INADDR_ANY;
 

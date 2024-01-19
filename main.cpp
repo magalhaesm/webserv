@@ -23,7 +23,6 @@ int main(int argc, char **argv)
     configParser.handleConfigFile(argv[1]);
 
     std::vector<ConfigSpec> specs;
-
     specs = configParser.getConfigSpecs();
 
     std::vector<Server*> servers(specs.size());
@@ -33,6 +32,53 @@ int main(int argc, char **argv)
     for(size_t i = 0; i < specs.size(); i++)
     {
         servers[i] = new Server(specs[i]);
+        
+        /* ---- printing getters ---- */
+
+        std::cout << "\nGETTERS SERVER " << i << ":" << std::endl;
+
+        int ports = specs[i].getPort();
+        std::cout << "  Ports: ";
+        std::cout << ports << std::endl;
+
+        std::vector<std::string> serverNames = specs[i].getServerName();
+        std::cout << "  Names: ";
+        for (size_t j = 0; j < serverNames.size(); ++j) {
+            std::cout << serverNames[j] << " ";
+        }
+        std::cout << std::endl;
+
+        std::string index = specs[i].getIndex();
+        std::cout << "  Index: ";
+        std::cout << index << std::endl;
+
+        std::string root = specs[i].getRoot();
+        std::cout << "  Root: ";
+        std::cout << root << std::endl;
+
+        std::string autoindex = specs[i].getAutoindex();
+        std::cout << "  Autoindex: ";
+        std::cout << autoindex << std::endl;
+
+        std::vector<std::string> errorPage = specs[i].getErrorPage();
+        std::cout << "  Error Page: ";
+        for (size_t j = 0; j < errorPage.size(); ++j) {
+            std::cout << errorPage[j] << " ";
+        }
+        std::cout << std::endl;
+
+        std::vector<std::string> cgi = specs[i].getCgi();
+        std::cout << "  Cgi: ";
+        for (size_t j = 0; j < cgi.size(); ++j) {
+            std::cout << cgi[j] << " ";
+        }
+        std::cout << std::endl;
+
+
+
+
+        /* -----------------------------*/
+
         listener.subscribe(servers[i]);
     }
 
