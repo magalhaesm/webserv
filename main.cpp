@@ -33,6 +33,8 @@ int main(int argc, char **argv)
     {
         servers[i] = new Server(specs[i]);
         
+
+
         /* ---- printing getters ---- */
 
         std::cout << "\nGETTERS SERVER " << i << ":" << std::endl;
@@ -74,10 +76,18 @@ int main(int argc, char **argv)
         }
         std::cout << std::endl;
 
+        std::vector<std::string> redirect = specs[i].getRedirect();
+        std::cout << "  redirect: ";
+        for (size_t j = 0; j < redirect.size(); ++j) {
+            std::cout << redirect[j] << " " << std::endl;
+        }
+        std::cout << std::endl;
+
 
 
 
         /* -----------------------------*/
+
 
         listener.subscribe(servers[i]);
     }

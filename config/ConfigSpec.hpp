@@ -33,12 +33,11 @@ class ConfigSpec
         std::string getAutoindex() const;
         std::vector<std::string> getErrorPage() const;
         std::vector<std::string> getCgi() const;
+        std::vector<std::string> getRedirect() const;
 
         //debug:
         void printParsedDirectives(void) const;
         void printParsedLocationBlocks(void) const;
-
-
 
 
     private:
