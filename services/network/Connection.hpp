@@ -9,19 +9,18 @@ class Dispatcher;
 class HTTPRequest;
 class HTTPResponse;
 
-// - Representa uma conexão entre um servidor e um cliente.
-// - Lida com o controle de estados da conexão e pode descartar a conexão se necessário.
 class Connection
 {
 public:
     Connection(Server* server, Dispatcher* dispatcher);
     ~Connection();
+
     void notify(struct epoll_event* event);
     std::string read();
-    void write(const std::string& response);
-    void close();
+    void write(HTTPResponse* response);
     int getSocket() const;
-    HTTPRequest* request();
+
+    const HTTPRequest* request();
     HTTPResponse* response();
 
 private:
@@ -30,6 +29,8 @@ private:
     Dispatcher* m_dispatcher;
     HTTPRequest* m_request;
     HTTPResponse* m_response;
+
+    void close();
 };
 
 #endif // !CONNECTION_HPP

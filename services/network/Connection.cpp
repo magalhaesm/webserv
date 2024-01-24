@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/socket.h>
@@ -23,18 +24,18 @@ Connection::~Connection()
     ::close(m_clientSocket);
 }
 
-HTTPRequest* Connection::request()
+const HTTPRequest* Connection::request()
 {
-    if (m_request == NULL)
+    if (!m_request)
     {
-        m_request = new HTTPRequest(this);
+        m_request = new HTTPRequest(this->read());
     }
     return m_request;
 }
 
 HTTPResponse* Connection::response()
 {
-    if (m_response == NULL)
+    if (!m_response)
     {
         m_response = new HTTPResponse(this);
     }
@@ -45,20 +46,13 @@ void Connection::notify(struct epoll_event* event)
 {
     if (event->events & EPOLLIN)
     {
-        bool finished = m_server->read(this);
-        if (finished)
-        {
-            event->events = EPOLLOUT | EPOLLET;
-        }
+        m_server->handleRequest(request(), response());
+        event->events = EPOLLOUT | EPOLLET;
     }
     if (event->events & EPOLLOUT)
     {
-        bool finished = m_server->write(this);
-        this->write(m_response->toString());
-        if (finished)
-        {
-            this->close();
-        }
+        this->write(m_response);
+        this->close();
     }
 }
 
@@ -67,7 +61,6 @@ void Connection::close()
     m_dispatcher->close(this);
 }
 
-// TODO: handle errors
 std::string Connection::read()
 {
     std::string request;
@@ -76,10 +69,10 @@ std::string Connection::read()
     return request;
 }
 
-// TODO: handle errors
-void Connection::write(const std::string& response)
+void Connection::write(HTTPResponse* response)
 {
-    ::write(m_clientSocket, &response[0], response.size());
+    const std::string& stream = response->text();
+    ::write(m_clientSocket, stream.c_str(), stream.size());
 }
 
 int Connection::getSocket() const

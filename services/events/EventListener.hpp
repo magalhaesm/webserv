@@ -2,7 +2,6 @@
 #define EVENT_LISTENER_HPP
 
 #include <map>
-#include <vector>
 #include <sys/epoll.h>
 
 #include "Server.hpp"
@@ -48,7 +47,7 @@ private:
      */
     static const int MAX_EVENTS = 10;
 
-    int m_epollFd;                           /** File descriptor for epoll. */
+    int m_epfd;                              /** File descriptor for epoll. */
     struct epoll_event m_events[MAX_EVENTS]; /** Array to store epoll events. */
     std::map<int, Server*> m_servers;        /** Map to store server instances. */
     Dispatcher m_dispatcher;                 /** Dispatcher for managing connections. */

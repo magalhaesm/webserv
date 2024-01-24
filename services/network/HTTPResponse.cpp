@@ -3,6 +3,7 @@
 #include "Connection.hpp"
 #include "HTTPResponse.hpp"
 
+const std::string CRLF("\r\n");
 const std::string& getStatusCode(int code);
 
 HTTPResponse::HTTPResponse(Connection* conn)
@@ -19,7 +20,7 @@ void HTTPResponse::setStatus(int status)
     m_statusCode = status;
 }
 
-void HTTPResponse::set(const std::string& field, const std::string& value)
+void HTTPResponse::setHeader(const std::string& field, const std::string& value)
 {
     m_header[field] = value;
 }
@@ -29,18 +30,24 @@ void HTTPResponse::setBody(const std::string& body)
     m_body = body;
 }
 
-std::string HTTPResponse::HTTPResponse::toString() const
+const std::string& HTTPResponse::HTTPResponse::text()
 {
-    std::ostringstream oss;
-
-    oss << "HTTP/1.1 " << m_statusCode << " ";
-    oss << getStatusCode(m_statusCode) << "\r\n";
-    for (Header::const_iterator it = m_header.begin(); it != m_header.end(); ++it)
+    if (m_text.empty())
     {
-        oss << it->first << ": " << it->second << "\r\n";
+        std::ostringstream oss;
+
+        oss << "HTTP/1.1 " << m_statusCode << " ";
+        oss << getStatusCode(m_statusCode) << CRLF;
+
+        for (Headers::iterator it = m_header.begin(); it != m_header.end(); ++it)
+        {
+            oss << it->first << ": " << it->second << CRLF;
+        }
+
+        oss << CRLF << m_body;
+        m_text = oss.str();
     }
-    oss << "\r\n" << m_body;
-    return oss.str();
+    return m_text;
 }
 
 const std::string& getStatusCode(int code)
@@ -53,6 +60,7 @@ const std::string& getStatusCode(int code)
     statusCodes[301] = "Moved Permanently";
     statusCodes[400] = "Bad Request";
     statusCodes[404] = "Not Found";
+    statusCodes[405] = "Method not allowed";
     statusCodes[505] = "HTTP Version Not Supported";
 
     return statusCodes[code];

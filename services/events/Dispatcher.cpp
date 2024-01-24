@@ -15,7 +15,7 @@ Dispatcher::~Dispatcher()
 
 void Dispatcher::notify(struct epoll_event* event)
 {
-    Connection* conn = get(event->data.fd);
+    Connection* conn = getConnection(event->data.fd);
     conn->notify(event);
 }
 
@@ -39,7 +39,7 @@ void Dispatcher::close(Connection* conn)
     }
 }
 
-inline Connection* Dispatcher::get(int socket)
+inline Connection* Dispatcher::getConnection(int socket)
 {
     std::map<int, Connection*>::iterator it = active.find(socket);
     if (it != active.end())

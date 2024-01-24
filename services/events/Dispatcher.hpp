@@ -51,7 +51,7 @@ private:
      * @param socket The socket for which to find the associated Connection.
      * @return The Connection associated with the socket, or NULL if not found.
      */
-    Connection* get(int socket);
+    Connection* getConnection(int socket);
 };
 
 #endif // !DISPATCHER_HPP

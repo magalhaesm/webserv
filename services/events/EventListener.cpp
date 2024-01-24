@@ -1,10 +1,7 @@
 #include <csignal>
 #include <cstdlib>
 #include <cstring>
-#include <errno.h>
 #include <unistd.h>
-#include <iostream>
-#include <stdexcept>
 #include <sys/socket.h>
 
 #include "Connection.hpp"
@@ -16,13 +13,13 @@ static void sigIntHandler(int);
 static void setSignalHandler();
 
 EventListener::EventListener()
-    : m_epollFd(epoll_create(1))
+    : m_epfd(epoll_create(1))
 {
 }
 
 EventListener::~EventListener()
 {
-    close(m_epollFd);
+    close(m_epfd);
 }
 
 void EventListener::subscribe(Server* target)
@@ -45,7 +42,7 @@ void EventListener::start()
 
 inline void EventListener::waitAndHandleEvents()
 {
-    int ready = epoll_wait(m_epollFd, m_events, MAX_EVENTS, -1);
+    int ready = epoll_wait(m_epfd, m_events, MAX_EVENTS, -1);
     for (int idx = 0; idx < ready; ++idx)
     {
         Server* server = findReceiver(m_events[idx].data.fd);
@@ -75,7 +72,7 @@ void EventListener::watch(int socket)
     struct epoll_event m_event;
     m_event.events = EPOLLIN;
     m_event.data.fd = socket;
-    epoll_ctl(m_epollFd, EPOLL_CTL_ADD, socket, &m_event);
+    epoll_ctl(m_epfd, EPOLL_CTL_ADD, socket, &m_event);
 }
 
 inline Server* EventListener::findReceiver(int socket)

@@ -1,8 +1,12 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include <map>
 #include <string>
+
+#include "HTTPRequest.hpp"
+#include "HTTPResponse.hpp"
+#include "HTMLController.hpp"
+#include "CGIController.hpp"
 
 class Connection;
 
@@ -42,10 +46,10 @@ class Server
 public:
     Server(const ConfigSpec& cfg);
     ~Server();
+
+    void handleRequest(const HTTPRequest* request, HTTPResponse* response);
     void listen();
     int accept();
-    bool read(Connection* conn);
-    bool write(Connection* conn);
     int getSocket() const;
 
 private:
@@ -53,7 +57,11 @@ private:
     std::string m_host;
     int m_port;
     int m_socket;
+    HTMLController htmlController;
+    CGIController cgiController;
 
+    bool isCGIRequest(const HTTPRequest* request);
+    bool isHTMLRequest(const HTTPRequest* request);
     int createSocket();
 };
 

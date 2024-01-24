@@ -5,7 +5,6 @@
 #include <fcntl.h>
 #include <iostream>
 #include <unistd.h>
-#include <stdexcept>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
@@ -31,6 +30,28 @@ Server::~Server()
     close(m_socket);
 }
 
+void Server::handleRequest(const HTTPRequest* request, HTTPResponse* response)
+{
+    if (isCGIRequest(request))
+    {
+        cgiController.handleCGIRequest(request, response);
+        return;
+    }
+    htmlController.handleHTMLRequest(request, response);
+}
+
+inline bool Server::isCGIRequest(const HTTPRequest* request)
+{
+    (void)request;
+    return false;
+}
+
+bool Server::isHTMLRequest(const HTTPRequest* request)
+{
+    (void)request;
+    return true;
+}
+
 void Server::listen()
 {
     if (::listen(m_socket, BACKLOG) == -1)
@@ -43,25 +64,6 @@ void Server::listen()
 int Server::accept()
 {
     return ::accept(m_socket, NULL, NULL);
-}
-
-bool Server::read(Connection* conn)
-{
-    HTTPRequest* request = conn->request();
-    std::cout << "Recebido: " << request->method() << std::endl;
-    std::cout << "Host: " << request->get("Host") << std::endl;
-    std::cout << "User-Agent: " << request->get("User-Agent") << std::endl;
-    return true;
-}
-
-bool Server::write(Connection* conn)
-{
-    HTTPResponse* response = conn->response();
-    const std::string html = "<html><body><h1>Hello, World!</h1></body></html>";
-    response->setStatus(200);
-    response->set("Content-Type", "text/html");
-    response->setBody(html);
-    return true;
 }
 
 int Server::getSocket() const

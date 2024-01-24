@@ -6,19 +6,22 @@ CHECK := \342\234\224
 LOG   := printf "[$(CYAN)$(CHECK)$(RESET)] %s\n"
 
 OBJ_DIR := obj
-DIRS    := server controllers models views config
+DIRS    := server controllers services views config
+DIRS    += services/network services/events
 
 vpath %.hpp $(DIRS)
 vpath %.cpp $(DIRS)
 
 HEADERS := Server.hpp EventListener.hpp Connection.hpp
 HEADERS += Dispatcher.hpp HTTPRequest.hpp HTTPResponse.hpp
+HEADERS += HTMLController.hpp CGIController.hpp
 
 SOURCES := main.cpp Server.cpp EventListener.cpp Connection.cpp
 SOURCES += Dispatcher.cpp HTTPRequest.cpp HTTPResponse.cpp
+SOURCES += HTMLController.cpp CGIController.cpp
 
 OBJS     := $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
-CXXFLAGS := -Wall -Werror -Wextra $(addprefix -I,$(DIRS))
+CXXFLAGS := -Wall -Werror -Wextra -std=c++98 $(addprefix -I,$(DIRS))
 
 all: $(NAME)
 
@@ -33,6 +36,9 @@ $(OBJ_DIR)/%.o: %.cpp $(HEADERS) | $(OBJ_DIR)
 $(OBJ_DIR):
 	@$(LOG) "Creating objects directory"
 	@mkdir $@
+
+tests:
+	@make -C tests --no-print-directory
 
 leak: $(NAME)
 	valgrind --leak-check=full --show-leak-kinds=all ./$(NAME)
@@ -49,4 +55,4 @@ fclean: clean
 
 re: clean all
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re tests

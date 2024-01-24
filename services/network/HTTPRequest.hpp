@@ -3,7 +3,7 @@
 
 #include <map>
 #include <string>
-#include <vector>
+#include <stdexcept>
 
 class Connection;
 
@@ -12,24 +12,35 @@ class Connection;
 class HTTPRequest
 {
 public:
-    HTTPRequest(Connection* conn);
+    HTTPRequest(const std::string& input);
     ~HTTPRequest();
 
     const std::string& method() const;
-    const std::string& URL() const;
-    std::string get(const std::string& field) const;
+    const std::string& path() const;
+    const std::string& getHeader(const std::string& field) const;
+
+    void validate() const;
 
 private:
-    typedef std::map<std::string, std::string> Header;
+    typedef std::map<std::string, std::string> Headers;
 
     Connection* m_conn;
     std::string m_method;
-    std::string m_url;
-    Header m_header;
+    std::string m_path;
+    Headers m_headers;
+    const std::string m_empty;
 
     void parseRequestLine(std::istringstream& stream);
     void parseHeaders(std::istringstream& stream);
     void parseBody(std::istringstream& stream);
+};
+
+std::ostream& operator<<(std::ostream& os, const HTTPRequest& request);
+
+class BadRequestException : public std::runtime_error
+{
+public:
+    BadRequestException(const std::string& message);
 };
 
 #endif // !HTTP_REQUEST_HPP
