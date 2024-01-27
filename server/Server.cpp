@@ -56,7 +56,6 @@ void Server::listen()
 {
     if (::listen(m_socket, BACKLOG) == -1)
     {
-        close(m_socket);
         fatalError("Error while listening");
     }
 }
@@ -88,7 +87,6 @@ int Server::createSocket()
     setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
     if (bind(fd, (struct sockaddr*)&addr, sizeof(addr)) == -1)
     {
-        close(fd);
         fatalError("Error during socket initialization");
     }
 
