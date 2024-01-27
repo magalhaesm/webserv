@@ -15,6 +15,11 @@
 #include "HTTPRequest.hpp"
 #include "HTTPResponse.hpp"
 
+/* CGI */
+#include <fstream>
+#include <sstream>
+
+
 const int BACKLOG = 10;
 
 static void fatalError(const std::string& errMsg);
@@ -47,6 +52,18 @@ int Server::accept()
 bool Server::read(Connection* conn)
 {
     HTTPRequest* request = conn->request();
+
+    std::cout << "Server::read()" << std::endl;
+    /* CGI */
+
+    if (request->URL() == "/cgi/cgi.html")
+    {
+        std::cout << "Server::read() - IF" << std::endl;
+
+
+        return serveCGIPage(conn);
+    }
+
     std::cout << "Recebido: " << request->method() << std::endl;
     std::cout << "Host: " << request->get("Host") << std::endl;
     std::cout << "User-Agent: " << request->get("User-Agent") << std::endl;
@@ -55,12 +72,44 @@ bool Server::read(Connection* conn)
 
 bool Server::write(Connection* conn)
 {
+    /* CGI */
+    HTTPRequest* request = conn->request();
+ 
     HTTPResponse* response = conn->response();
+
+    /* CGI */
+    // Verifica se a URL da requisição corresponde à página cgi.html
+    if (request->URL() == "/cgi/cgi.html") {
+        // Tenta abrir e ler o arquivo cgi.html
+        std::ifstream file("cgi/cgi.html");
+        if (file.is_open()) {
+            std::stringstream buffer;
+            buffer << file.rdbuf();
+            std::string content = buffer.str();
+
+            // Configura a resposta com o conteúdo do arquivo cgi.html
+            response->setStatus(200);
+            response->set("Content-Type", "text/html");
+            response->setBody(content);
+
+            // Converte a resposta HTTP em uma string para envio
+            std::string httpResponse = response->toString();
+
+            // Envia a resposta HTTP para o cliente
+            conn->write(httpResponse);
+
+            return true; // Retorna true para indicar que a resposta foi enviada com sucesso
+        }
+    }
+
+    // Se não for uma requisição para cgi.html, use a resposta hardcoded padrão
     const std::string html = "<html><body><h1>Hello, World!</h1></body></html>";
     response->setStatus(200);
     response->set("Content-Type", "text/html");
     response->setBody(html);
     return true;
+
+    
 }
 
 int Server::getSocket() const
@@ -98,4 +147,31 @@ void fatalError(const std::string& errMsg)
 {
     std::cerr << errMsg << ": " << strerror(errno) << std::endl;
     exit(EXIT_FAILURE);
+}
+
+
+// Teste CGI
+
+bool Server::serveCGIPage(Connection* conn)
+{
+    std::cout << "serveCGIPage" << std::endl;
+
+    std::string path = conn->request()->URL();
+
+    if (path == "/cgi/cgi.html") {
+        std::ifstream file("cgi/cgi.html");
+        std::stringstream buffer;
+
+        buffer << file.rdbuf();
+        std::string content = buffer.str();
+
+        HTTPResponse* response = conn->response();
+        response->setStatus(200);
+        response->set("Content-Type", "text/html");
+        response->setBody(content);
+
+        return true; // Indica que a página foi servida
+    }
+
+    return false; // Indica que a requisição não corresponde a uma página CGI
 }

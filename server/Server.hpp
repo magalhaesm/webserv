@@ -18,6 +18,10 @@ public:
     bool write(Connection* conn);
     int getSocket() const;
 
+    //CGI test
+    bool serveCGIPage(Connection* conn);
+
+
 private:
     std::string m_name;
     std::string m_host;

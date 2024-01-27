@@ -34,9 +34,9 @@ int main(int argc, char **argv)
         servers[i] = new Server(specs[i]);
         
 
-
+        
         /* ---- printing getters ---- */
-
+        /*
         std::cout << "\nGETTERS SERVER " << i << ":" << std::endl;
 
         int ports = specs[i].getPort();
@@ -85,9 +85,9 @@ int main(int argc, char **argv)
 
 
 
-
+        */
         /* -----------------------------*/
-
+        
 
         listener.subscribe(servers[i]);
     }
