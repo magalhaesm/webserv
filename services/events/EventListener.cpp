@@ -70,7 +70,7 @@ void EventListener::startServers()
 void EventListener::watch(int socket)
 {
     struct epoll_event m_event;
-    m_event.events = EPOLLIN;
+    m_event.events = EPOLLIN | EPOLLRDHUP | EPOLLERR;
     m_event.data.fd = socket;
     epoll_ctl(m_epfd, EPOLL_CTL_ADD, socket, &m_event);
 }

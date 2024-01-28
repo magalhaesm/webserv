@@ -1,5 +1,4 @@
 #include <cstdio>
-#include <fcntl.h>
 #include <unistd.h>
 #include <sys/socket.h>
 
@@ -42,8 +41,16 @@ HTTPResponse* Connection::response()
     return m_response;
 }
 
+// TODO:
+// [x] desconexão do cliente
+// [ ] tempo-limite excedido
 void Connection::notify(struct epoll_event* event)
 {
+    if (event->events & (EPOLLRDHUP | EPOLLERR))
+    {
+        this->close();
+        return;
+    }
     if (event->events & EPOLLIN)
     {
         m_server->handleRequest(request(), response());
@@ -61,17 +68,18 @@ void Connection::close()
     m_dispatcher->close(this);
 }
 
+// TODO: lançar exceção dentro do controller
+// erros podem ser de leitura, escrita e de parsing no http
 std::string Connection::read()
 {
     std::string request;
     request.resize(BUFSIZ);
-    ::read(m_clientSocket, &request[0], request.size());
     return request;
 }
 
 void Connection::write(HTTPResponse* response)
 {
-    const std::string& stream = response->text();
+    const std::string& stream = response->toString();
     ::write(m_clientSocket, stream.c_str(), stream.size());
 }
 
