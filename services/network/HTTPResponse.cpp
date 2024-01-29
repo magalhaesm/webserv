@@ -30,7 +30,7 @@ void HTTPResponse::setBody(const std::string& body)
     m_body = body;
 }
 
-const std::string& HTTPResponse::HTTPResponse::text()
+const std::string& HTTPResponse::HTTPResponse::toString()
 {
     if (m_text.empty())
     {
@@ -61,6 +61,9 @@ const std::string& getStatusCode(int code)
     statusCodes[400] = "Bad Request";
     statusCodes[404] = "Not Found";
     statusCodes[405] = "Method not allowed";
+    statusCodes[500] = "Internal Server Error";
+    statusCodes[501] = "Not Implemented";
+    statusCodes[503] = "Service Unavailable";
     statusCodes[505] = "HTTP Version Not Supported";
 
     return statusCodes[code];

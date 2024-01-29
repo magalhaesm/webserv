@@ -7,6 +7,9 @@
 #include "Connection.hpp"
 #include "EventListener.hpp"
 
+const int TIMEOUT_SEC = 15;
+const int TIMEOUT_MS = 3000;
+
 bool g_running = true;
 
 static void sigIntHandler(int);
@@ -42,7 +45,7 @@ void EventListener::start()
 
 inline void EventListener::waitAndHandleEvents()
 {
-    int ready = epoll_wait(m_epfd, m_events, MAX_EVENTS, -1);
+    int ready = epoll_wait(m_epfd, m_events, MAX_EVENTS, TIMEOUT_MS);
     for (int idx = 0; idx < ready; ++idx)
     {
         Server* server = findReceiver(m_events[idx].data.fd);
@@ -55,6 +58,7 @@ inline void EventListener::waitAndHandleEvents()
             m_dispatcher.notify(&m_events[idx]);
         }
     }
+    m_dispatcher.checkTimeout(TIMEOUT_SEC);
 }
 
 void EventListener::startServers()
@@ -67,7 +71,7 @@ void EventListener::startServers()
     }
 }
 
-void EventListener::watch(int socket)
+inline void EventListener::watch(int socket)
 {
     struct epoll_event m_event;
     m_event.events = EPOLLIN | EPOLLRDHUP | EPOLLERR;

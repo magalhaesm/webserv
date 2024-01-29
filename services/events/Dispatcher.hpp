@@ -43,8 +43,10 @@ public:
      */
     void notify(struct epoll_event* event);
 
+    void checkTimeout(std::time_t threshold);
+
 private:
-    std::map<int, Connection*> active; /** Map to store active connections. */
+    std::map<int, Connection*> m_active; /** Map to store active connections. */
 
     /**
      * @brief Gets the Connection associated with the specified socket.

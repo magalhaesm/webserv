@@ -1,6 +1,7 @@
 #ifndef CONNECTION_HPP
 #define CONNECTION_HPP
 
+#include <ctime>
 #include <string>
 #include <sys/epoll.h>
 
@@ -19,6 +20,7 @@ public:
     std::string read();
     void write(HTTPResponse* response);
     int getSocket() const;
+    std::time_t getLastActivity() const;
 
     const HTTPRequest* request();
     HTTPResponse* response();
@@ -29,6 +31,7 @@ private:
     Dispatcher* m_dispatcher;
     HTTPRequest* m_request;
     HTTPResponse* m_response;
+    std::time_t m_timeOfLastActivity;
 
     void close();
 };

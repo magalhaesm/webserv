@@ -12,6 +12,7 @@ Connection::Connection(Server* server, Dispatcher* dispatcher)
     , m_dispatcher(dispatcher)
     , m_request(NULL)
     , m_response(NULL)
+    , m_timeOfLastActivity(time(NULL))
 {
     m_clientSocket = server->accept();
 }
@@ -43,24 +44,29 @@ HTTPResponse* Connection::response()
 
 // TODO:
 // [x] desconexão do cliente
-// [ ] tempo-limite excedido
+// [x] tempo-limite excedido
 void Connection::notify(struct epoll_event* event)
 {
     if (event->events & (EPOLLRDHUP | EPOLLERR))
     {
-        this->close();
+        close();
         return;
     }
     if (event->events & EPOLLIN)
     {
         m_server->handleRequest(request(), response());
-        event->events = EPOLLOUT | EPOLLET;
+        event->events = EPOLLOUT;
     }
     if (event->events & EPOLLOUT)
     {
-        this->write(m_response);
-        this->close();
+        write(m_response);
+        close();
     }
+}
+
+std::time_t Connection::getLastActivity() const
+{
+    return m_timeOfLastActivity;
 }
 
 void Connection::close()
@@ -74,13 +80,22 @@ std::string Connection::read()
 {
     std::string request;
     request.resize(BUFSIZ);
+    if (::recv(m_clientSocket, &request[0], request.size(), 0) <= 0)
+    {
+        close();
+    }
+    m_timeOfLastActivity = time(NULL);
     return request;
 }
 
 void Connection::write(HTTPResponse* response)
 {
     const std::string& stream = response->toString();
-    ::write(m_clientSocket, stream.c_str(), stream.size());
+    if (::send(m_clientSocket, stream.c_str(), stream.size(), 0) <= 0)
+    {
+        close();
+    }
+    m_timeOfLastActivity = time(NULL);
 }
 
 int Connection::getSocket() const

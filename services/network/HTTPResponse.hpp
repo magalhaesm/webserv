@@ -15,7 +15,8 @@ public:
     void setStatus(int status);
     void setHeader(const std::string& field, const std::string& value);
     void setBody(const std::string& body);
-    const std::string& text();
+
+    const std::string& toString();
 
 private:
     typedef std::map<std::string, std::string> Headers;
