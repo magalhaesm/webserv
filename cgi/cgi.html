@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>CGIs</title>
+  <title>Gerador de Senhas CGI</title>
   <style>
     * {
       overflow: hidden;
@@ -35,24 +35,24 @@
       margin-bottom: 20px;
     }
 
-    p {
-      line-height: 1.5;
+    form {
       margin-bottom: 20px;
     }
 
-    .button-container {
-      display: flex;
-      justify-content: space-between;
+    label, input, .button {
+      display: block;
+      margin-bottom: 10px;
     }
 
     .button {
-      display: inline-block;
       padding: 10px 20px;
       background-color: rgb(0, 104, 136);
       color: #fff;
       font-size: 20px;
       text-decoration: none;
       border-radius: 4px;
+      text-align: center;
+      cursor: pointer;
     }
 
     .button:hover {
@@ -62,21 +62,18 @@
 </head>
 <body>
   <div class="content">
-    <h1>CGIs</h1>
-    <p>
-      CGI é uma sigla para Common Gateway Interface, ou Interface Comum de Ligação. São uma especificação
-      de interface que permite que um servidor execute programas externos, normalmente scripts, e permite
-      que estes programas processem requisições, e permitem que informações sejam passadas para estes
-      scripts através do standard input ou de variáveis de ambiente.
-    </p>
-    <p>
-      Nosso Webserv pode executar scripts em Python ou em PHP.
-    </p>
-    <br>
-    <div class="button-container">
-      <a href="http://localhost:3007/cgi/so_long.c" class="button">Rodar o So_Long 🐍</a>
-      <a href="http://localhost:3007/cgi/bad_cgi.html" class="button">Ok, vamos continuar!</a>
-    </div>
+    <h1>Gerador de Senhas CGI</h1>
+    <form action="/cgi-bin/password_generator.py" method="post">
+      <label for="length">Comprimento da Senha:</label>
+      <input type="number" id="length" name="length" min="1" max="20" required>
+      <input type="checkbox" id="special_chars" name="special_chars" value="s">
+      <label for="special_chars">Incluir Caracteres Especiais</label>
+      <input type="checkbox" id="digits" name="digits" value="s">
+      <label for="digits">Incluir Números</label>
+      <input type="checkbox" id="uppercase" name="uppercase" value="s">
+      <label for="uppercase">Incluir Letras Maiúsculas</label>
+      <input type="submit" value="Gerar Senha" class="button">
+    </form>
   </div>
 </body>
 </html>
