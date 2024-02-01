@@ -14,6 +14,7 @@
 #include "Connection.hpp"
 #include "HTTPRequest.hpp"
 #include "HTTPResponse.hpp"
+#include "CGIScriptController.hpp"
 
 /* CGI */
 #include <fstream>
@@ -52,17 +53,22 @@ int Server::accept()
 bool Server::read(Connection* conn)
 {
     HTTPRequest* request = conn->request();
+    CGIScriptController cgi;
 
+    std::cout << "Funcao Server::read()" << std::endl;
     /* CGI */
 
-    if (request->URL() == "/cgi/cgi.html")
+    std::string request_url = request->URL();
+    if (request_url.find("/cgi/") != std::string::npos)
     {
         std::cout << "Server::read() - IF" << std::endl;
         std::cout << "URL: " << request->URL() << std::endl;
 
-        return serveCGIPage(conn);
+        if (request->method() == "POST")
+            cgi.handleRequest(*request);
+        else
+            return serveCGIPage(conn);
     }
-
     return true;
 }
 
