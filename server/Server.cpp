@@ -53,20 +53,16 @@ bool Server::read(Connection* conn)
 {
     HTTPRequest* request = conn->request();
 
-    std::cout << "Server::read()" << std::endl;
     /* CGI */
 
     if (request->URL() == "/cgi/cgi.html")
     {
         std::cout << "Server::read() - IF" << std::endl;
-
+        std::cout << "URL: " << request->URL() << std::endl;
 
         return serveCGIPage(conn);
     }
 
-    std::cout << "Recebido: " << request->method() << std::endl;
-    std::cout << "Host: " << request->get("Host") << std::endl;
-    std::cout << "User-Agent: " << request->get("User-Agent") << std::endl;
     return true;
 }
 
