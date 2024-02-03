@@ -79,6 +79,7 @@ void CGIScriptController::setCGIEnvironment(const HTTPRequest& request) //config
 
 void CGIScriptController::executeScript(const std::string& scriptPath) //executa o script CGI fazendo fork e o pipe
 {
+    std::cout << "executeScript" << std::endl;
     int pipefd[2];
     pid_t pid;
 
@@ -112,10 +113,17 @@ void CGIScriptController::executeScript(const std::string& scriptPath) //executa
         int nbytes;
         close(pipefd[1]);
 
+        std::cout << "executeScript: antes do while" << std::endl;
+
         while ((nbytes = read(pipefd[0], buffer, sizeof(buffer))) > 0) {
             std::cout.write(buffer, nbytes);
         }
+ 
+        std::cout << "executeScript: apos  while" << std::endl;
 
         close(pipefd[0]);
+
+        std::cout << "executeScript: apos pipe" << std::endl;
+
     }
 }

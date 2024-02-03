@@ -105,7 +105,7 @@ bool Server::write(Connection* conn)
     }
 
     // Se não for uma requisição para cgi.html, use a resposta hardcoded padrão
-    const std::string html = "<html><body><h1>Hello, World!</h1></body></html>";
+    const std::string html = "<html><body><h1>Hello, World! HELLO! </h1></body></html>";
     response->setStatus(200);
     response->set("Content-Type", "text/html");
     response->setBody(html);
