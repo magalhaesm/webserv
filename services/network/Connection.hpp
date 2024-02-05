@@ -6,19 +6,19 @@
 #include <sys/epoll.h>
 
 class Server;
-class Dispatcher;
 class HTTPRequest;
 class HTTPResponse;
+class EventListener;
 
 class Connection
 {
 public:
-    Connection(Server* server, Dispatcher* dispatcher);
+    Connection(Server* server, EventListener* listener);
     ~Connection();
 
-    void notify(struct epoll_event* event);
-    std::string read();
-    void write(HTTPResponse* response);
+    bool read();
+    bool write();
+    void close();
     int getSocket() const;
     std::time_t getLastActivity() const;
 
@@ -28,12 +28,13 @@ public:
 private:
     int m_clientSocket;
     Server* m_server;
-    Dispatcher* m_dispatcher;
     HTTPRequest* m_request;
     HTTPResponse* m_response;
+    EventListener* m_listener;
     std::time_t m_timeOfLastActivity;
+    std::string m_readBuffer;
 
-    void close();
+    void updateLastActivity();
 };
 
 #endif // !CONNECTION_HPP

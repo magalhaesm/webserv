@@ -1,6 +1,8 @@
+#include <vector>
 #include <csignal>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <unistd.h>
 #include <sys/socket.h>
 
@@ -22,14 +24,23 @@ EventListener::EventListener()
 
 EventListener::~EventListener()
 {
-    close(m_epfd);
+    std::map<int, Connection*>::iterator it;
+    for (it = m_active.begin(); it != m_active.end(); ++it)
+    {
+        delete it->second;
+    }
+    ::close(m_epfd);
 }
 
-void EventListener::subscribe(Server* target)
+void EventListener::subscribe(Server* server)
 {
-    int socket = target->getSocket();
-    m_servers[socket] = target;
-    watch(socket);
+    int socket = server->getSocket();
+    m_servers[socket] = server;
+
+    struct epoll_event ev;
+    ev.events = EPOLLIN;
+    ev.data.fd = socket;
+    epoll_ctl(m_epfd, EPOLL_CTL_ADD, socket, &ev);
 }
 
 void EventListener::start()
@@ -39,29 +50,23 @@ void EventListener::start()
 
     while (g_running)
     {
-        waitAndHandleEvents();
+        int ready = epoll_wait(m_epfd, m_events, MAX_EVENTS, TIMEOUT_MS);
+        for (int idx = 0; idx < ready; ++idx)
+        {
+            handleEvent(&m_events[idx]);
+        }
+        checkTimeout(TIMEOUT_SEC);
     }
 }
 
-inline void EventListener::waitAndHandleEvents()
+void EventListener::close(Connection* conn)
 {
-    int ready = epoll_wait(m_epfd, m_events, MAX_EVENTS, TIMEOUT_MS);
-    for (int idx = 0; idx < ready; ++idx)
-    {
-        Server* server = findReceiver(m_events[idx].data.fd);
-        if (server)
-        {
-            this->accept(server);
-        }
-        else
-        {
-            m_dispatcher.notify(&m_events[idx]);
-        }
-    }
-    m_dispatcher.checkTimeout(TIMEOUT_SEC);
+    int connID = conn->getSocket();
+    delete m_active.at(connID);
+    m_active.erase(connID);
 }
 
-void EventListener::startServers()
+inline void EventListener::startServers()
 {
     std::map<int, Server*>::iterator it;
     for (it = m_servers.begin(); it != m_servers.end(); ++it)
@@ -71,33 +76,84 @@ void EventListener::startServers()
     }
 }
 
-inline void EventListener::watch(int socket)
+inline void EventListener::handleEvent(struct epoll_event* ev)
 {
-    struct epoll_event m_event;
-    m_event.events = EPOLLIN | EPOLLRDHUP | EPOLLERR;
-    m_event.data.fd = socket;
-    epoll_ctl(m_epfd, EPOLL_CTL_ADD, socket, &m_event);
+    if (stablishConnection(ev->data.fd))
+    {
+        return;
+    }
+
+    Connection* conn = m_active.at(ev->data.fd);
+
+    if (ev->events & EPOLLIN)
+    {
+        update(conn->read(), ev, ev->events | EPOLLOUT);
+    }
+    else if (ev->events & EPOLLOUT)
+    {
+        update(conn->write(), ev, ev->events & ~EPOLLOUT);
+    }
+    else if (ev->events & (EPOLLRDHUP | EPOLLERR))
+    {
+        conn->close();
+    }
 }
 
-inline Server* EventListener::findReceiver(int socket)
+bool EventListener::stablishConnection(int socket)
 {
-    std::map<int, Server*>::iterator it = m_servers.find(socket);
+    std::map<int, Server*>::const_iterator it = m_servers.find(socket);
     if (it != m_servers.end())
     {
-        return it->second;
+        Server* server = it->second;
+        Connection* conn = new Connection(server, this);
+
+        int client = conn->getSocket();
+        m_active[client] = conn;
+
+        struct epoll_event ev;
+        ev.events = EPOLLIN | EPOLLRDHUP | EPOLLERR | EPOLLET;
+        ev.data.fd = client;
+        epoll_ctl(m_epfd, EPOLL_CTL_ADD, client, &ev);
+
+        return true;
     }
-    return NULL;
+    return false;
 }
 
-inline void EventListener::accept(Server* server)
+inline void EventListener::checkTimeout(std::time_t threshold)
 {
-    Connection* client = m_dispatcher.connect(server);
-    watch(client->getSocket());
+    std::vector<Connection*> expired;
+    std::map<int, Connection*>::iterator it;
+
+    for (it = m_active.begin(); it != m_active.end(); ++it)
+    {
+        Connection* conn = it->second;
+        std::time_t elapsedTime = time(NULL) - conn->getLastActivity();
+
+        if (elapsedTime > threshold)
+        {
+            expired.push_back(conn);
+        }
+    }
+    for (size_t i = 0; i < expired.size(); ++i)
+    {
+        close(expired[i]);
+    }
+}
+
+void EventListener::update(bool change, struct epoll_event* ev, uint32_t events)
+{
+    if (change)
+    {
+        ev->events |= events;
+        epoll_ctl(m_epfd, EPOLL_CTL_MOD, ev->data.fd, ev);
+    }
 }
 
 void sigIntHandler(int)
 {
     g_running = false;
+    std::cerr << "signal: interrupt" << std::endl;
 }
 
 void setSignalHandler()

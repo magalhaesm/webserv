@@ -3,15 +3,15 @@
 #include <sys/socket.h>
 
 #include "Connection.hpp"
-#include "Dispatcher.hpp"
+#include "EventListener.hpp"
 #include "HTTPRequest.hpp"
 #include "HTTPResponse.hpp"
 
-Connection::Connection(Server* server, Dispatcher* dispatcher)
+Connection::Connection(Server* server, EventListener* listener)
     : m_server(server)
-    , m_dispatcher(dispatcher)
     , m_request(NULL)
     , m_response(NULL)
+    , m_listener(listener)
     , m_timeOfLastActivity(time(NULL))
 {
     m_clientSocket = server->accept();
@@ -24,11 +24,62 @@ Connection::~Connection()
     ::close(m_clientSocket);
 }
 
+// TODO: lançar exceção dentro do controller
+// erros podem ser de leitura, escrita e de parsing no http
+bool Connection::read()
+{
+    std::string input;
+    input.resize(BUFSIZ + 1);
+    if (::recv(m_clientSocket, &input[0], input.size(), 0) <= 0)
+    {
+        close();
+    }
+
+    if (!m_request)
+    {
+        m_request = new HTTPRequest(input);
+    }
+    m_server->handleRequest(m_request, response());
+    updateLastActivity();
+
+    return true;
+}
+
+bool Connection::write()
+{
+    HTTPResponse* resp = m_response;
+    const std::string& stream = resp->toString();
+    if (::send(m_clientSocket, stream.c_str(), stream.size(), 0) <= 0)
+    {
+        close();
+    }
+    updateLastActivity();
+
+    close();
+    return false;
+}
+
+void Connection::close()
+{
+    m_listener->close(this);
+}
+
+int Connection::getSocket() const
+{
+    return m_clientSocket;
+}
+
+std::time_t Connection::getLastActivity() const
+{
+    return m_timeOfLastActivity;
+}
+
+// TODO: manter o buffer de entrada na conexão
 const HTTPRequest* Connection::request()
 {
     if (!m_request)
     {
-        m_request = new HTTPRequest(this->read());
+        m_request = new HTTPRequest("");
     }
     return m_request;
 }
@@ -42,63 +93,7 @@ HTTPResponse* Connection::response()
     return m_response;
 }
 
-// TODO:
-// [x] desconexão do cliente
-// [x] tempo-limite excedido
-void Connection::notify(struct epoll_event* event)
+void Connection::updateLastActivity()
 {
-    if (event->events & (EPOLLRDHUP | EPOLLERR))
-    {
-        close();
-        return;
-    }
-    if (event->events & EPOLLIN)
-    {
-        m_server->handleRequest(request(), response());
-        event->events = EPOLLOUT;
-    }
-    if (event->events & EPOLLOUT)
-    {
-        write(m_response);
-        close();
-    }
-}
-
-std::time_t Connection::getLastActivity() const
-{
-    return m_timeOfLastActivity;
-}
-
-void Connection::close()
-{
-    m_dispatcher->close(this);
-}
-
-// TODO: lançar exceção dentro do controller
-// erros podem ser de leitura, escrita e de parsing no http
-std::string Connection::read()
-{
-    std::string request;
-    request.resize(BUFSIZ);
-    if (::recv(m_clientSocket, &request[0], request.size(), 0) <= 0)
-    {
-        close();
-    }
     m_timeOfLastActivity = time(NULL);
-    return request;
-}
-
-void Connection::write(HTTPResponse* response)
-{
-    const std::string& stream = response->toString();
-    if (::send(m_clientSocket, stream.c_str(), stream.size(), 0) <= 0)
-    {
-        close();
-    }
-    m_timeOfLastActivity = time(NULL);
-}
-
-int Connection::getSocket() const
-{
-    return m_clientSocket;
 }
