@@ -3,6 +3,8 @@
 #include <iostream>
 #include <cstdlib>
 #include <unistd.h>
+#include <sys/wait.h>
+#include <cstring>
 
 
 CGIScriptController::CGIScriptController(void)
@@ -37,9 +39,13 @@ void CGIScriptController::handleRequest(const HTTPRequest& request) //recebe req
     std::cout << "inside handleRequest()" << std::endl;
     setCGIEnvironment(request);
 
+    //funcao para ler o conteudo da msg http que vai para o cgi?
+    //std::string postData = request.getBody(); // Assumindo que getBody() retorna o corpo da requisição
+    //aqui colocamos hardcoded
+    std::string postData = "length=10&special_chars=s&digits=s&uppercase=s";
+
     //executa o sript em python
-    executeScript("./cgi/password_generator.py");
-    
+    executeScript("./cgi/password_generator.py", postData);    
 }
 
 
@@ -77,53 +83,86 @@ void CGIScriptController::setCGIEnvironment(const HTTPRequest& request) //config
 }
 
 
-void CGIScriptController::executeScript(const std::string& scriptPath) //executa o script CGI fazendo fork e o pipe
+void CGIScriptController::executeScript(const std::string& scriptPath, const std::string& postData)
 {
-    std::cout << "executeScript" << std::endl;
-    int pipefd[2];
+    int pipefd[2]; // Pipe para capturar a saída do script CGI
+    int inputPipe[2]; // Pipe para passar os dados da requisição POST para o stdin do script CGI
     pid_t pid;
 
-    if (pipe(pipefd) == -1)
+    // Criação dos pipes
+    if (pipe(pipefd) == -1 || pipe(inputPipe) == -1)
     {
         perror("pipe");
         exit(EXIT_FAILURE);
     }
 
     pid = fork();
-    if (pid == -1)
+    if (pid == -1) 
     {
         perror("fork");
         exit(EXIT_FAILURE);
     }
 
-    if (pid == 0)
+    if (pid == 0) 
     { // Processo filho
+        // Fecha os lados não utilizados dos pipes
         close(pipefd[0]);
-        dup2(pipefd[1], STDOUT_FILENO);
-        close(pipefd[1]);
+        close(inputPipe[1]);
 
-        // Executar o script Python
-        execl("/usr/bin/python3", "python", scriptPath.c_str(), (char *)NULL);
+        // Redireciona stdout e stdin
+        dup2(pipefd[1], STDOUT_FILENO);
+        dup2(inputPipe[0], STDIN_FILENO);
+
+        // Fecha os descritores duplicados
+        close(pipefd[1]);
+        close(inputPipe[0]);
+
+        // Executa o script CGI
+        execl("/usr/bin/python3", "python3", scriptPath.c_str(), (char *)NULL);
+        
+        // Se execl falhar
         perror("execl");
         exit(EXIT_FAILURE);
     } 
-    else
+    else 
     { // Processo pai
-        char buffer[128];
-        int nbytes;
+        // Fecha os lados não utilizados dos pipes
         close(pipefd[1]);
+        close(inputPipe[0]);
 
-        std::cout << "executeScript: antes do while" << std::endl;
-
-        while ((nbytes = read(pipefd[0], buffer, sizeof(buffer))) > 0) {
-            std::cout.write(buffer, nbytes);
+        // Escreve os dados da requisição POST no stdin do script CGI
+        ssize_t bytes_written = write(inputPipe[1], postData.c_str(), postData.size());
+        if (bytes_written == -1) 
+        {
+            perror("write");
+            // Considerar tratamento adicional de erro aqui
         }
- 
-        std::cout << "executeScript: apos  while" << std::endl;
+        close(inputPipe[1]); // Fecha o lado de escrita após escrever os dados
 
+        // Lê a saída do script CGI
+        char buffer[128];
+        ssize_t nbytes;
+        while ((nbytes = read(pipefd[0], buffer, sizeof(buffer))) > 0) 
+        {
+            // Escreve a saída do script CGI para o stdout do processo pai
+            write(STDOUT_FILENO, buffer, nbytes);
+        }
+        if (nbytes == -1) 
+        {
+            perror("read");
+            // Considerar tratamento adicional de erro aqui
+        }
         close(pipefd[0]);
 
-        std::cout << "executeScript: apos pipe" << std::endl;
-
+        // Espera o processo filho terminar
+        int status;
+        waitpid(pid, &status, 0);
+        if (WIFEXITED(status)) 
+        {
+            std::cout << "Script CGI exited with status " << WEXITSTATUS(status) << std::endl;
+        } else if (WIFSIGNALED(status)) 
+        {
+            std::cout << "Script CGI killed by signal " << WTERMSIG(status) << std::endl;
+        }
     }
 }

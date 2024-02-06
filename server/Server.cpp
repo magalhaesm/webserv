@@ -64,6 +64,8 @@ bool Server::read(Connection* conn)
         std::cout << "Server::read() - IF" << std::endl;
         std::cout << "URL: " << request->URL() << std::endl;
 
+        std::cout << "Request Method: " << request->method() << std::endl;
+
         if (request->method() == "POST")
             cgi.handleRequest(*request);
         else
