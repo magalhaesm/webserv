@@ -9,8 +9,12 @@
 #include "Connection.hpp"
 #include "EventListener.hpp"
 
-const int TIMEOUT_SEC = 15;
+const int TIMEOUT_SEC = 5;
 const int TIMEOUT_MS = 3000;
+
+const int ALL_EVENTS = EPOLLIN | EPOLLOUT | EPOLLRDHUP | EPOLLERR;
+// const int READ_EVENT = ALL_EVENTS & ~EPOLLOUT;
+// const int WRITE_EVENT = ALL_EVENTS & ~EPOLLIN;
 
 bool g_running = true;
 
@@ -78,20 +82,20 @@ inline void EventListener::startServers()
 
 inline void EventListener::handleEvent(struct epoll_event* ev)
 {
-    if (stablishConnection(ev->data.fd))
+    if (establishConnection(ev->data.fd))
     {
         return;
     }
 
     Connection* conn = m_active.at(ev->data.fd);
 
-    if (ev->events & EPOLLIN)
+    if ((ev->events & EPOLLIN) == EPOLLIN)
     {
-        update(conn->read(), ev, ev->events | EPOLLOUT);
+        update(conn->read(), ev, EPOLLOUT);
     }
-    else if (ev->events & EPOLLOUT)
+    else if ((ev->events & EPOLLOUT) == EPOLLOUT)
     {
-        update(conn->write(), ev, ev->events & ~EPOLLOUT);
+        update(conn->write(), ev, EPOLLIN);
     }
     else if (ev->events & (EPOLLRDHUP | EPOLLERR))
     {
@@ -99,19 +103,19 @@ inline void EventListener::handleEvent(struct epoll_event* ev)
     }
 }
 
-bool EventListener::stablishConnection(int socket)
+bool EventListener::establishConnection(int socket)
 {
     std::map<int, Server*>::const_iterator it = m_servers.find(socket);
     if (it != m_servers.end())
     {
         Server* server = it->second;
-        Connection* conn = new Connection(server, this);
+        Connection* conn = new Connection(this, server);
 
         int client = conn->getSocket();
         m_active[client] = conn;
 
         struct epoll_event ev;
-        ev.events = EPOLLIN | EPOLLRDHUP | EPOLLERR | EPOLLET;
+        ev.events = ALL_EVENTS;
         ev.data.fd = client;
         epoll_ctl(m_epfd, EPOLL_CTL_ADD, client, &ev);
 
@@ -141,11 +145,11 @@ inline void EventListener::checkTimeout(std::time_t threshold)
     }
 }
 
-void EventListener::update(bool change, struct epoll_event* ev, uint32_t events)
+inline void EventListener::update(bool change, struct epoll_event* ev, uint32_t events)
 {
     if (change)
     {
-        ev->events |= events;
+        ev->events = events;
         epoll_ctl(m_epfd, EPOLL_CTL_MOD, ev->data.fd, ev);
     }
 }

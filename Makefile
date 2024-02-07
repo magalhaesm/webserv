@@ -13,17 +13,21 @@ vpath %.hpp $(DIRS)
 vpath %.cpp $(DIRS)
 
 HEADERS := Server.hpp EventListener.hpp Connection.hpp
-HEADERS += HTTPRequest.hpp HTTPResponse.hpp
+HEADERS += HTTPRequest.hpp HTTPResponse.hpp HTTP.hpp
 HEADERS += HTMLController.hpp CGIController.hpp
 
 SOURCES := main.cpp Server.cpp EventListener.cpp Connection.cpp
-SOURCES += HTTPRequest.cpp HTTPResponse.cpp
+SOURCES += HTTPRequest.cpp HTTPResponse.cpp HTTP.cpp
 SOURCES += HTMLController.cpp CGIController.cpp
 
 OBJS     := $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
 CXXFLAGS := -Wall -Werror -Wextra -std=c++98 $(addprefix -I,$(DIRS))
 
 all: $(NAME)
+
+run: $(NAME)
+	@ echo "--> Running $@"
+	@ ./$(NAME)
 
 $(NAME): $(OBJS)
 	@$(LOG) "Building $@"
@@ -37,7 +41,7 @@ $(OBJ_DIR):
 	@$(LOG) "Creating objects directory"
 	@mkdir $@
 
-tests:
+tests: $(NAME)
 	@make -C tests --no-print-directory
 
 leak: $(NAME)

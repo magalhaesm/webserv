@@ -31,7 +31,7 @@ public:
 
     /**
      * @brief Subscribes a server for event notifications.
-     * @param target The server to subscribe.
+     * @param server The server to subscribe.
      */
     void subscribe(Server* server);
 
@@ -58,7 +58,7 @@ private:
      */
     void startServers();
 
-    bool stablishConnection(int socket);
+    bool establishConnection(int socket);
     void handleEvent(struct epoll_event* event);
     void update(bool change, struct epoll_event* event, uint32_t events);
     void checkTimeout(std::time_t threshold);

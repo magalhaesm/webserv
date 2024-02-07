@@ -1,4 +1,6 @@
 #include <cstdio>
+#include <iostream>
+#include <strings.h>
 #include <unistd.h>
 #include <sys/socket.h>
 
@@ -7,13 +9,16 @@
 #include "HTTPRequest.hpp"
 #include "HTTPResponse.hpp"
 
-Connection::Connection(Server* server, EventListener* listener)
+const int BUFSIZE = 1024;
+
+Connection::Connection(EventListener* listener, Server* server)
     : m_server(server)
+    , m_listener(listener)
     , m_request(NULL)
     , m_response(NULL)
-    , m_listener(listener)
     , m_timeOfLastActivity(time(NULL))
 {
+    std::cout << "== NEW CONNECTION ==\n";
     m_clientSocket = server->accept();
 }
 
@@ -24,44 +29,69 @@ Connection::~Connection()
     ::close(m_clientSocket);
 }
 
+// +--------------------+         +--------------------+
+// | APPLICATION (send) |         | APPLICATION (recv) |
+// +--------------------+         +--------------------+
+// |      KERNEL        |   -->   |      KERNEL        |
+// +--------------------+         +--------------------+
+
 // TODO: lançar exceção dentro do controller
 // erros podem ser de leitura, escrita e de parsing no http
 bool Connection::read()
 {
-    std::string input;
-    input.resize(BUFSIZ + 1);
-    if (::recv(m_clientSocket, &input[0], input.size(), 0) <= 0)
+    char buffer[BUFSIZE];
+    bzero(&buffer, BUFSIZE);
+
+    ssize_t bytesRead = ::recv(m_clientSocket, buffer, BUFSIZE, 0);
+    if (bytesRead <= 0)
     {
-        close();
+        return this->close();
     }
 
-    if (!m_request)
-    {
-        m_request = new HTTPRequest(input);
-    }
-    m_server->handleRequest(m_request, response());
-    updateLastActivity();
+    m_buffer.append(buffer, bytesRead);
 
-    return true;
+    // TODO: encapsular este bloco
+    size_t pos = m_buffer.rfind("\r\n\r\n");
+    if (pos != std::string::npos)
+    {
+        m_request = new HTTPRequest(m_buffer);
+        m_server->handleRequest(m_request, response());
+        m_buffer = m_response->toString();
+        updateLastActivity();
+        return true;
+    }
+
+    return false;
 }
 
 bool Connection::write()
 {
-    HTTPResponse* resp = m_response;
-    const std::string& stream = resp->toString();
-    if (::send(m_clientSocket, stream.c_str(), stream.size(), 0) <= 0)
+    if (m_buffer.empty())
     {
-        close();
+        return true;
     }
-    updateLastActivity();
 
-    close();
+    size_t bufsiz = std::min<int>(m_buffer.size(), BUFSIZE);
+    ssize_t bytesSent = ::send(m_clientSocket, m_buffer.c_str(), bufsiz, 0);
+    if (bytesSent <= 0)
+    {
+        return this->close();
+    }
+
+    updateLastActivity();
+    m_buffer.erase(0, bytesSent);
+
+    if (m_buffer.empty())
+    {
+        return m_response->isPersistent() ? true : this->close();
+    }
     return false;
 }
 
-void Connection::close()
+bool Connection::close()
 {
     m_listener->close(this);
+    return true;
 }
 
 int Connection::getSocket() const

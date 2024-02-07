@@ -3,7 +3,6 @@
 #include "Connection.hpp"
 #include "HTTPResponse.hpp"
 
-const std::string CRLF("\r\n");
 const std::string& getStatusCode(int code);
 
 HTTPResponse::HTTPResponse(Connection* conn)
@@ -28,6 +27,21 @@ void HTTPResponse::setHeader(const std::string& field, const std::string& value)
 void HTTPResponse::setBody(const std::string& body)
 {
     m_body = body;
+}
+
+bool HTTPResponse::isPersistent()
+{
+    return getHeader("Connection") == "keep-alive";
+}
+
+const std::string& HTTPResponse::getHeader(const std::string& field)
+{
+    Headers::const_iterator it = m_header.find(field);
+    if (it != m_header.end())
+    {
+        return it->second;
+    }
+    return m_empty;
 }
 
 const std::string& HTTPResponse::HTTPResponse::toString()

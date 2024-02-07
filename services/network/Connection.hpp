@@ -13,12 +13,12 @@ class EventListener;
 class Connection
 {
 public:
-    Connection(Server* server, EventListener* listener);
+    Connection(EventListener* listener, Server* server);
     ~Connection();
 
     bool read();
     bool write();
-    void close();
+    bool close();
     int getSocket() const;
     std::time_t getLastActivity() const;
 
@@ -28,11 +28,11 @@ public:
 private:
     int m_clientSocket;
     Server* m_server;
+    EventListener* m_listener;
     HTTPRequest* m_request;
     HTTPResponse* m_response;
-    EventListener* m_listener;
     std::time_t m_timeOfLastActivity;
-    std::string m_readBuffer;
+    std::string m_buffer;
 
     void updateLastActivity();
 };

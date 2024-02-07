@@ -1,9 +1,9 @@
 #ifndef HTTP_REQUEST_HPP
 #define HTTP_REQUEST_HPP
 
-#include <map>
 #include <string>
-#include <stdexcept>
+
+#include "HTTP.hpp"
 
 class Connection;
 
@@ -15,6 +15,7 @@ public:
     HTTPRequest(const std::string& input);
     ~HTTPRequest();
 
+    static HTTPRequest createRequest(const std::string& input);
     const std::string& method() const;
     const std::string& path() const;
     const std::string& getHeader(const std::string& field) const;
@@ -22,11 +23,11 @@ public:
     void validate() const;
 
 private:
-    typedef std::map<std::string, std::string> Headers;
-
     Connection* m_conn;
     std::string m_method;
     std::string m_path;
+    std::string m_version;
+    std::string m_query;
     Headers m_headers;
     const std::string m_empty;
 
@@ -36,11 +37,5 @@ private:
 };
 
 std::ostream& operator<<(std::ostream& os, const HTTPRequest& request);
-
-class BadRequestException : public std::runtime_error
-{
-public:
-    BadRequestException(const std::string& message);
-};
 
 #endif // !HTTP_REQUEST_HPP
