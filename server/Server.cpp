@@ -67,7 +67,11 @@ bool Server::read(Connection* conn)
         std::cout << "Request Method: " << request->method() << std::endl;
 
         if (request->method() == "POST")
-            cgi.handleRequest(*request);
+        {
+            std::string httpResponse = cgi.handleRequest(*request);
+            std::cout << "httpResponse: " << httpResponse << std::endl;
+            conn->write(httpResponse);
+        }
         else
             return serveCGIPage(conn);
     }
