@@ -52,7 +52,7 @@ int Server::accept()
 
 bool Server::read(Connection* conn)
 {
-    HTTPRequest* request = conn->request();
+    HTTPRequest* request = conn->request(); /**/
     CGIScriptController cgi;
 
     std::cout << "Funcao Server::read()" << std::endl;
@@ -75,7 +75,7 @@ bool Server::read(Connection* conn)
         else
             return serveCGIPage(conn);
     }
-    return true;
+    return true; /**/
 }
 
 bool Server::write(Connection* conn)
@@ -83,7 +83,7 @@ bool Server::write(Connection* conn)
     /* CGI */
     HTTPRequest* request = conn->request();
  
-    HTTPResponse* response = conn->response();
+    HTTPResponse* response = conn->response(); /**/
 
     /* CGI */
     // Verifica se a URL da requisição corresponde à página cgi.html
@@ -91,7 +91,8 @@ bool Server::write(Connection* conn)
         // Tenta abrir e ler o arquivo cgi.html
         std::ifstream file("cgi/cgi.html");
         if (file.is_open()) {
-            std::stringstream buffer;
+            std::stringstream buffer;    return true;
+
             buffer << file.rdbuf();
             std::string content = buffer.str();
 
@@ -110,7 +111,7 @@ bool Server::write(Connection* conn)
         }
     }
 
-    // Se não for uma requisição para cgi.html, use a resposta hardcoded padrão
+    /**/ //Se não for uma requisição para cgi.html, use a resposta hardcoded padrão
     const std::string html = "<html><body><h1>Hello, World! HELLO! </h1></body></html>";
     response->setStatus(200);
     response->set("Content-Type", "text/html");
