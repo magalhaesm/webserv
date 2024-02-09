@@ -9,6 +9,7 @@ class Server;
 class HTTPRequest;
 class HTTPResponse;
 class EventListener;
+class HTTPParser;
 
 class Connection
 {
@@ -20,9 +21,8 @@ public:
     bool write();
     bool close();
     int getSocket() const;
-    std::time_t getLastActivity() const;
+    std::time_t getLastActivityTime() const;
 
-    const HTTPRequest* request();
     HTTPResponse* response();
 
 private:
@@ -31,10 +31,11 @@ private:
     EventListener* m_listener;
     HTTPRequest* m_request;
     HTTPResponse* m_response;
-    std::time_t m_timeOfLastActivity;
+    HTTPParser& m_parser;
+    std::time_t m_lastActivityTime;
     std::string m_buffer;
 
-    void updateLastActivity();
+    void updateLastActivityTime();
 };
 
 #endif // !CONNECTION_HPP

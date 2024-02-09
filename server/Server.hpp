@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "HTTPParser.hpp"
 #include "HTTPRequest.hpp"
 #include "HTTPResponse.hpp"
 #include "HTMLController.hpp"
@@ -51,6 +52,7 @@ public:
     void listen();
     int accept();
     int getSocket() const;
+    HTTPParser& getParser();
 
 private:
     std::string m_name;
@@ -59,9 +61,8 @@ private:
     int m_socket;
     HTMLController htmlController;
     CGIController cgiController;
+    HTTPParser m_parser;
 
-    bool isCGIRequest(const HTTPRequest* request);
-    bool isHTMLRequest(const HTTPRequest* request);
     int createSocket();
 };
 

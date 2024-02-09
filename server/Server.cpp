@@ -4,6 +4,7 @@
 #include <cstring>
 #include <fcntl.h>
 #include <iostream>
+#include <strings.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -15,12 +16,29 @@
 
 const int BACKLOG = 10;
 
+const std::string ERROR_MESSAGE_TEMPLATE =
+
+    "<!DOCTYPE HTML>\n"
+    "<html lang=\"en\">\n"
+    "  <head>\n"
+    "    <title>{ERROR_MESSAGE}</title>\n"
+    "  </head>\n"
+    "  <body>\n"
+    "    <center>\n"
+    "      <h1>{ERROR_MESSAGE}</h1>\n"
+    "    </center>\n"
+    "    <hr>\n"
+    "    <center>webserv</center>\n"
+    "  </body>\n"
+    "</html>";
+
 static void fatalError(const std::string& errMsg);
 
 Server::Server(const ConfigSpec& cfg)
     : m_name(cfg.getServerName())
     , m_host(cfg.getHostName())
     , m_port(cfg.getPort())
+    , m_parser(32)
 {
     m_socket = createSocket();
 }
@@ -32,24 +50,12 @@ Server::~Server()
 
 void Server::handleRequest(const HTTPRequest* request, HTTPResponse* response)
 {
-    if (isCGIRequest(request))
+    if (cgiController.isCGI(request))
     {
         cgiController.handleCGIRequest(request, response);
         return;
     }
     htmlController.handleHTMLRequest(request, response);
-}
-
-inline bool Server::isCGIRequest(const HTTPRequest* request)
-{
-    (void)request;
-    return false;
-}
-
-bool Server::isHTMLRequest(const HTTPRequest* request)
-{
-    (void)request;
-    return true;
 }
 
 void Server::listen()
@@ -70,6 +76,11 @@ int Server::getSocket() const
     return m_socket;
 }
 
+HTTPParser& Server::getParser()
+{
+    return m_parser;
+}
+
 int Server::createSocket()
 {
     int fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -79,6 +90,7 @@ int Server::createSocket()
     }
 
     struct sockaddr_in addr;
+    bzero(&addr, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(m_port);
     addr.sin_addr.s_addr = INADDR_ANY;

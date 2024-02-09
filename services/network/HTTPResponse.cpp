@@ -36,7 +36,7 @@ bool HTTPResponse::isPersistent()
 
 const std::string& HTTPResponse::getHeader(const std::string& field)
 {
-    Headers::const_iterator it = m_header.find(field);
+    http::Headers::const_iterator it = m_header.find(field);
     if (it != m_header.end())
     {
         return it->second;
@@ -53,7 +53,7 @@ const std::string& HTTPResponse::HTTPResponse::toString()
         oss << "HTTP/1.1 " << m_statusCode << " ";
         oss << getStatusCode(m_statusCode) << CRLF;
 
-        for (Headers::iterator it = m_header.begin(); it != m_header.end(); ++it)
+        for (http::Headers::iterator it = m_header.begin(); it != m_header.end(); ++it)
         {
             oss << it->first << ": " << it->second << CRLF;
         }

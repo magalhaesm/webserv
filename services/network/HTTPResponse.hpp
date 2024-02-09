@@ -25,7 +25,7 @@ public:
 private:
     Connection* m_conn;
     int m_statusCode;
-    Headers m_header;
+    http::Headers m_header;
     std::string m_body;
     std::string m_text;
 

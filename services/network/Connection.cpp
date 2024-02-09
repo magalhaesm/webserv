@@ -16,7 +16,8 @@ Connection::Connection(EventListener* listener, Server* server)
     , m_listener(listener)
     , m_request(NULL)
     , m_response(NULL)
-    , m_timeOfLastActivity(time(NULL))
+    , m_parser(server->getParser())
+    , m_lastActivityTime(time(NULL))
 {
     std::cout << "== NEW CONNECTION ==\n";
     m_clientSocket = server->accept();
@@ -35,13 +36,14 @@ Connection::~Connection()
 // |      KERNEL        |   -->   |      KERNEL        |
 // +--------------------+         +--------------------+
 
+// XXX: POST
+// content-length, content-type
+
 // TODO: lançar exceção dentro do controller
 // erros podem ser de leitura, escrita e de parsing no http
 bool Connection::read()
 {
     char buffer[BUFSIZE];
-    bzero(&buffer, BUFSIZE);
-
     ssize_t bytesRead = ::recv(m_clientSocket, buffer, BUFSIZE, 0);
     if (bytesRead <= 0)
     {
@@ -50,17 +52,33 @@ bool Connection::read()
 
     m_buffer.append(buffer, bytesRead);
 
-    // TODO: encapsular este bloco
-    size_t pos = m_buffer.rfind("\r\n\r\n");
-    if (pos != std::string::npos)
+    // if (m_parser.isRequestComplete(m_buffer))
+    // {
+    //     m_request = new HTTPRequest(m_buffer);
+    //     m_server->handleRequest(m_request, response());
+    //     m_buffer = m_response->toString();
+    //     updateLastActivityTime();
+    //     return true;
+    // }
+
+    if (m_parser.isRequestComplete(m_buffer))
     {
-        m_request = new HTTPRequest(m_buffer);
-        m_server->handleRequest(m_request, response());
+        HTTPRequest request = m_parser.newHTTPRequest(); // TODO: request: canonical form
+        // m_response.clear();
+        m_server->handleRequest(&request, response());
         m_buffer = m_response->toString();
-        updateLastActivity();
+        updateLastActivityTime();
         return true;
     }
-
+    // size_t pos = m_buffer.rfind("\r\n\r\n");
+    // if (pos != std::string::npos)
+    // {
+    //     m_request = new HTTPRequest(m_buffer);
+    //     m_server->handleRequest(m_request, response());
+    //     m_buffer = m_response->toString();
+    //     updateLastActivityTime();
+    //     return true;
+    // }
     return false;
 }
 
@@ -72,14 +90,14 @@ bool Connection::write()
     }
 
     size_t bufsiz = std::min<int>(m_buffer.size(), BUFSIZE);
-    ssize_t bytesSent = ::send(m_clientSocket, m_buffer.c_str(), bufsiz, 0);
-    if (bytesSent <= 0)
+    ssize_t bytesWritten = ::send(m_clientSocket, m_buffer.c_str(), bufsiz, 0);
+    if (bytesWritten <= 0)
     {
         return this->close();
     }
 
-    updateLastActivity();
-    m_buffer.erase(0, bytesSent);
+    updateLastActivityTime();
+    m_buffer.erase(0, bytesWritten);
 
     if (m_buffer.empty())
     {
@@ -99,20 +117,20 @@ int Connection::getSocket() const
     return m_clientSocket;
 }
 
-std::time_t Connection::getLastActivity() const
+std::time_t Connection::getLastActivityTime() const
 {
-    return m_timeOfLastActivity;
+    return m_lastActivityTime;
 }
 
 // TODO: manter o buffer de entrada na conexão
-const HTTPRequest* Connection::request()
-{
-    if (!m_request)
-    {
-        m_request = new HTTPRequest("");
-    }
-    return m_request;
-}
+// const HTTPRequest* Connection::request()
+// {
+//     if (!m_request)
+//     {
+//         m_request = new HTTPRequest("");
+//     }
+//     return m_request;
+// }
 
 HTTPResponse* Connection::response()
 {
@@ -123,7 +141,7 @@ HTTPResponse* Connection::response()
     return m_response;
 }
 
-void Connection::updateLastActivity()
+void Connection::updateLastActivityTime()
 {
-    m_timeOfLastActivity = time(NULL);
+    m_lastActivityTime = time(NULL);
 }

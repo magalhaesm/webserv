@@ -38,6 +38,7 @@ void HTMLController::handleGetRequest(const HTTPRequest* request, HTTPResponse* 
 {
     std::cout << "\nmethod: " << request->method() << std::endl;
 
+    std::cout << "Host: " << request->getHeader("Host") << std::endl;
     std::cout << "User-Agent: " << request->getHeader("User-Agent") << std::endl;
     std::cout << "Connection: " << request->getHeader("Connection") << std::endl;
 
@@ -46,9 +47,8 @@ void HTMLController::handleGetRequest(const HTTPRequest* request, HTTPResponse* 
     response->setHeader("Server", "Webserv");
     // response->setHeader("Connection", "close");
     response->setHeader("Connection", "keep-alive");
-    response->setHeader("Content-Length", "70");
-    std::string body = "<!DOCTYPE>html><html><body><h1>HTMLController here!</h1></body></html>";
-    response->setBody(body);
+    response->setHeader("Content-Length", "65");
+    response->setBody("<!DOCTYPE><html><body><h1>HTMLController here!</h1></body></html>");
 }
 
 void HTMLController::handlePostRequest(const HTTPRequest* request, HTTPResponse* response)
@@ -57,7 +57,11 @@ void HTMLController::handlePostRequest(const HTTPRequest* request, HTTPResponse*
 
     response->setStatus(200);
     response->setHeader("Content-Type", "text/html");
-    response->setBody("<html><body><h1>HTMLController here!</h1></body></html>");
+    response->setHeader("Server", "Webserv");
+    response->setHeader("Connection", "keep-alive");
+    response->setHeader("Content-Length", "65");
+    std::string body = "<!DOCTYPE><html><body><h1>HTMLController here!</h1></body></html>";
+    response->setBody(body);
 }
 
 void HTMLController::handleDeleteRequest(const HTTPRequest* request, HTTPResponse* response)

@@ -14,11 +14,11 @@ vpath %.cpp $(DIRS)
 
 HEADERS := Server.hpp EventListener.hpp Connection.hpp
 HEADERS += HTTPRequest.hpp HTTPResponse.hpp HTTP.hpp
-HEADERS += HTMLController.hpp CGIController.hpp
+HEADERS += HTMLController.hpp CGIController.hpp HTTPParser.hpp
 
 SOURCES := main.cpp Server.cpp EventListener.cpp Connection.cpp
 SOURCES += HTTPRequest.cpp HTTPResponse.cpp HTTP.cpp
-SOURCES += HTMLController.cpp CGIController.cpp
+SOURCES += HTMLController.cpp CGIController.cpp HTTPParser.cpp
 
 OBJS     := $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
 CXXFLAGS := -Wall -Werror -Wextra -std=c++98 $(addprefix -I,$(DIRS))

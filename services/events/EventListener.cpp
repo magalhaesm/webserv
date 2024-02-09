@@ -99,6 +99,7 @@ inline void EventListener::handleEvent(struct epoll_event* ev)
     }
     else if (ev->events & (EPOLLRDHUP | EPOLLERR))
     {
+        std::cout << "HUP\n";
         conn->close();
     }
 }
@@ -132,7 +133,7 @@ inline void EventListener::checkTimeout(std::time_t threshold)
     for (it = m_active.begin(); it != m_active.end(); ++it)
     {
         Connection* conn = it->second;
-        std::time_t elapsedTime = time(NULL) - conn->getLastActivity();
+        std::time_t elapsedTime = time(NULL) - conn->getLastActivityTime();
 
         if (elapsedTime > threshold)
         {
@@ -147,11 +148,12 @@ inline void EventListener::checkTimeout(std::time_t threshold)
 
 inline void EventListener::update(bool change, struct epoll_event* ev, uint32_t events)
 {
-    if (change)
+    if (change == false)
     {
-        ev->events = events;
-        epoll_ctl(m_epfd, EPOLL_CTL_MOD, ev->data.fd, ev);
+        return;
     }
+    ev->events = events;
+    epoll_ctl(m_epfd, EPOLL_CTL_MOD, ev->data.fd, ev);
 }
 
 void sigIntHandler(int)
