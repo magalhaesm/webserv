@@ -52,30 +52,25 @@ int Server::accept()
 
 bool Server::read(Connection* conn)
 {
-    HTTPRequest* request = conn->request(); /**/
-    CGIScriptController cgi;
+    HTTPRequest* request = conn->request();
 
-    std::cout << "Funcao Server::read()" << std::endl;
     /* CGI */
+    CGIScriptController cgi;
 
     std::string request_url = request->URL();
     if (request_url.find("/cgi/") != std::string::npos)
     {
-        std::cout << "Server::read() - IF" << std::endl;
-        std::cout << "URL: " << request->URL() << std::endl;
-
-        std::cout << "Request Method: " << request->method() << std::endl;
-
         if (request->method() == "POST")
         {
             std::string httpResponse = cgi.handleRequest(*request);
-            std::cout << "httpResponse: " << httpResponse << std::endl;
             conn->write(httpResponse);
         }
         else
             return serveCGIPage(conn);
     }
-    return true; /**/
+    /* end CGI */
+
+    return true;
 }
 
 bool Server::write(Connection* conn)
@@ -159,15 +154,14 @@ void fatalError(const std::string& errMsg)
 }
 
 
-// Teste CGI
+/* CGI */
 
 bool Server::serveCGIPage(Connection* conn)
 {
-    std::cout << "serveCGIPage" << std::endl;
-
     std::string path = conn->request()->URL();
 
-    if (path == "/cgi/cgi.html") {
+    if (path == "/cgi/cgi.html")
+    {
         std::ifstream file("cgi/cgi.html");
         std::stringstream buffer;
 
@@ -179,8 +173,7 @@ bool Server::serveCGIPage(Connection* conn)
         response->set("Content-Type", "text/html");
         response->setBody(content);
 
-        return true; // Indica que a página foi servida
+        return true;
     }
-
-    return false; // Indica que a requisição não corresponde a uma página CGI
+    return false;
 }
