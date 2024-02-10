@@ -1,15 +1,12 @@
 #include <cstdio>
-#include <iostream>
 #include <strings.h>
 #include <unistd.h>
 #include <sys/socket.h>
 
 #include "Connection.hpp"
 #include "EventListener.hpp"
-#include "HTTPRequest.hpp"
-#include "HTTPResponse.hpp"
 
-const int BUFSIZE = 10;
+const int BUFSIZE = 1024;
 
 Connection::Connection(EventListener* listener, Server* server)
     : m_server(server)
@@ -17,7 +14,6 @@ Connection::Connection(EventListener* listener, Server* server)
     , m_lastActivityTime(time(NULL))
     , m_persistent(true)
 {
-    std::cout << "== NEW CONNECTION ==\n";
     m_clientSocket = server->accept();
 }
 
@@ -26,8 +22,6 @@ Connection::~Connection()
     ::close(m_clientSocket);
 }
 
-// TODO: lançar exceção dentro do controller
-// erros podem ser de leitura, escrita e de parsing no http
 bool Connection::read()
 {
     char buffer[BUFSIZE];
@@ -39,16 +33,9 @@ bool Connection::read()
 
     m_buffer.append(buffer, bytesRead);
 
-    // TODO: refactor: conexão não conhece o protocolo que trafega
-    // server.parseRequest(m_buffer);
-    // server.processRequest(this);
-    if (m_server->parser().isRequestComplete(m_buffer))
+    if (m_server->parseRequest(m_buffer))
     {
-        HTTPRequest request = m_server->parser().newHTTPRequest();
-        HTTPResponse response;
-        m_server->handleRequest(request, response);
-        this->setPersistent(response.isKeepAlive());
-        m_buffer = response.toString();
+        m_server->processRequest(this);
         this->updateLastActivityTime();
         return true;
     }
@@ -79,13 +66,18 @@ bool Connection::write()
     return false;
 }
 
+void Connection::send(const std::string& response)
+{
+    m_buffer = response;
+}
+
 bool Connection::close()
 {
     m_listener->close(this);
     return true;
 }
 
-int Connection::getSocket() const
+int Connection::getID() const
 {
     return m_clientSocket;
 }

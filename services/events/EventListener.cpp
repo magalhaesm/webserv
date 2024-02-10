@@ -12,10 +12,6 @@
 const int TIMEOUT_SEC = 5;
 const int TIMEOUT_MS = 3000;
 
-const int ALL_EVENTS = EPOLLIN | EPOLLOUT | EPOLLRDHUP | EPOLLERR;
-// const int READ_EVENT = ALL_EVENTS & ~EPOLLOUT;
-// const int WRITE_EVENT = ALL_EVENTS & ~EPOLLIN;
-
 bool g_running = true;
 
 static void sigIntHandler(int);
@@ -65,9 +61,9 @@ void EventListener::start()
 
 void EventListener::close(Connection* conn)
 {
-    int connID = conn->getSocket();
-    delete m_active.at(connID);
-    m_active.erase(connID);
+    int id = conn->getID();
+    delete m_active.at(id);
+    m_active.erase(id);
 }
 
 inline void EventListener::startServers()
@@ -97,11 +93,6 @@ inline void EventListener::handleEvent(struct epoll_event* ev)
     {
         update(conn->write(), ev, EPOLLIN);
     }
-    else if (ev->events & (EPOLLRDHUP | EPOLLERR))
-    {
-        std::cout << "HUP\n";
-        conn->close();
-    }
 }
 
 bool EventListener::establishConnection(int socket)
@@ -112,11 +103,11 @@ bool EventListener::establishConnection(int socket)
         Server* server = it->second;
         Connection* conn = new Connection(this, server);
 
-        int client = conn->getSocket();
+        int client = conn->getID();
         m_active[client] = conn;
 
         struct epoll_event ev;
-        ev.events = ALL_EVENTS;
+        ev.events = EPOLLIN | EPOLLOUT;
         ev.data.fd = client;
         epoll_ctl(m_epfd, EPOLL_CTL_ADD, client, &ev);
 

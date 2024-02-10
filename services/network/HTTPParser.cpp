@@ -21,12 +21,12 @@ const HTTPRequest& HTTPParser::newHTTPRequest()
     return m_request = HTTPRequest(m_msg);
 }
 
-bool HTTPParser::isRequestComplete(const std::string& buffer)
+bool HTTPParser::parseRequest(const std::string& data)
 {
-    size_t pos = buffer.rfind("\r\n\r\n");
+    size_t pos = data.rfind("\r\n\r\n");
     if (pos != std::string::npos)
     {
-        std::istringstream stream(buffer);
+        std::istringstream stream(data);
         parseRequestLine(stream);
         parseHeaders(stream);
         return true;

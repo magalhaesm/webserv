@@ -9,6 +9,8 @@
 #include "HTMLController.hpp"
 #include "CGIController.hpp"
 
+class Connection;
+
 class ConfigSpec
 {
 public:
@@ -42,11 +44,12 @@ public:
     Server(const ConfigSpec& cfg);
     ~Server();
 
-    void handleRequest(const HTTPRequest& request, HTTPResponse& response);
     void listen();
     int accept();
     int getSocket() const;
-    HTTPParser& parser();
+
+    bool parseRequest(const std::string& data);
+    void processRequest(Connection* conn);
 
 private:
     std::string m_name;
@@ -56,6 +59,7 @@ private:
     CGIController cgiController;
     HTTPParser m_parser;
 
+    void handleRequest(const HTTPRequest& request, HTTPResponse& response);
     int createSocket();
 };
 

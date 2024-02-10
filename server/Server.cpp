@@ -47,6 +47,20 @@ Server::~Server()
     close(m_socket);
 }
 
+bool Server::parseRequest(const std::string& buffer)
+{
+    return m_parser.parseRequest(buffer);
+}
+
+void Server::processRequest(Connection* conn)
+{
+    HTTPRequest request = m_parser.newHTTPRequest();
+    HTTPResponse response;
+    handleRequest(request, response);
+    conn->setPersistent(response.isKeepAlive());
+    conn->send(response.toString());
+}
+
 void Server::handleRequest(const HTTPRequest& request, HTTPResponse& response)
 {
     if (cgiController.isCGI(request))
@@ -73,11 +87,6 @@ int Server::accept()
 int Server::getSocket() const
 {
     return m_socket;
-}
-
-HTTPParser& Server::parser()
-{
-    return m_parser;
 }
 
 int Server::createSocket()

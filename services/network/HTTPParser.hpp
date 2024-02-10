@@ -5,8 +5,6 @@
 
 #include "HTTPRequest.hpp"
 
-// XXX: o Server passa para o parser algumas das configurações
-// que vão condicionar o parsing
 class HTTPParser
 {
 public:
@@ -17,7 +15,7 @@ public:
     ~HTTPParser();
 
     const HTTPRequest& newHTTPRequest();
-    bool isRequestComplete(const std::string& buffer);
+    bool parseRequest(const std::string& buffer);
 
     void parseRequestLine(std::istringstream& stream);
     void parseHeaders(std::istringstream& stream);

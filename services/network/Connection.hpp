@@ -18,7 +18,8 @@ public:
     bool read();
     bool write();
     bool close();
-    int getSocket() const;
+    void send(const std::string& response);
+    int getID() const;
     std::time_t getLastActivityTime() const;
     void setPersistent(bool persistent);
 
