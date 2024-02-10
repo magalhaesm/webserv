@@ -5,8 +5,7 @@
 
 const std::string& getStatusCode(int code);
 
-HTTPResponse::HTTPResponse(Connection* conn)
-    : m_conn(conn)
+HTTPResponse::HTTPResponse()
 {
 }
 
@@ -21,7 +20,7 @@ void HTTPResponse::setStatus(int status)
 
 void HTTPResponse::setHeader(const std::string& field, const std::string& value)
 {
-    m_header[field] = value;
+    m_headers[field] = value;
 }
 
 void HTTPResponse::setBody(const std::string& body)
@@ -29,15 +28,10 @@ void HTTPResponse::setBody(const std::string& body)
     m_body = body;
 }
 
-bool HTTPResponse::isPersistent()
-{
-    return getHeader("Connection") == "keep-alive";
-}
-
 const std::string& HTTPResponse::getHeader(const std::string& field)
 {
-    http::Headers::const_iterator it = m_header.find(field);
-    if (it != m_header.end())
+    http::Headers::const_iterator it = m_headers.find(field);
+    if (it != m_headers.end())
     {
         return it->second;
     }
@@ -53,7 +47,8 @@ const std::string& HTTPResponse::HTTPResponse::toString()
         oss << "HTTP/1.1 " << m_statusCode << " ";
         oss << getStatusCode(m_statusCode) << CRLF;
 
-        for (http::Headers::iterator it = m_header.begin(); it != m_header.end(); ++it)
+        http::Headers::const_iterator it;
+        for (it = m_headers.begin(); it != m_headers.end(); ++it)
         {
             oss << it->first << ": " << it->second << CRLF;
         }
@@ -62,6 +57,11 @@ const std::string& HTTPResponse::HTTPResponse::toString()
         m_text = oss.str();
     }
     return m_text;
+}
+
+bool HTTPResponse::isKeepAlive()
+{
+    return getHeader("Connection") == "keep-alive";
 }
 
 const std::string& getStatusCode(int code)

@@ -9,13 +9,13 @@ namespace http
 {
     typedef std::map<std::string, std::string> Headers;
 
-    enum status
+    enum Status
     {
         OK = 200
 
     };
 
-    enum method
+    enum Method
     {
         GET,
         POST,
@@ -32,12 +32,6 @@ namespace http
         std::string query;
         Headers headers;
         std::string body;
-
-    public:
-        Message();
-        Message(const Message& rhs);
-        Message& operator=(const Message& rhs);
-        ~Message();
     };
 
     class HTTPException;

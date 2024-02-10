@@ -9,8 +9,6 @@
 #include "HTMLController.hpp"
 #include "CGIController.hpp"
 
-class Connection;
-
 class ConfigSpec
 {
 public:
@@ -28,13 +26,9 @@ public:
     {
         return m_name;
     }
-    std::string getHostName() const
-    {
-        return "www.42sp.com.br";
-    }
     int getBodySizeLimit() const
     {
-        return 1024;
+        return 32; // Mb
     }
 
 private:
@@ -48,15 +42,14 @@ public:
     Server(const ConfigSpec& cfg);
     ~Server();
 
-    void handleRequest(const HTTPRequest* request, HTTPResponse* response);
+    void handleRequest(const HTTPRequest& request, HTTPResponse& response);
     void listen();
     int accept();
     int getSocket() const;
-    HTTPParser& getParser();
+    HTTPParser& parser();
 
 private:
     std::string m_name;
-    std::string m_host;
     int m_port;
     int m_socket;
     HTMLController htmlController;

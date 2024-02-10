@@ -36,9 +36,8 @@ static void fatalError(const std::string& errMsg);
 
 Server::Server(const ConfigSpec& cfg)
     : m_name(cfg.getServerName())
-    , m_host(cfg.getHostName())
     , m_port(cfg.getPort())
-    , m_parser(32)
+    , m_parser(cfg.getBodySizeLimit())
 {
     m_socket = createSocket();
 }
@@ -48,7 +47,7 @@ Server::~Server()
     close(m_socket);
 }
 
-void Server::handleRequest(const HTTPRequest* request, HTTPResponse* response)
+void Server::handleRequest(const HTTPRequest& request, HTTPResponse& response)
 {
     if (cgiController.isCGI(request))
     {
@@ -76,7 +75,7 @@ int Server::getSocket() const
     return m_socket;
 }
 
-HTTPParser& Server::getParser()
+HTTPParser& Server::parser()
 {
     return m_parser;
 }

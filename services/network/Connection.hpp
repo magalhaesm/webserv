@@ -6,10 +6,8 @@
 #include <sys/epoll.h>
 
 class Server;
-class HTTPRequest;
 class HTTPResponse;
 class EventListener;
-class HTTPParser;
 
 class Connection
 {
@@ -22,6 +20,7 @@ public:
     bool close();
     int getSocket() const;
     std::time_t getLastActivityTime() const;
+    void setPersistent(bool persistent);
 
     HTTPResponse* response();
 
@@ -29,11 +28,9 @@ private:
     int m_clientSocket;
     Server* m_server;
     EventListener* m_listener;
-    HTTPRequest* m_request;
-    HTTPResponse* m_response;
-    HTTPParser& m_parser;
     std::time_t m_lastActivityTime;
     std::string m_buffer;
+    bool m_persistent;
 
     void updateLastActivityTime();
 };

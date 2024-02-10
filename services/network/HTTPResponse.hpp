@@ -5,27 +5,23 @@
 
 #include "HTTP.hpp"
 
-class Connection;
-
 class HTTPResponse
 {
 public:
-    HTTPResponse(Connection* conn);
+    HTTPResponse();
     ~HTTPResponse();
 
     void setStatus(int status);
     void setHeader(const std::string& field, const std::string& value);
     void setBody(const std::string& body);
 
-    bool isPersistent();
     const std::string& getHeader(const std::string& field);
-
     const std::string& toString();
+    bool isKeepAlive();
 
 private:
-    Connection* m_conn;
     int m_statusCode;
-    http::Headers m_header;
+    http::Headers m_headers;
     std::string m_body;
     std::string m_text;
 

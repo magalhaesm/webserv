@@ -7,11 +7,12 @@
 class CGIController
 {
 public:
-    void handleCGIRequest(const HTTPRequest* request, HTTPResponse* response);
+    void handleCGIRequest(const HTTPRequest& request, HTTPResponse& response);
+    bool isCGI(const HTTPRequest& request);
 
 private:
-    void handleGetRequest(const HTTPRequest* request, HTTPResponse* response);
-    void handlePostRequest(const HTTPRequest* request, HTTPResponse* response);
+    void handleGetRequest(const HTTPRequest& request, HTTPResponse& response);
+    void handlePostRequest(const HTTPRequest& request, HTTPResponse& response);
 };
 
 #endif // !CGI_CONTROLLER_HPP

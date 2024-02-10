@@ -9,15 +9,13 @@
 #include "HTTPRequest.hpp"
 #include "HTTPResponse.hpp"
 
-const int BUFSIZE = 1024;
+const int BUFSIZE = 10;
 
 Connection::Connection(EventListener* listener, Server* server)
     : m_server(server)
     , m_listener(listener)
-    , m_request(NULL)
-    , m_response(NULL)
-    , m_parser(server->getParser())
     , m_lastActivityTime(time(NULL))
+    , m_persistent(true)
 {
     std::cout << "== NEW CONNECTION ==\n";
     m_clientSocket = server->accept();
@@ -25,19 +23,8 @@ Connection::Connection(EventListener* listener, Server* server)
 
 Connection::~Connection()
 {
-    delete m_request;
-    delete m_response;
     ::close(m_clientSocket);
 }
-
-// +--------------------+         +--------------------+
-// | APPLICATION (send) |         | APPLICATION (recv) |
-// +--------------------+         +--------------------+
-// |      KERNEL        |   -->   |      KERNEL        |
-// +--------------------+         +--------------------+
-
-// XXX: POST
-// content-length, content-type
 
 // TODO: lançar exceção dentro do controller
 // erros podem ser de leitura, escrita e de parsing no http
@@ -52,33 +39,19 @@ bool Connection::read()
 
     m_buffer.append(buffer, bytesRead);
 
-    // if (m_parser.isRequestComplete(m_buffer))
-    // {
-    //     m_request = new HTTPRequest(m_buffer);
-    //     m_server->handleRequest(m_request, response());
-    //     m_buffer = m_response->toString();
-    //     updateLastActivityTime();
-    //     return true;
-    // }
-
-    if (m_parser.isRequestComplete(m_buffer))
+    // TODO: refactor: conexão não conhece o protocolo que trafega
+    // server.parseRequest(m_buffer);
+    // server.processRequest(this);
+    if (m_server->parser().isRequestComplete(m_buffer))
     {
-        HTTPRequest request = m_parser.newHTTPRequest(); // TODO: request: canonical form
-        // m_response.clear();
-        m_server->handleRequest(&request, response());
-        m_buffer = m_response->toString();
-        updateLastActivityTime();
+        HTTPRequest request = m_server->parser().newHTTPRequest();
+        HTTPResponse response;
+        m_server->handleRequest(request, response);
+        this->setPersistent(response.isKeepAlive());
+        m_buffer = response.toString();
+        this->updateLastActivityTime();
         return true;
     }
-    // size_t pos = m_buffer.rfind("\r\n\r\n");
-    // if (pos != std::string::npos)
-    // {
-    //     m_request = new HTTPRequest(m_buffer);
-    //     m_server->handleRequest(m_request, response());
-    //     m_buffer = m_response->toString();
-    //     updateLastActivityTime();
-    //     return true;
-    // }
     return false;
 }
 
@@ -101,7 +74,7 @@ bool Connection::write()
 
     if (m_buffer.empty())
     {
-        return m_response->isPersistent() ? true : this->close();
+        return m_persistent ? true : this->close();
     }
     return false;
 }
@@ -122,23 +95,9 @@ std::time_t Connection::getLastActivityTime() const
     return m_lastActivityTime;
 }
 
-// TODO: manter o buffer de entrada na conexão
-// const HTTPRequest* Connection::request()
-// {
-//     if (!m_request)
-//     {
-//         m_request = new HTTPRequest("");
-//     }
-//     return m_request;
-// }
-
-HTTPResponse* Connection::response()
+void Connection::setPersistent(bool persistent)
 {
-    if (!m_response)
-    {
-        m_response = new HTTPResponse(this);
-    }
-    return m_response;
+    m_persistent = persistent;
 }
 
 void Connection::updateLastActivityTime()

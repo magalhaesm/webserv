@@ -4,7 +4,6 @@ HTTPParser::HTTPParser()
     : m_request(m_msg)
     , m_bodySizeInBytes(32)
 {
-    m_bodySizeInBytes <<= 20;
 }
 
 HTTPParser::HTTPParser(unsigned int bodySize)
