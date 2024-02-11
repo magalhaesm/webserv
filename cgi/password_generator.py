@@ -26,7 +26,7 @@ use_uppercase = form.getvalue('uppercase', 'n').lower() == 's'
 
 generated_password = generate_password(length, use_special_chars, use_digits, use_uppercase)
 
-generated_password = generate_password(10, 's','s', 's')
+#generated_password = generate_password(10, 's','s', 's')
 
 
 print("Content-type: text/html\n")

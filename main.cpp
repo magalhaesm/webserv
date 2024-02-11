@@ -36,18 +36,17 @@ int main(int argc, char **argv)
 
         
         /* ---- printing getters ---- */
-        /*
+        
         std::cout << "\nGETTERS SERVER " << i << ":" << std::endl;
 
         int ports = specs[i].getPort();
         std::cout << "  Ports: ";
         std::cout << ports << std::endl;
 
-        std::vector<std::string> serverNames = specs[i].getServerName();
+        std::string serverNames = specs[i].getServerName();
         std::cout << "  Names: ";
-        for (size_t j = 0; j < serverNames.size(); ++j) {
-            std::cout << serverNames[j] << " ";
-        }
+        std::cout << serverNames << std::endl;
+
         std::cout << std::endl;
 
         std::string index = specs[i].getIndex();
@@ -69,23 +68,20 @@ int main(int argc, char **argv)
         }
         std::cout << std::endl;
 
-        std::vector<std::string> cgi = specs[i].getCgi();
+        std::string cgi = specs[i].getCgi();
         std::cout << "  Cgi: ";
-        for (size_t j = 0; j < cgi.size(); ++j) {
-            std::cout << cgi[j] << " ";
-        }
+        std::cout << cgi << std::endl;
+
         std::cout << std::endl;
 
-        std::vector<std::string> redirect = specs[i].getRedirect();
+        std::string redirect = specs[i].getRedirect();
         std::cout << "  redirect: ";
-        for (size_t j = 0; j < redirect.size(); ++j) {
-            std::cout << redirect[j] << " " << std::endl;
-        }
+        std::cout << redirect << std::endl;
         std::cout << std::endl;
 
 
 
-        */
+        
         /* -----------------------------*/
         
 

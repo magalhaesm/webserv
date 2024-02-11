@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+
 class ConfigSpec
 {
     public:
@@ -25,20 +26,18 @@ class ConfigSpec
         void setLocationBlocks(const std::map<std::string, std::map<std::string, std::string> > &locationBlocks);
 
         //directive getters:
-        std::vector<std::string> getDirectiveValues(const std::string& directiveName);
         int getPort() const;
-        std::vector<std::string> getServerName() const;
+        std::string getServerName() const;
         std::string getIndex() const;
         std::string getRoot() const;
         std::string getAutoindex() const;
         std::vector<std::string> getErrorPage() const;
-        std::vector<std::string> getCgi() const;
-        std::vector<std::string> getRedirect() const;
+        std::string getCgi() const;
+        std::string getRedirect() const;
 
         //debug:
         void printParsedDirectives(void) const;
         void printParsedLocationBlocks(void) const;
-
 
     private:
     std::map<std::string, std::vector<std::string> > _directives;
