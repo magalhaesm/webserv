@@ -19,10 +19,11 @@ public:
 
     void parseRequestLine(std::istringstream& stream);
     void parseHeaders(std::istringstream& stream);
+    void parseBody(const std::string& body);
 
 private:
     http::Message m_msg;
-    HTTPRequest m_request;
+    HTTPRequest m_request; // TODO: isso é necessário?
     unsigned int m_bodySizeInBytes;
 };
 #endif // !HTTP_PARSER_HPP

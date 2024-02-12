@@ -4,7 +4,6 @@
 #include <cstring>
 #include <fcntl.h>
 #include <iostream>
-#include <strings.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -18,7 +17,7 @@ const int BACKLOG = 10;
 
 const std::string ERROR_MESSAGE_TEMPLATE =
 
-    "<!DOCTYPE HTML>\n"
+    "<!DOCTYPE html>\n"
     "<html lang=\"en\">\n"
     "  <head>\n"
     "    <title>{ERROR_MESSAGE}</title>\n"
@@ -56,12 +55,12 @@ void Server::processRequest(Connection* conn)
 {
     HTTPRequest request = m_parser.newHTTPRequest();
     HTTPResponse response;
-    handleRequest(request, response);
+    this->handleRequest(request, response);
     conn->setPersistent(response.isKeepAlive());
     conn->send(response.toString());
 }
 
-void Server::handleRequest(const HTTPRequest& request, HTTPResponse& response)
+inline void Server::handleRequest(const HTTPRequest& request, HTTPResponse& response)
 {
     if (cgiController.isCGI(request))
     {
@@ -97,8 +96,7 @@ int Server::createSocket()
         fatalError("Error creating socket");
     }
 
-    struct sockaddr_in addr;
-    bzero(&addr, sizeof(addr));
+    struct sockaddr_in addr = {};
     addr.sin_family = AF_INET;
     addr.sin_port = htons(m_port);
     addr.sin_addr.s_addr = INADDR_ANY;

@@ -1,12 +1,11 @@
-#include <cstdio>
-#include <strings.h>
 #include <unistd.h>
+#include <strings.h>
 #include <sys/socket.h>
 
 #include "Connection.hpp"
 #include "EventListener.hpp"
 
-const int BUFSIZE = 1024;
+const int BUFSIZE = 10;
 
 Connection::Connection(EventListener* listener, Server* server)
     : m_server(server)
@@ -56,7 +55,7 @@ bool Connection::write()
         return this->close();
     }
 
-    updateLastActivityTime();
+    this->updateLastActivityTime();
     m_buffer.erase(0, bytesWritten);
 
     if (m_buffer.empty())

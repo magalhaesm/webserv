@@ -23,21 +23,28 @@ namespace http
         UNKNOWN
     };
 
+    enum State
+    {
+        START,
+        FINISHED
+    };
+
     struct Message
     {
-        // http::method m_method;
-        std::string method;
+        Method method;
         std::string version;
         std::string path;
         std::string query;
         Headers headers;
         std::string body;
+        State state;
+        int cursor;
     };
 
     class HTTPException;
 };
 
-const std::string CRLF("\r\n");
+const std::string CRLF = "\r\n";
 
 std::string toLower(const std::string& input);
 

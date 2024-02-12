@@ -5,6 +5,8 @@
 #include <string>
 #include <sys/epoll.h>
 
+#include "HTTP.hpp"
+
 class Server;
 class HTTPResponse;
 class EventListener;
@@ -32,6 +34,7 @@ private:
     std::time_t m_lastActivityTime;
     std::string m_buffer;
     bool m_persistent;
+    http::Message m_msg;
 
     void updateLastActivityTime();
 };

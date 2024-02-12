@@ -13,12 +13,12 @@ public:
     HTTPRequest& operator=(const HTTPRequest& rhs);
     ~HTTPRequest();
 
-    const std::string& method() const;
+    http::Method method() const;
     const std::string& path() const;
     const std::string& getHeader(const std::string& field) const;
 
 private:
-    const http::Message& m_msg; // TODO: talvez deva ser um ponteiro
+    const http::Message& m_msg;
     const std::string m_empty;
 
     void parseRequestLine(std::istringstream& stream);

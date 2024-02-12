@@ -10,11 +10,8 @@ HTTPRequest::HTTPRequest(const HTTPRequest& rhs)
 {
 }
 
-HTTPRequest& HTTPRequest::operator=(const HTTPRequest& rhs)
+HTTPRequest& HTTPRequest::operator=(const HTTPRequest&)
 {
-    if (&rhs != this)
-    {
-    }
     return *this;
 }
 
@@ -22,7 +19,7 @@ HTTPRequest::~HTTPRequest()
 {
 }
 
-const std::string& HTTPRequest::method() const
+http::Method HTTPRequest::method() const
 {
     return m_msg.method;
 }
