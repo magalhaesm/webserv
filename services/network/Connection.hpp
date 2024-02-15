@@ -3,7 +3,6 @@
 
 #include <ctime>
 #include <string>
-#include <sys/epoll.h>
 
 #include "HTTP.hpp"
 
@@ -11,6 +10,7 @@ class Server;
 class HTTPResponse;
 class EventListener;
 
+// TODO: renomear para HTTPConnection
 class Connection
 {
 public:
@@ -20,22 +20,21 @@ public:
     bool read();
     bool write();
     bool close();
-    void send(const std::string& response);
     int getID() const;
     std::time_t getLastActivityTime() const;
     void setPersistent(bool persistent);
-
-    HTTPResponse* response();
 
 private:
     int m_clientSocket;
     Server* m_server;
     EventListener* m_listener;
     std::time_t m_lastActivityTime;
-    std::string m_buffer;
     bool m_persistent;
+    std::string m_raw;
     http::Message m_msg;
 
+    void send(const std::string& response);
+    void processRequest();
     void updateLastActivityTime();
 };
 

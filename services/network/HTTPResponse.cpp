@@ -61,7 +61,7 @@ const std::string& HTTPResponse::HTTPResponse::toString()
 
 bool HTTPResponse::isKeepAlive()
 {
-    return getHeader("Connection") == "keep-alive";
+    return getHeader("Connection") != "close";
 }
 
 const std::string& getStatusCode(int code)

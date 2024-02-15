@@ -1,9 +1,6 @@
 #include <vector>
 #include <csignal>
-#include <cstdlib>
-#include <cstring>
 #include <iostream>
-#include <unistd.h>
 #include <sys/socket.h>
 
 #include "Connection.hpp"

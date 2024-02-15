@@ -20,10 +20,6 @@ public:
 private:
     const http::Message& m_msg;
     const std::string m_empty;
-
-    void parseRequestLine(std::istringstream& stream);
-    void parseHeaders(std::istringstream& stream);
-    void parseBody(std::istringstream& stream);
 };
 
 std::ostream& operator<<(std::ostream& os, const HTTPRequest& request);

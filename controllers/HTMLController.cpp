@@ -61,9 +61,16 @@ void HTMLController::handlePostRequest(const HTTPRequest& request, HTTPResponse&
     response.setHeader("Content-Type", "text/html");
     response.setHeader("Server", "Webserv");
     response.setHeader("Connection", "keep-alive");
-    response.setHeader("Content-Length", "65");
+    response.setHeader("Content-Length", "70");
     std::string body = "<!DOCTYPE HTML><html><body><h1>HTMLController here!</h1></body></html>";
     response.setBody(body);
+    std::cout << "Path: " << request.path() << std::endl;
+
+    std::cout << "Host: " << request.getHeader("Host") << std::endl;
+    std::cout << "User-Agent: " << request.getHeader("User-Agent") << std::endl;
+    std::cout << "Content-Length: " << request.getHeader("Content-Length") << std::endl;
+    std::cout << "Content-Type: " << request.getHeader("Content-Type") << std::endl;
+    std::cout << "Connection: " << request.getHeader("Connection") << std::endl;
 }
 
 void HTMLController::handleDeleteRequest(const HTTPRequest& request, HTTPResponse& response)

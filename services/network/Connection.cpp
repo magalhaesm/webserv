@@ -3,10 +3,12 @@
 #include <sys/socket.h>
 
 #include "Connection.hpp"
+#include "HTTPParser.hpp"
 #include "EventListener.hpp"
 
 const int BUFSIZE = 10;
 
+// TODO: receber do servidor as restrições de parsing
 Connection::Connection(EventListener* listener, Server* server)
     : m_server(server)
     , m_listener(listener)
@@ -21,6 +23,15 @@ Connection::~Connection()
     ::close(m_clientSocket);
 }
 
+void Connection::processRequest()
+{
+    HTTPRequest request(m_msg);
+    HTTPResponse response;
+    m_server->handleRequest(request, response);
+    this->setPersistent(response.isKeepAlive());
+    this->send(response.toString());
+}
+
 bool Connection::read()
 {
     char buffer[BUFSIZE];
@@ -30,11 +41,11 @@ bool Connection::read()
         return this->close();
     }
 
-    m_buffer.append(buffer, bytesRead);
+    m_raw.append(buffer, bytesRead);
 
-    if (m_server->parseRequest(m_buffer))
+    if (HTTPParser::parseRequest(m_raw, m_msg))
     {
-        m_server->processRequest(this);
+        this->processRequest();
         this->updateLastActivityTime();
         return true;
     }
@@ -43,31 +54,32 @@ bool Connection::read()
 
 bool Connection::write()
 {
-    if (m_buffer.empty())
+    if (m_raw.empty())
     {
         return true;
     }
 
-    size_t bufsiz = std::min<int>(m_buffer.size(), BUFSIZE);
-    ssize_t bytesWritten = ::send(m_clientSocket, m_buffer.c_str(), bufsiz, 0);
+    size_t bufsiz = std::min<int>(m_raw.size(), BUFSIZE);
+    ssize_t bytesWritten = ::send(m_clientSocket, m_raw.c_str(), bufsiz, 0);
     if (bytesWritten <= 0)
     {
         return this->close();
     }
 
     this->updateLastActivityTime();
-    m_buffer.erase(0, bytesWritten);
+    m_raw.erase(0, bytesWritten);
 
-    if (m_buffer.empty())
+    if (m_raw.empty())
     {
         return m_persistent ? true : this->close();
     }
     return false;
 }
 
-void Connection::send(const std::string& response)
+inline void Connection::send(const std::string& response)
 {
-    m_buffer = response;
+    m_raw = response;
+    m_msg.clear();
 }
 
 bool Connection::close()

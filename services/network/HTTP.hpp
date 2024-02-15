@@ -23,9 +23,13 @@ namespace http
         UNKNOWN
     };
 
-    enum State
+    enum ParsingState
     {
-        START,
+        HEADERS,
+        BODY,
+        CONTENT_ENCODING,
+        CONTENT_LENGTH,
+        CHUNKED,
         FINISHED
     };
 
@@ -37,14 +41,18 @@ namespace http
         std::string query;
         Headers headers;
         std::string body;
-        State state;
-        int cursor;
+        ParsingState state;
+        size_t cursor;
+
+        Message();
+        void clear();
     };
 
     class HTTPException;
 };
 
 const std::string CRLF = "\r\n";
+const std::string HEADER_END = CRLF + CRLF;
 
 std::string toLower(const std::string& input);
 

@@ -10,8 +10,6 @@
 
 #include "Server.hpp"
 #include "Connection.hpp"
-#include "HTTPRequest.hpp"
-#include "HTTPResponse.hpp"
 
 const int BACKLOG = 10;
 
@@ -36,7 +34,6 @@ static void fatalError(const std::string& errMsg);
 Server::Server(const ConfigSpec& cfg)
     : m_name(cfg.getServerName())
     , m_port(cfg.getPort())
-    , m_parser(cfg.getBodySizeLimit())
 {
     m_socket = createSocket();
 }
@@ -46,21 +43,7 @@ Server::~Server()
     close(m_socket);
 }
 
-bool Server::parseRequest(const std::string& buffer)
-{
-    return m_parser.parseRequest(buffer);
-}
-
-void Server::processRequest(Connection* conn)
-{
-    HTTPRequest request = m_parser.newHTTPRequest();
-    HTTPResponse response;
-    this->handleRequest(request, response);
-    conn->setPersistent(response.isKeepAlive());
-    conn->send(response.toString());
-}
-
-inline void Server::handleRequest(const HTTPRequest& request, HTTPResponse& response)
+void Server::handleRequest(const HTTPRequest& request, HTTPResponse& response)
 {
     if (cgiController.isCGI(request))
     {
