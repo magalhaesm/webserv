@@ -5,31 +5,33 @@
 #include "HTTP.hpp"
 #include "HTTPParser.hpp"
 
-void parseRequestLine(std::istringstream& stream, http::Message& msg);
-void parseHeaders(std::istringstream& stream, http::Message& msg);
+void readRequestLine(std::istringstream& stream, http::Message& msg);
+void readHeaders(std::istringstream& stream, http::Message& msg);
 
 void setMethod(const std::string& method, http::Message& msg);
 void removeCR(std::string& s);
+bool needsMoreContent(const std::string& raw, http::Message& msg);
 
-const bool INCOMPLETE = false;
-const bool COMPLETE = true;
+const bool AGAIN = false;
+const bool DONE = true;
 
 // Return false whenever there isn't enough data to be parsed.
+// bool HTTPParser::parseRequest(const std::string& raw, Message& msg, const ConfigSpec& cfg);
 bool HTTPParser::parseRequest(const std::string& raw, http::Message& msg)
 {
     switch (msg.state)
     {
     case http::HEADERS:
     {
-        size_t end = raw.rfind(HEADER_END);
+        size_t end = raw.rfind(PART_END);
         if (end == std::string::npos)
         {
-            return INCOMPLETE;
+            return AGAIN;
         }
 
         std::istringstream stream(raw.substr(msg.cursor, end));
-        parseRequestLine(stream, msg);
-        parseHeaders(stream, msg);
+        readRequestLine(stream, msg);
+        readHeaders(stream, msg);
 
         msg.cursor = end + 4;
         msg.state = http::BODY;
@@ -42,55 +44,75 @@ bool HTTPParser::parseRequest(const std::string& raw, http::Message& msg)
         case http::GET:
         case http::DELETE:
         case http::UNKNOWN:
-            msg.state = http::FINISHED;
+            msg.state = http::FINISH;
             break;
         case http::POST:
-            msg.state = http::CONTENT_ENCODING;
+            msg.state = http::CONTENT_TYPE;
             break;
         }
         return parseRequest(raw, msg);
     }
-    case http::CONTENT_ENCODING:
+    case http::CONTENT_TYPE:
     {
         http::Headers::iterator it = msg.headers.find("transfer-encoding");
         if (it != msg.headers.end())
         {
             if (it->second.find("chunked") != std::string::npos)
             {
-                msg.state = http::CHUNKED;
+                msg.state = http::CHUNKED_DATA;
                 return parseRequest(raw, msg);
             }
         }
-        msg.state = http::CONTENT_LENGTH;
+
+        it = msg.headers.find("content-type");
+        if (it != msg.headers.end())
+        {
+            if (it->second.find("x-www-form-urlencoded") != std::string::npos)
+            {
+                msg.state = http::URL_ENCODED;
+            }
+            else if (it->second.find("multipart/form-data") != std::string::npos)
+            {
+                msg.state = http::FORM_DATA;
+            }
+            it = msg.headers.find("content-length");
+            msg.bodySize = std::atoi(it->second.c_str());
+        }
         return parseRequest(raw, msg);
     }
-    case http::CONTENT_LENGTH:
+    case http::URL_ENCODED:
     {
-        http::Headers::iterator it = msg.headers.find("content-length");
-        size_t remainingData = raw.size() - msg.cursor;
-        size_t expectedData = std::atoi(it->second.c_str());
-        if (remainingData < expectedData)
+        if (needsMoreContent(raw, msg))
         {
-            return INCOMPLETE;
+            return AGAIN;
         }
         msg.body = raw.substr(msg.cursor);
-        std::cout << "BODY:\n" << msg.body << std::endl;
-        msg.state = http::FINISHED;
-        return COMPLETE;
+        msg.state = http::FINISH;
+        return DONE;
     }
-    case http::CHUNKED:
+    case http::FORM_DATA:
     {
-        msg.state = http::FINISHED;
+        if (needsMoreContent(raw, msg))
+        {
+            return AGAIN;
+        }
+        msg.body = raw.substr(msg.cursor);
+        msg.state = http::FINISH;
+        return DONE;
+    }
+    case http::CHUNKED_DATA:
+    {
+        msg.state = http::FINISH;
         std::cout << "Chunked\n";
-        return COMPLETE;
+        return DONE;
     }
-    case http::FINISHED:
-        return COMPLETE;
+    case http::FINISH:
+        return DONE;
     }
-    return INCOMPLETE;
+    return AGAIN;
 }
 
-inline void parseRequestLine(std::istringstream& stream, http::Message& msg)
+inline void readRequestLine(std::istringstream& stream, http::Message& msg)
 {
     std::string method;
 
@@ -98,7 +120,7 @@ inline void parseRequestLine(std::istringstream& stream, http::Message& msg)
     setMethod(method, msg);
 }
 
-inline void parseHeaders(std::istringstream& stream, http::Message& msg)
+inline void readHeaders(std::istringstream& stream, http::Message& msg)
 {
     std::string line;
 
@@ -142,4 +164,10 @@ inline void removeCR(std::string& s)
     {
         s.resize(len);
     }
+}
+
+inline bool needsMoreContent(const std::string& raw, http::Message& msg)
+{
+    size_t contentLength = raw.size() - msg.cursor;
+    return contentLength < msg.bodySize;
 }

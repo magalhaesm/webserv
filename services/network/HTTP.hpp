@@ -27,10 +27,11 @@ namespace http
     {
         HEADERS,
         BODY,
-        CONTENT_ENCODING,
-        CONTENT_LENGTH,
-        CHUNKED,
-        FINISHED
+        CONTENT_TYPE,
+        FORM_DATA,
+        URL_ENCODED,
+        CHUNKED_DATA,
+        FINISH
     };
 
     struct Message
@@ -41,6 +42,7 @@ namespace http
         std::string query;
         Headers headers;
         std::string body;
+        size_t bodySize;
         ParsingState state;
         size_t cursor;
 
@@ -52,7 +54,7 @@ namespace http
 };
 
 const std::string CRLF = "\r\n";
-const std::string HEADER_END = CRLF + CRLF;
+const std::string PART_END = CRLF + CRLF;
 
 std::string toLower(const std::string& input);
 

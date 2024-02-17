@@ -17,6 +17,7 @@ void http::Message::clear()
     query.clear();
     headers.clear();
     body.clear();
+    bodySize = 0;
     state = HEADERS;
     cursor = 0;
 }

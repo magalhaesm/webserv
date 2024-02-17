@@ -3,10 +3,12 @@
 #include <sys/socket.h>
 
 #include "Connection.hpp"
+#include "HTTP.hpp"
 #include "HTTPParser.hpp"
 #include "EventListener.hpp"
 
 const int BUFSIZE = 10;
+// const int BUFSIZE = 4096;
 
 // TODO: receber do servidor as restrições de parsing
 Connection::Connection(EventListener* listener, Server* server)
@@ -43,13 +45,14 @@ bool Connection::read()
 
     m_raw.append(buffer, bytesRead);
 
-    if (HTTPParser::parseRequest(m_raw, m_msg))
+    if (HTTPParser::parseRequest(m_raw, m_msg) == false)
     {
-        this->processRequest();
-        this->updateLastActivityTime();
-        return true;
+        return false;
     }
-    return false;
+
+    this->processRequest();
+    this->updateLastActivityTime();
+    return true;
 }
 
 bool Connection::write()
