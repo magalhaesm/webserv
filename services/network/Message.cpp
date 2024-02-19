@@ -48,7 +48,6 @@ Body& Body::operator=(const Body& rhs)
         m_type = rhs.m_type;
         m_content = rhs.m_content;
     }
-
     return *this;
 }
 

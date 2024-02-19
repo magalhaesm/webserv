@@ -84,23 +84,30 @@ inline bool isURLHexEncoded(const std::string& str, size_t i)
 
 // ------------------------------------------------------------------------
 
-// FormDataParser::FormDataParser()
-//     : ABodyParser()
-// {
-// }
-//
-// FormDataParser::~FormDataParser()
-// {
-// }
+FormDataParser::FormDataParser(const std::string& raw, Message& msg)
+    : ABodyParser(raw, msg)
+{
+}
+
+Body* FormDataParser::createBody()
+{
+    Body* body = new Body(FormData);
+    body->set("content", m_raw.substr(m_msg.offset));
+    return body;
+}
 
 // ------------------------------------------------------------------------
 
-// ChunkedParser::ChunkedParser()
-// {
-// }
-//
-// ChunkedParser::~ChunkedParser()
-// {
-// }
+ChunkedParser::ChunkedParser(const std::string& raw, Message& msg)
+    : ABodyParser(raw, msg)
+{
+}
+
+Body* ChunkedParser::createBody()
+{
+    Body* body = new Body(Chunked);
+    body->set("content", m_raw.substr(m_msg.offset));
+    return body;
+}
 
 // ------------------------------------------------------------------------

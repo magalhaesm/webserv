@@ -21,10 +21,8 @@ enum ParsingState
 {
     HEADERS,
     BODY,
-    CONTENT_TYPE,
-    FORM_DATA,
-    URL_ENCODED,
-    CHUNKED_DATA,
+    BODY_TYPE,
+    BODY_CONTENT,
     FINISH
 };
 

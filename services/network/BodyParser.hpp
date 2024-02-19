@@ -36,12 +36,12 @@ public:
     Body* createBody();
 
 private:
-    enum InternalState
+    enum ParsingPhase
     {
         Meta,   // CRLF
         Content // Data
     };
-    InternalState m_state;
+    ParsingPhase m_state;
 };
 
 class ChunkedParser : public ABodyParser

@@ -1,19 +1,20 @@
 #include <cstdlib>
 #include <sstream>
-#include <iostream>
 
 #include "helpers.hpp"
+#include "Message.hpp"
 #include "BodyParser.hpp"
 #include "HTTPParser.hpp"
+
+const bool AGAIN = false;
+const bool DONE = true;
 
 void readRequestLine(std::istringstream& stream, Message& msg);
 void readHeaders(std::istringstream& stream, Message& msg);
 
 void setMethod(const std::string& method, Message& msg);
 void removeCR(std::string& s);
-
-const bool AGAIN = false;
-const bool DONE = true;
+bool has(const std::string& term, const Headers::const_iterator& it);
 
 // NOTE:
 // urlEncoded = value
@@ -52,44 +53,40 @@ bool HTTPParser::parseRequest(const std::string& raw, Message& msg)
             msg.state = FINISH;
             break;
         case POST:
-            msg.state = CONTENT_TYPE;
+            msg.state = BODY_TYPE;
             break;
         }
         return parseRequest(raw, msg);
     }
-    case CONTENT_TYPE:
+    case BODY_TYPE:
     {
-        Headers::iterator it = msg.headers.find("transfer-encoding");
+        Headers::const_iterator it = msg.headers.find("transfer-encoding");
         if (it != msg.headers.end())
         {
-            if (it->second.find("chunked") != std::string::npos)
+            if (has("chunked", it))
             {
-                msg.state = CHUNKED_DATA;
-                return parseRequest(raw, msg);
+                msg.parser = new ChunkedParser(raw, msg);
             }
         }
-
-        it = msg.headers.find("content-type");
-        if (it != msg.headers.end())
+        else
         {
-            if (it->second.find("x-www-form-urlencoded") != std::string::npos)
+            it = msg.headers.find("content-type");
+            if (it != msg.headers.end())
             {
-                msg.parser = new URLEncodedParser(raw, msg);
-                msg.state = URL_ENCODED;
-            }
-            else if (it->second.find("multipart/form-data") != std::string::npos)
-            {
-                // TODO: mover para o parser do body
-                size_t boundaryPos = it->second.find("boundary") + 9;
-                if (boundaryPos != std::string::npos)
+                if (has("x-www-form-urlencoded", it))
                 {
-                    msg.state = FORM_DATA;
+                    msg.parser = new URLEncodedParser(raw, msg);
+                }
+                else if (has("multipart/form-data", it))
+                {
+                    msg.parser = new FormDataParser(raw, msg);
                 }
             }
         }
+        msg.state = BODY_CONTENT;
         return parseRequest(raw, msg);
     }
-    case URL_ENCODED:
+    case BODY_CONTENT:
     {
         if (msg.parser->needsMoreContent())
         {
@@ -97,19 +94,6 @@ bool HTTPParser::parseRequest(const std::string& raw, Message& msg)
         }
         msg.body = msg.parser->createBody();
         msg.state = FINISH;
-        return DONE;
-    }
-    // Criar arquivo temporário, escrever nele
-    // NOTE: colocar em body apenas o nome do arquivo já baixado em /tmp
-    case FORM_DATA:
-    {
-        msg.state = FINISH;
-        return DONE;
-    }
-    case CHUNKED_DATA:
-    {
-        msg.state = FINISH;
-        std::cout << "Chunked\n";
         return DONE;
     }
     case FINISH:
@@ -170,4 +154,9 @@ inline void removeCR(std::string& s)
     {
         s.resize(len);
     }
+}
+
+inline bool has(const std::string& term, const Headers::const_iterator& it)
+{
+    return it->second.find(term) != std::string::npos;
 }
