@@ -3,22 +3,22 @@
 
 #include <string>
 
-#include "HTTP.hpp"
+#include "Message.hpp"
 
 class HTTPRequest
 {
 public:
-    HTTPRequest(const http::Message& message);
+    HTTPRequest(const Message& message);
     HTTPRequest(const HTTPRequest& rhs);
     HTTPRequest& operator=(const HTTPRequest& rhs);
     ~HTTPRequest();
 
-    http::Method method() const;
+    Method method() const;
     const std::string& path() const;
     const std::string& getHeader(const std::string& field) const;
 
 private:
-    const http::Message& m_msg;
+    const Message& m_msg;
     const std::string m_empty;
 };
 

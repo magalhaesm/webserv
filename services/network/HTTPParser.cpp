@@ -2,64 +2,69 @@
 #include <sstream>
 #include <iostream>
 
-#include "HTTP.hpp"
+#include "helpers.hpp"
+#include "BodyParser.hpp"
 #include "HTTPParser.hpp"
 
-void readRequestLine(std::istringstream& stream, http::Message& msg);
-void readHeaders(std::istringstream& stream, http::Message& msg);
+void readRequestLine(std::istringstream& stream, Message& msg);
+void readHeaders(std::istringstream& stream, Message& msg);
 
-void setMethod(const std::string& method, http::Message& msg);
+void setMethod(const std::string& method, Message& msg);
 void removeCR(std::string& s);
-bool needsMoreContent(const std::string& raw, http::Message& msg);
 
 const bool AGAIN = false;
 const bool DONE = true;
 
+// NOTE:
+// urlEncoded = value
+// chunked = value
+// name = value/@filename
+
 // Return false whenever there isn't enough data to be parsed.
 // bool HTTPParser::parseRequest(const std::string& raw, Message& msg, const ConfigSpec& cfg);
-bool HTTPParser::parseRequest(const std::string& raw, http::Message& msg)
+bool HTTPParser::parseRequest(const std::string& raw, Message& msg)
 {
     switch (msg.state)
     {
-    case http::HEADERS:
+    case HEADERS:
     {
-        size_t end = raw.rfind(PART_END);
+        size_t end = raw.rfind(DELIMITER);
         if (end == std::string::npos)
         {
             return AGAIN;
         }
 
-        std::istringstream stream(raw.substr(msg.cursor, end));
+        std::istringstream stream(raw.substr(msg.offset, end));
         readRequestLine(stream, msg);
         readHeaders(stream, msg);
 
-        msg.cursor = end + 4;
-        msg.state = http::BODY;
+        msg.offset = end + DELIMITER.length();
+        msg.state = BODY;
         return parseRequest(raw, msg);
     }
-    case http::BODY:
+    case BODY:
     {
         switch (msg.method)
         {
-        case http::GET:
-        case http::DELETE:
-        case http::UNKNOWN:
-            msg.state = http::FINISH;
+        case GET:
+        case DELETE:
+        case UNKNOWN:
+            msg.state = FINISH;
             break;
-        case http::POST:
-            msg.state = http::CONTENT_TYPE;
+        case POST:
+            msg.state = CONTENT_TYPE;
             break;
         }
         return parseRequest(raw, msg);
     }
-    case http::CONTENT_TYPE:
+    case CONTENT_TYPE:
     {
-        http::Headers::iterator it = msg.headers.find("transfer-encoding");
+        Headers::iterator it = msg.headers.find("transfer-encoding");
         if (it != msg.headers.end())
         {
             if (it->second.find("chunked") != std::string::npos)
             {
-                msg.state = http::CHUNKED_DATA;
+                msg.state = CHUNKED_DATA;
                 return parseRequest(raw, msg);
             }
         }
@@ -69,50 +74,51 @@ bool HTTPParser::parseRequest(const std::string& raw, http::Message& msg)
         {
             if (it->second.find("x-www-form-urlencoded") != std::string::npos)
             {
-                msg.state = http::URL_ENCODED;
+                msg.parser = new URLEncodedParser(raw, msg);
+                msg.state = URL_ENCODED;
             }
             else if (it->second.find("multipart/form-data") != std::string::npos)
             {
-                msg.state = http::FORM_DATA;
+                // TODO: mover para o parser do body
+                size_t boundaryPos = it->second.find("boundary") + 9;
+                if (boundaryPos != std::string::npos)
+                {
+                    msg.state = FORM_DATA;
+                }
             }
-            it = msg.headers.find("content-length");
-            msg.bodySize = std::atoi(it->second.c_str());
         }
         return parseRequest(raw, msg);
     }
-    case http::URL_ENCODED:
+    case URL_ENCODED:
     {
-        if (needsMoreContent(raw, msg))
+        if (msg.parser->needsMoreContent())
         {
             return AGAIN;
         }
-        msg.body = raw.substr(msg.cursor);
-        msg.state = http::FINISH;
+        msg.body = msg.parser->createBody();
+        msg.state = FINISH;
         return DONE;
     }
-    case http::FORM_DATA:
+    // Criar arquivo temporário, escrever nele
+    // NOTE: colocar em body apenas o nome do arquivo já baixado em /tmp
+    case FORM_DATA:
     {
-        if (needsMoreContent(raw, msg))
-        {
-            return AGAIN;
-        }
-        msg.body = raw.substr(msg.cursor);
-        msg.state = http::FINISH;
+        msg.state = FINISH;
         return DONE;
     }
-    case http::CHUNKED_DATA:
+    case CHUNKED_DATA:
     {
-        msg.state = http::FINISH;
+        msg.state = FINISH;
         std::cout << "Chunked\n";
         return DONE;
     }
-    case http::FINISH:
+    case FINISH:
         return DONE;
     }
     return AGAIN;
 }
 
-inline void readRequestLine(std::istringstream& stream, http::Message& msg)
+inline void readRequestLine(std::istringstream& stream, Message& msg)
 {
     std::string method;
 
@@ -120,7 +126,7 @@ inline void readRequestLine(std::istringstream& stream, http::Message& msg)
     setMethod(method, msg);
 }
 
-inline void readHeaders(std::istringstream& stream, http::Message& msg)
+inline void readHeaders(std::istringstream& stream, Message& msg)
 {
     std::string line;
 
@@ -137,23 +143,23 @@ inline void readHeaders(std::istringstream& stream, http::Message& msg)
     }
 }
 
-inline void setMethod(const std::string& method, http::Message& msg)
+inline void setMethod(const std::string& method, Message& msg)
 {
     if (method == "GET")
     {
-        msg.method = http::GET;
+        msg.method = GET;
     }
     else if (method == "POST")
     {
-        msg.method = http::POST;
+        msg.method = POST;
     }
     else if (method == "DELETE")
     {
-        msg.method = http::DELETE;
+        msg.method = DELETE;
     }
     else
     {
-        msg.method = http::UNKNOWN;
+        msg.method = UNKNOWN;
     }
 }
 
@@ -164,10 +170,4 @@ inline void removeCR(std::string& s)
     {
         s.resize(len);
     }
-}
-
-inline bool needsMoreContent(const std::string& raw, http::Message& msg)
-{
-    size_t contentLength = raw.size() - msg.cursor;
-    return contentLength < msg.bodySize;
 }

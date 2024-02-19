@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "HTTP.hpp"
+#include "Message.hpp"
 
 class HTTPResponse
 {
@@ -21,7 +21,7 @@ public:
 
 private:
     int m_statusCode;
-    http::Headers m_headers;
+    Headers m_headers;
     std::string m_body;
     std::string m_text;
 

@@ -1,5 +1,6 @@
 #include <sstream>
 
+#include "helpers.hpp"
 #include "Connection.hpp"
 #include "HTTPResponse.hpp"
 
@@ -30,7 +31,7 @@ void HTTPResponse::setBody(const std::string& body)
 
 const std::string& HTTPResponse::getHeader(const std::string& field)
 {
-    http::Headers::const_iterator it = m_headers.find(field);
+    Headers::const_iterator it = m_headers.find(field);
     if (it != m_headers.end())
     {
         return it->second;
@@ -47,7 +48,7 @@ const std::string& HTTPResponse::HTTPResponse::toString()
         oss << "HTTP/1.1 " << m_statusCode << " ";
         oss << getStatusCode(m_statusCode) << CRLF;
 
-        http::Headers::const_iterator it;
+        Headers::const_iterator it;
         for (it = m_headers.begin(); it != m_headers.end(); ++it)
         {
             oss << it->first << ": " << it->second << CRLF;

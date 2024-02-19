@@ -5,10 +5,10 @@ void CGIController::handleCGIRequest(const HTTPRequest& request, HTTPResponse& r
     // TODO: Lógica para manipular solicitações CGI
     switch (request.method())
     {
-    case http::GET:
+    case GET:
         handleGetRequest(request, response);
         break;
-    case http::POST:
+    case POST:
         handlePostRequest(request, response);
         break;
     default:

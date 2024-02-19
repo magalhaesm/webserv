@@ -4,7 +4,7 @@
 #include <ctime>
 #include <string>
 
-#include "HTTP.hpp"
+#include "Message.hpp"
 
 class Server;
 class HTTPResponse;
@@ -31,7 +31,7 @@ private:
     std::time_t m_lastActivityTime;
     bool m_persistent;
     std::string m_raw;
-    http::Message m_msg;
+    Message m_msg;
 
     void send(const std::string& response);
     void processRequest();

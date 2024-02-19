@@ -1,7 +1,6 @@
 #include "HTMLController.hpp"
 
 #include <iostream>
-#include "HTTP.hpp"
 
 void HTMLController::handleHTMLRequest(const HTTPRequest& request, HTTPResponse& response)
 {
@@ -11,13 +10,13 @@ void HTMLController::handleHTMLRequest(const HTTPRequest& request, HTTPResponse&
 
     switch (request.method())
     {
-    case http::GET:
+    case GET:
         handleGetRequest(request, response);
         break;
-    case http::POST:
+    case POST:
         handlePostRequest(request, response);
         break;
-    case http::DELETE:
+    case DELETE:
         handleDeleteRequest(request, response);
         break;
     default:

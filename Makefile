@@ -13,21 +13,29 @@ vpath %.hpp $(DIRS)
 vpath %.cpp $(DIRS)
 
 HEADERS := Server.hpp EventListener.hpp Connection.hpp
-HEADERS += HTTPRequest.hpp HTTPResponse.hpp HTTP.hpp
-HEADERS += HTMLController.hpp CGIController.hpp HTTPParser.hpp
+HEADERS += HTTPRequest.hpp HTTPResponse.hpp Message.hpp BodyParser.hpp
+HEADERS += HTMLController.hpp CGIController.hpp HTTPParser.hpp helpers.hpp
 
 SOURCES := main.cpp Server.cpp EventListener.cpp Connection.cpp
-SOURCES += HTTPRequest.cpp HTTPResponse.cpp HTTP.cpp
-SOURCES += HTMLController.cpp CGIController.cpp HTTPParser.cpp
+SOURCES += HTTPRequest.cpp HTTPResponse.cpp Message.cpp BodyParser.cpp
+SOURCES += HTMLController.cpp CGIController.cpp HTTPParser.cpp helpers.cpp
 
 OBJS     := $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
-CXXFLAGS := -Wall -Werror -Wextra -std=c++98 $(addprefix -I,$(DIRS))
+CXXFLAGS := -Wall -Werror -Wextra -std=c++98 -O2 $(addprefix -I,$(DIRS))
 
 all: $(NAME)
 
 run: $(NAME)
 	@ echo "--> Running $@"
 	@ ./$(NAME)
+
+req:
+	curl -v 127.0.0.1:8080
+
+chunked:
+	curl -X POST \
+		--header "Transfer-Encoding: chunked" \
+		--data-binary "@file.txt" 127.0.0.1:8080
 
 $(NAME): $(OBJS)
 	@$(LOG) "Building $@"

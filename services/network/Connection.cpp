@@ -3,13 +3,13 @@
 #include <sys/socket.h>
 
 #include "Connection.hpp"
-#include "HTTP.hpp"
 #include "HTTPParser.hpp"
 #include "EventListener.hpp"
 
 const int BUFSIZE = 10;
 // const int BUFSIZE = 4096;
 
+// TODO: usar clear na Message como função da classe Connection
 // TODO: receber do servidor as restrições de parsing
 Connection::Connection(EventListener* listener, Server* server)
     : m_server(server)
@@ -82,7 +82,7 @@ bool Connection::write()
 inline void Connection::send(const std::string& response)
 {
     m_raw = response;
-    m_msg.clear();
+    clear(m_msg);
 }
 
 bool Connection::close()
