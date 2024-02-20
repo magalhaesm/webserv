@@ -1,4 +1,4 @@
-#include "helpers.hpp"
+#include "strings.hpp"
 #include "HTTPRequest.hpp"
 
 HTTPRequest::HTTPRequest(const Message& message)
@@ -32,7 +32,7 @@ const std::string& HTTPRequest::path() const
 
 const std::string& HTTPRequest::getHeader(const std::string& field) const
 {
-    Headers::const_iterator it = m_msg.headers.find(toLower(field));
+    Headers::const_iterator it = m_msg.headers.find(ft::toLower(field));
     if (it != m_msg.headers.end())
     {
         return it->second;

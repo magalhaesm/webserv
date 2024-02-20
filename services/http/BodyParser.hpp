@@ -1,11 +1,14 @@
 #ifndef BODY_PARSER_HPP
 #define BODY_PARSER_HPP
 
+#include <fstream>
 #include <string>
+#include "http/Message.hpp"
 
 class Body;
-struct Message;
 
+// TODO: modificar o construtor de Body para receber BodyContent
+// e remover o método set
 class ABodyParser
 {
 public:
@@ -17,7 +20,7 @@ public:
 protected:
     const std::string& m_raw;
     Message& m_msg;
-    Body* m_body;
+    BodyContent m_content;
     size_t m_bodySize;
 };
 
@@ -33,15 +36,14 @@ class FormDataParser : public ABodyParser
 {
 public:
     FormDataParser(const std::string& raw, Message& msg);
+    bool needsMoreContent();
     Body* createBody();
 
 private:
-    enum ParsingPhase
-    {
-        Meta,   // CRLF
-        Content // Data
-    };
-    ParsingPhase m_state;
+    std::string m_boundaryStart;
+    std::string m_boundaryEnd;
+    static const size_t BOUNDARY_LENGTH = 9;
+    std::ofstream file;
 };
 
 class ChunkedParser : public ABodyParser

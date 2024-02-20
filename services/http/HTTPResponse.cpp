@@ -1,6 +1,6 @@
 #include <sstream>
 
-#include "helpers.hpp"
+#include "definitions.hpp"
 #include "Connection.hpp"
 #include "HTTPResponse.hpp"
 

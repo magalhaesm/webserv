@@ -1,7 +1,8 @@
 #include <cstdlib>
 #include <sstream>
 
-#include "helpers.hpp"
+#include "definitions.hpp"
+#include "strings.hpp"
 #include "Message.hpp"
 #include "BodyParser.hpp"
 #include "HTTPParser.hpp"
@@ -29,7 +30,7 @@ bool HTTPParser::parseRequest(const std::string& raw, Message& msg)
     {
     case HEADERS:
     {
-        size_t end = raw.rfind(DELIMITER);
+        size_t end = raw.find(DELIMITER);
         if (end == std::string::npos)
         {
             return AGAIN;
@@ -122,7 +123,7 @@ inline void readHeaders(std::istringstream& stream, Message& msg)
         {
             std::string key = line.substr(0, colonPos);
             std::string value = line.substr(colonPos + 2);
-            msg.headers[toLower(key)] = value;
+            msg.headers[ft::toLower(key)] = value;
         }
     }
 }
