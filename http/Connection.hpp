@@ -10,7 +10,6 @@ class Server;
 class HTTPResponse;
 class EventListener;
 
-// TODO: renomear para HTTPConnection
 class Connection
 {
 public:
