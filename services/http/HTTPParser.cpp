@@ -17,14 +17,9 @@ void setMethod(const std::string& method, Message& msg);
 void removeCR(std::string& s);
 bool has(const std::string& term, const Headers::const_iterator& it);
 
-// NOTE:
-// urlEncoded = value
-// chunked = value
-// name = value/@filename
-
 // Return false whenever there isn't enough data to be parsed.
 // bool HTTPParser::parseRequest(const std::string& raw, Message& msg, const ConfigSpec& cfg);
-bool HTTPParser::parseRequest(const std::string& raw, Message& msg)
+bool HTTPParser::parseRequest(std::string& raw, Message& msg)
 {
     switch (msg.state)
     {
@@ -36,11 +31,11 @@ bool HTTPParser::parseRequest(const std::string& raw, Message& msg)
             return AGAIN;
         }
 
-        std::istringstream stream(raw.substr(msg.offset, end));
+        std::istringstream stream(raw.substr(0, end));
         readRequestLine(stream, msg);
         readHeaders(stream, msg);
 
-        msg.offset = end + DELIMITER.length();
+        raw.erase(0, end + DELIMITER.length());
         msg.state = BODY;
         return parseRequest(raw, msg);
     }

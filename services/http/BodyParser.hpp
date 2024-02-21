@@ -1,24 +1,23 @@
 #ifndef BODY_PARSER_HPP
 #define BODY_PARSER_HPP
 
-#include <fstream>
 #include <string>
+#include <fstream>
+
 #include "http/Message.hpp"
 
 class Body;
 
-// TODO: modificar o construtor de Body para receber BodyContent
-// e remover o método set
 class ABodyParser
 {
 public:
-    ABodyParser(const std::string& raw, Message& msg);
+    ABodyParser(std::string& raw, Message& msg);
     virtual ~ABodyParser();
-    virtual bool needsMoreContent();
+    virtual bool needsMoreContent() = 0;
     virtual Body* createBody() = 0;
 
 protected:
-    const std::string& m_raw;
+    std::string& m_raw;
     Message& m_msg;
     BodyContent m_content;
     size_t m_bodySize;
@@ -27,7 +26,8 @@ protected:
 class URLEncodedParser : public ABodyParser
 {
 public:
-    URLEncodedParser(const std::string& raw, Message& msg);
+    URLEncodedParser(std::string& raw, Message& msg);
+    bool needsMoreContent();
     Body* createBody();
     static std::string decode(const std::string& str);
 };
@@ -35,7 +35,7 @@ public:
 class FormDataParser : public ABodyParser
 {
 public:
-    FormDataParser(const std::string& raw, Message& msg);
+    FormDataParser(std::string& raw, Message& msg);
     bool needsMoreContent();
     Body* createBody();
 
@@ -49,7 +49,8 @@ private:
 class ChunkedParser : public ABodyParser
 {
 public:
-    ChunkedParser(const std::string& raw, Message& msg);
+    ChunkedParser(std::string& raw, Message& msg);
+    bool needsMoreContent();
     Body* createBody();
 };
 

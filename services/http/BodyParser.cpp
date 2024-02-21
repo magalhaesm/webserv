@@ -11,7 +11,7 @@ static bool isURLHexEncoded(const std::string& str, size_t i);
 
 // ------------------------------------------------------------------------
 
-ABodyParser::ABodyParser(const std::string& raw, Message& msg)
+ABodyParser::ABodyParser(std::string& raw, Message& msg)
     : m_raw(raw)
     , m_msg(msg)
     , m_bodySize(0)
@@ -23,28 +23,26 @@ ABodyParser::ABodyParser(const std::string& raw, Message& msg)
     }
 }
 
-bool ABodyParser::needsMoreContent()
-{
-    size_t contentLength = m_raw.size() - m_msg.offset;
-    return contentLength < m_bodySize;
-}
-
 ABodyParser::~ABodyParser()
 {
 }
 
 // ------------------------------------------------------------------------
 
-URLEncodedParser::URLEncodedParser(const std::string& raw, Message& msg)
+URLEncodedParser::URLEncodedParser(std::string& raw, Message& msg)
     : ABodyParser(raw, msg)
 {
 }
 
+bool URLEncodedParser::needsMoreContent()
+{
+    return m_raw.size() < m_bodySize;
+}
+
 Body* URLEncodedParser::createBody()
 {
-    Body* body = new Body(URLEncoded);
-    body->set("content", decode(m_raw.substr(m_msg.offset)));
-    return body;
+    m_content["content"] = decode(m_raw);
+    return new Body(URLEncoded, m_content);
 }
 
 std::string URLEncodedParser::decode(const std::string& str)
@@ -82,7 +80,7 @@ inline bool isURLHexEncoded(const std::string& str, size_t i)
 
 // ------------------------------------------------------------------------
 
-FormDataParser::FormDataParser(const std::string& raw, Message& msg)
+FormDataParser::FormDataParser(std::string& raw, Message& msg)
     : ABodyParser(raw, msg)
 {
     Headers::const_iterator it = m_msg.headers.find("content-type");
@@ -115,17 +113,15 @@ void removeOuterQuotes(std::string& str)
 
 bool FormDataParser::needsMoreContent()
 {
-    size_t contentLength = m_raw.size() - m_msg.offset;
-
-    if (contentLength < m_bodySize)
+    if (m_raw.size() < m_bodySize)
     {
         return true;
     }
 
-    size_t end = m_raw.find(DELIMITER, m_msg.offset);
+    size_t end = m_raw.find(DELIMITER);
     if (end != std::string::npos)
     {
-        std::string metaData = m_raw.substr(m_msg.offset, end);
+        std::string metaData = m_raw.substr(0, end);
         ft::StringArray header = ft::split(metaData, CRLF);
         ft::StringArray disposition = ft::split(header[1], "; ");
 
@@ -137,12 +133,12 @@ bool FormDataParser::needsMoreContent()
         m_content[name] = filename;
 
         file.open(filename.c_str());
-        m_msg.offset = end + DELIMITER.length();
+        m_raw.erase(0, end + DELIMITER.length());
     }
-    size_t idx = m_raw.find(CRLF + m_boundaryEnd, m_msg.offset);
-    if (idx != std::string::npos)
+    end = m_raw.find(CRLF + m_boundaryEnd);
+    if (end != std::string::npos)
     {
-        file << m_raw.substr(m_msg.offset, idx - m_msg.offset);
+        file << m_raw.substr(0, end);
         file.close();
     }
     return false;
@@ -150,25 +146,29 @@ bool FormDataParser::needsMoreContent()
 
 Body* FormDataParser::createBody()
 {
-    Body* body = new Body(FormData);
-    body->set("content", m_raw.substr(m_msg.offset));
-    // std::cout << m_raw.substr(m_msg.offset) << std::endl;
-    // return new Body(FormData, m_content);
-    return body;
+    return new Body(FormData, m_content);
 }
 
 // ------------------------------------------------------------------------
 
-ChunkedParser::ChunkedParser(const std::string& raw, Message& msg)
+ChunkedParser::ChunkedParser(std::string& raw, Message& msg)
     : ABodyParser(raw, msg)
 {
 }
 
+bool ChunkedParser::needsMoreContent()
+{
+    size_t end = m_raw.rfind("0" + DELIMITER);
+    if (end == std::string::npos)
+    {
+        return true;
+    }
+    return false;
+}
+
 Body* ChunkedParser::createBody()
 {
-    Body* body = new Body(Chunked);
-    body->set("content", m_raw.substr(m_msg.offset));
-    return body;
+    return new Body(Chunked, m_content);
 }
 
 // ------------------------------------------------------------------------

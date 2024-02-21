@@ -43,27 +43,22 @@ struct Message
     Body* body;
     ABodyParser* parser;
     ParsingState state;
-    size_t offset;
 
     Message();
 };
 
 void clear(Message& msg);
 
-// urlEncoded = value
-// chunked = value
-// name = value/@filename
 class Body
 {
 public:
-    Body(BodyType type);
+    Body(BodyType type, BodyContent content);
     Body(const Body& rhs);
     Body& operator=(const Body& rhs);
     ~Body();
 
     BodyType getType() const;
     const std::string& get(const std::string& key);
-    void set(const std::string& key, const std::string& value);
 
 private:
     BodyType m_type;

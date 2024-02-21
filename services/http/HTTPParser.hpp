@@ -6,7 +6,7 @@
 class HTTPParser
 {
 public:
-    static bool parseRequest(const std::string& raw, Message& msg);
+    static bool parseRequest(std::string& raw, Message& msg);
 };
 
 #endif // !HTTP_PARSER_HPP

@@ -16,7 +16,6 @@ void clear(Message& msg)
     msg.query.clear();
     msg.headers.clear();
     msg.state = HEADERS;
-    msg.offset = 0;
 
     if (msg.body != NULL)
     {
@@ -30,8 +29,9 @@ void clear(Message& msg)
 
 // ------------------------------------------------------------------------
 
-Body::Body(BodyType type)
+Body::Body(BodyType type, BodyContent content)
     : m_type(type)
+    , m_content(content)
 {
 }
 
@@ -68,9 +68,4 @@ const std::string& Body::get(const std::string& key)
         return it->second;
     }
     return m_empty;
-}
-
-void Body::set(const std::string& key, const std::string& value)
-{
-    m_content[key] = value;
 }
