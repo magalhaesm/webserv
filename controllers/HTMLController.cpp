@@ -61,7 +61,7 @@ void HTMLController::handlePostRequest(const HTTPRequest& request, HTTPResponse&
     response.setHeader("Server", "Webserv");
     response.setHeader("Connection", "keep-alive");
     response.setHeader("Content-Length", "70");
-    std::string body = "<!DOCTYPE HTML><html><body><h1>HTMLController here!</h1></body></html>";
+    std::string body = "<!DOCTYPE html><html><body><h1>HTMLController here!</h1></body></html>";
     response.setBody(body);
     std::cout << "Path: " << request.path() << std::endl;
 
@@ -69,6 +69,7 @@ void HTMLController::handlePostRequest(const HTTPRequest& request, HTTPResponse&
     std::cout << "User-Agent: " << request.getHeader("User-Agent") << std::endl;
     std::cout << "Content-Length: " << request.getHeader("Content-Length") << std::endl;
     std::cout << "Content-Type: " << request.getHeader("Content-Type") << std::endl;
+    std::cout << "Transfer-Encoding: " << request.getHeader("Transfer-Encoding") << std::endl;
     std::cout << "Connection: " << request.getHeader("Connection") << std::endl;
 }
 

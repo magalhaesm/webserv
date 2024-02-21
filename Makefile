@@ -6,20 +6,23 @@ CHECK := \342\234\224
 LOG   := printf "[$(CYAN)$(CHECK)$(RESET)] %s\n"
 
 OBJ_DIR := obj
-DIRS    := server controllers services views config
-DIRS    += services/http services/events helpers
+DIRS    := http http/parser events config server controllers helpers
 
 vpath %.hpp $(DIRS)
 vpath %.cpp $(DIRS)
 
 HEADERS := Server.hpp EventListener.hpp Connection.hpp
-HEADERS += HTTPRequest.hpp HTTPResponse.hpp Message.hpp BodyParser.hpp
-HEADERS += HTMLController.hpp CGIController.hpp HTTPParser.hpp strings.hpp
+HEADERS += HTTPRequest.hpp HTTPResponse.hpp Message.hpp
+HEADERS += HTMLController.hpp CGIController.hpp strings.hpp
+HEADERS += HTTPParser.hpp ABodyParser.hpp URLEncodedParser.hpp
+HEADERS += FormDataParser.hpp Body.hpp
 HEADERS += definitions.hpp
 
 SOURCES := main.cpp Server.cpp EventListener.cpp Connection.cpp
-SOURCES += HTTPRequest.cpp HTTPResponse.cpp Message.cpp BodyParser.cpp
-SOURCES += HTMLController.cpp CGIController.cpp HTTPParser.cpp strings.cpp
+SOURCES += HTTPRequest.cpp HTTPResponse.cpp Message.cpp
+SOURCES += HTMLController.cpp CGIController.cpp strings.cpp
+SOURCES += HTTPParser.cpp ABodyParser.cpp URLEncodedParser.cpp
+SOURCES += FormDataParser.cpp Body.cpp
 
 OBJS     := $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
 CXXFLAGS := -Wall -Werror -Wextra -std=c++98 -O2 $(addprefix -I,$(DIRS))

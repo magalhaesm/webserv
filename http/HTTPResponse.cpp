@@ -4,7 +4,7 @@
 #include "Connection.hpp"
 #include "HTTPResponse.hpp"
 
-const std::string& getStatusCode(int code);
+const std::string& httpStatusCode(int code);
 
 HTTPResponse::HTTPResponse()
 {
@@ -46,7 +46,7 @@ const std::string& HTTPResponse::HTTPResponse::toString()
         std::ostringstream oss;
 
         oss << "HTTP/1.1 " << m_statusCode << " ";
-        oss << getStatusCode(m_statusCode) << CRLF;
+        oss << httpStatusCode(m_statusCode) << CRLF;
 
         Headers::const_iterator it;
         for (it = m_headers.begin(); it != m_headers.end(); ++it)
@@ -65,21 +65,21 @@ bool HTTPResponse::isKeepAlive()
     return getHeader("Connection") != "close";
 }
 
-const std::string& getStatusCode(int code)
+const std::string& httpStatusCode(int code)
 {
-    static std::map<int, std::string> statusCodes;
+    static std::map<int, std::string> status;
 
-    statusCodes[100] = "Continue";
-    statusCodes[200] = "OK";
-    statusCodes[201] = "Created";
-    statusCodes[301] = "Moved Permanently";
-    statusCodes[400] = "Bad Request";
-    statusCodes[404] = "Not Found";
-    statusCodes[405] = "Method not allowed";
-    statusCodes[500] = "Internal Server Error";
-    statusCodes[501] = "Not Implemented";
-    statusCodes[503] = "Service Unavailable";
-    statusCodes[505] = "HTTP Version Not Supported";
+    status[100] = "Continue";
+    status[200] = "OK";
+    status[201] = "Created";
+    status[301] = "Moved Permanently";
+    status[400] = "Bad Request";
+    status[404] = "Not Found";
+    status[405] = "Method not allowed";
+    status[500] = "Internal Server Error";
+    status[501] = "Not Implemented";
+    status[503] = "Service Unavailable";
+    status[505] = "HTTP Version Not Supported";
 
-    return statusCodes[code];
+    return status[code];
 }

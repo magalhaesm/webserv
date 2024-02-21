@@ -1,11 +1,11 @@
 #include <cstdlib>
 #include <sstream>
 
+#include "HTTPParser.hpp"
+#include "FormDataParser.hpp"
+#include "URLEncodedParser.hpp"
 #include "definitions.hpp"
 #include "strings.hpp"
-#include "Message.hpp"
-#include "BodyParser.hpp"
-#include "HTTPParser.hpp"
 
 const bool AGAIN = false;
 const bool DONE = true;
@@ -56,27 +56,16 @@ bool HTTPParser::parseRequest(std::string& raw, Message& msg)
     }
     case BODY_TYPE:
     {
-        Headers::const_iterator it = msg.headers.find("transfer-encoding");
+        Headers::const_iterator it = msg.headers.find("content-type");
         if (it != msg.headers.end())
         {
-            if (has("chunked", it))
+            if (has("x-www-form-urlencoded", it))
             {
-                msg.parser = new ChunkedParser(raw, msg);
+                msg.parser = new URLEncodedParser(raw, msg);
             }
-        }
-        else
-        {
-            it = msg.headers.find("content-type");
-            if (it != msg.headers.end())
+            else if (has("multipart/form-data", it))
             {
-                if (has("x-www-form-urlencoded", it))
-                {
-                    msg.parser = new URLEncodedParser(raw, msg);
-                }
-                else if (has("multipart/form-data", it))
-                {
-                    msg.parser = new FormDataParser(raw, msg);
-                }
+                msg.parser = new FormDataParser(raw, msg);
             }
         }
         msg.state = BODY_CONTENT;

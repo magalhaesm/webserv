@@ -6,7 +6,7 @@
 #include "Connection.hpp"
 #include "EventListener.hpp"
 
-const int TIMEOUT_SEC = 5;
+const int TIMEOUT_SEC = 10;
 const int TIMEOUT_MS = 3000;
 
 bool g_running = true;

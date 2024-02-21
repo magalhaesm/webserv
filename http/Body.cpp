@@ -1,33 +1,4 @@
-#include "Message.hpp"
-#include "BodyParser.hpp"
-
-Message::Message()
-    : body(NULL)
-    , parser(NULL)
-{
-    clear(*this);
-}
-
-void clear(Message& msg)
-{
-    msg.method = UNKNOWN;
-    msg.version.clear();
-    msg.path.clear();
-    msg.query.clear();
-    msg.headers.clear();
-    msg.state = HEADERS;
-
-    if (msg.body != NULL)
-    {
-        delete msg.body;
-    }
-    if (msg.parser != NULL)
-    {
-        delete msg.parser;
-    }
-}
-
-// ------------------------------------------------------------------------
+#include "Body.hpp"
 
 Body::Body(BodyType type, BodyContent content)
     : m_type(type)

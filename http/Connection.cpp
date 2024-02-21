@@ -6,10 +6,8 @@
 #include "HTTPParser.hpp"
 #include "EventListener.hpp"
 
-const int BUFSIZE = 10;
-// const int BUFSIZE = 4096;
+const int BUFSIZE = 8192;
 
-// TODO: usar clear na Message como função da classe Connection
 // TODO: receber do servidor as restrições de parsing
 Connection::Connection(EventListener* listener, Server* server)
     : m_server(server)
