@@ -6,7 +6,7 @@ CHECK := \342\234\224
 LOG   := printf "[$(CYAN)$(CHECK)$(RESET)] %s\n"
 
 OBJ_DIR := obj
-DIRS    := http http/parser events config server controllers helpers
+DIRS    := http http/parser events config controllers helpers
 
 vpath %.hpp $(DIRS)
 vpath %.cpp $(DIRS)
@@ -63,4 +63,4 @@ fclean: clean
 
 re: clean all
 
-.PHONY: all clean fclean re tests
+.PHONY: all clean fclean re test

@@ -26,6 +26,13 @@ EventListener::~EventListener()
     {
         delete it->second;
     }
+
+    std::map<int, Server*>::iterator ite;
+    for (ite = m_servers.begin(); ite != m_servers.end(); ++ite)
+    {
+        delete ite->second;
+    }
+
     ::close(m_epfd);
 }
 
@@ -82,11 +89,11 @@ inline void EventListener::handleEvent(struct epoll_event* ev)
 
     Connection* conn = m_active.at(ev->data.fd);
 
-    if ((ev->events & EPOLLIN) == EPOLLIN)
+    if (ev->events & EPOLLIN)
     {
         update(conn->read(), ev, EPOLLOUT);
     }
-    else if ((ev->events & EPOLLOUT) == EPOLLOUT)
+    else if (ev->events & EPOLLOUT)
     {
         update(conn->write(), ev, EPOLLIN);
     }
