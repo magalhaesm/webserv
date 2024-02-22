@@ -7,35 +7,9 @@
 #include "HTTPResponse.hpp"
 #include "HTMLController.hpp"
 #include "CGIController.hpp"
+#include "ConfigSpec.hpp"
 
 class Connection;
-
-class ConfigSpec
-{
-public:
-    ConfigSpec(int port, std::string name)
-        : m_port(port)
-        , m_name(name)
-    {
-    }
-
-    int getPort() const
-    {
-        return m_port;
-    }
-    std::string getServerName() const
-    {
-        return m_name;
-    }
-    int getBodySizeLimit() const
-    {
-        return 32; // Mb
-    }
-
-private:
-    int m_port;
-    std::string m_name;
-};
 
 class Server
 {
