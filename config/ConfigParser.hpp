@@ -1,8 +1,8 @@
 #ifndef ConfigParser_HPP
 #define ConfigParser_HPP
 
-#include "Libs.hpp"
 #include "ConfigSpec.hpp"
+#include <string>
 
 // - Responsável por ler e interpretar o arquivo de configuração
 // recebe um arquivo de configuração

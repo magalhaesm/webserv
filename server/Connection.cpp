@@ -43,18 +43,18 @@ HTTPResponse* Connection::response()
 
 void Connection::notify(struct epoll_event* event)
 {
-    if (event->events & EPOLLIN)
+    if (event->events & EPOLLIN) //when epollin event occurs, there is incoming data to read
     {
         bool finished = m_server->read(this);
         if (finished)
         {
-            event->events = EPOLLOUT | EPOLLET;
-        }
+            event->events = EPOLLOUT | EPOLLET; //if the request has been fully read and processed
+        }                                       //the code prepares to send a response by setting the event to EPOLLOUT | EPOLLET
     }
-    if (event->events & EPOLLOUT)
+    if (event->events & EPOLLOUT)  
     {
-        bool finished = m_server->write(this);
-        this->write(m_response->toString());
+        bool finished = m_server->write(this); //to initiate response process
+        this->write(m_response->toString()); //send response
         if (finished)
         {
             this->close();

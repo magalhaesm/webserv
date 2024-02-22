@@ -1,5 +1,11 @@
 #include "ConfigParser.hpp"
-#include "ConfigSpec.hpp"
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <stack>
+#include <functional>
+#include <algorithm>
 
 ConfigParser::ConfigParser(void)
 {
@@ -44,7 +50,7 @@ void ConfigParser::handleConfigFile(char *filePath)
     if (!configFile.is_open())
         throw std::runtime_error("Failed to open file: " + std::string(filePath)); //no catch block yet
 
-    std::cout << "File opened successfully!" << std::endl;
+    std::cout << "Config file opened successfully!" << std::endl;
 
     // read the file content
     content << configFile.rdbuf();
@@ -55,13 +61,11 @@ void ConfigParser::handleConfigFile(char *filePath)
     if (!validateServerBlock() || !checkBracketsMatch())
         throw std::runtime_error("syntax error detected on input file");
 
-    std::cout << "Everything seens OK" << std::endl;
-
     extractServerBlocks();
     parseServerBlocks();
 
     //DEBUG
-    printAllConfigSpecs();
+    //printAllConfigSpecs();
 }
 
 
@@ -160,7 +164,7 @@ void ConfigParser::extractServerBlocks(void)
         }
     } 
     // DEGUB:
-    printExtractedServerBlocks();
+    //printExtractedServerBlocks();
 }
 
 
@@ -391,11 +395,16 @@ void ConfigParser::parseDirectivesInLocation(const std::string &block)
 }
 
 
-/* getter */
+/* getters */
+
 const std::vector<ConfigSpec>& ConfigParser::getConfigSpecs() const
 {
     return _configSpecs;
 }
+
+
+
+
 
 /* DEBUG */
 

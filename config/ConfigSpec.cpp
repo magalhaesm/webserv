@@ -1,5 +1,6 @@
 #include "ConfigSpec.hpp"
-
+#include <iostream>
+#include <sstream>
 
 ConfigSpec::ConfigSpec(void)
 {
@@ -42,109 +43,139 @@ void ConfigSpec::setLocationBlocks(const std::map<std::string, std::map<std::str
     this->_locationBlocks = locationBlocks;
 }
 
+/* GETTERS */
 
-/*
-//nao retorna o valor
-std::vector<std::string> ConfigSpec::getDirective(const std::string& key) const
+int ConfigSpec::getPort() const
 {
-    std::vector<std::string> value;
-    std::map<std::string, std::vector<std::string> >::const_iterator it;
-    
-    it = _directives.find(key);
+    std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("listen");
+
+    int port = std::atoi(it->second[0].c_str());
+
     if (it != _directives.end())
     {
-        value = it->second;
-        return value; 
+        if (port < 1 || port > 65535 )
+            throw std::invalid_argument("Usage: invalid port");
+        return port;
     }
     else
-        return value; //!!!
-
-bool ConfigSpec::getLocationBlock(const std::string& path, std::map<std::string, std::string>& blockConfig) const
-{
-    std::map<std::string, std::map<std::string, std::string> >::const_iterator it = _locationBlocks.find(path);
-    if (it != _locationBlocks.end())
-    {
-        blockConfig = it->second;
-        return true;
-    }
-    blockConfig.clear();
-    return false;
+        return -1;
 }
-*/
 
-
-
-
-//void ConfigSpec::setDirectives(const std::map<std::string, std::string> &parsedDirectives)
-/*
-void ConfigSpec::setDirectives(const std::map<std::string, std::string> &parsedDirectives)
+std::string ConfigSpec::getServerName() const
 {
-    std::map<std::string, std::string>::const_iterator it;
-    for (it = parsedDirectives.begin(); it != parsedDirectives.end(); ++it)
+    std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("server_name");
+
+    if (it != _directives.end())
     {
-        const std::string &directiveName = it->first;
-        const std::string &directiveValue = it->second;
-
-        if (directiveName == "listen")
-        {
-            this->_listen = std::atoi(directiveValue.c_str());
-        }
-        else if (directiveName == "autoindex")
-        {
-            this->_autoindex = std::atoi(directiveValue.c_str());
-        }
-        else if (directiveName == "client_max_body_size")
-        {
-            this->_client_max_body_size = std::atoi(directiveValue.c_str());
-        }
-        else if (directiveName == "root")
-        {
-            this->_root = directiveName;
-        }
-        else if (directiveName == "index")
-        {
-            std::istringstream valueStream(directiveValue);
-            std::string singleValue;
-            //this->index.clear();
-
-            while (valueStream >> singleValue)
-                this->_index.push_back(singleValue);
-        }
-        else if (directiveName == "ConfigSpec_name")
-        {
-            std::istringstream valueStream(directiveValue);
-            std::string singleValue;
-            //this->index.clear();
-
-            while (valueStream >> singleValue)
-                this->_ConfigSpec_name.push_back(singleValue);
-        }
-        else if (directiveName == "cgi")
-        {
-            std::istringstream valueStream(directiveValue);
-            std::string extension, handler;
-            if (valueStream >> extension >> handler)
-                this->_cgi[extension] = handler;
-        }
-        else if (directiveName == "error_page")
-        {
-            std::istringstream valueStream(directiveValue);
-            int errorCode;
-            std::string filePath;
-            if (valueStream >> errorCode >> filePath)
-                this->_error_page[errorCode] = filePath;
-        }
-        else if (directiveName == "redirect")
-        {
-            std::istringstream valueStream(directiveValue);
-            int redirectCode;
-            std::string filePath;
-            if (valueStream >> redirectCode >> filePath)
-                this->_redirect[redirectCode] = filePath;
-        }
+        if (it->second[0].empty())
+            throw std::invalid_argument("Usage: Expect argument for server name");
+        return it->second[0];
     }
+    else
+        return " ";
 }
-*/
+
+std::string ConfigSpec::getIndex() const
+{
+    std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("index");
+
+    if (it != _directives.end())
+    {
+        if (it->second[0].empty())
+            throw std::invalid_argument("Usage: Expect argument for index");
+        return it->second[0];
+    }
+    else
+        return " ";
+}
+
+std::string ConfigSpec::getRoot() const
+{
+    std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("root");
+
+    if (it != _directives.end())
+    {
+        if (it->second[0].empty())
+            throw std::invalid_argument("Usage: Expect argument for root");
+        return it->second[0];
+    }
+    else
+        return " ";
+
+
+    if (it != _directives.end())
+        return it->second[0];
+    else
+        return " ";
+}
+
+std::string ConfigSpec::getAutoindex() const
+{
+    std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("autoindex");
+
+
+    if (it != _directives.end())
+    {
+        if (it->second[0].empty())
+            throw std::invalid_argument("Usage: Expect 1 argument for autoindex");
+        if (it->second[0] != "on" && it->second[0] != "off")
+            throw std::invalid_argument("Usage: Invalid argument for 'autoindex' - expect 'on' or 'off'");
+
+        return it->second[0];
+    }
+    else
+        return " ";
+}
+
+std::vector<std::string> ConfigSpec::getErrorPage() const
+{
+    std::vector<std::string> errorPage;
+
+    std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("error_page");
+
+    if (it != _directives.end())
+    {
+        if (it->second[0].empty())
+            throw std::invalid_argument("Usage: Expect 1 argument for error page");
+
+        for(size_t i = 0; i < it->second.size(); ++i)
+            errorPage.push_back(it->second[i]);
+        return errorPage;
+    }
+    else
+        return std::vector<std::string>();
+}
+
+std::string ConfigSpec::getCgi() const
+{
+    std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("cgi");
+
+    if (it != _directives.end())
+    {
+        if (it->second.size() == 1 && it->second[0] == ".py python3")
+            return it->second[0];
+        else
+            throw std::invalid_argument("Usage: Invalid argument for 'cgi' - expect '.py python3'");
+    }
+    else
+        return " ";
+}
+
+std::string ConfigSpec::getRedirect() const
+{
+    std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("redirect");
+
+    if (it != _directives.end())
+    {
+        if (it->second.size() == 1 && (!it->second[0].empty()))
+            return it->second[0];
+        else
+            throw std::invalid_argument("Usage: expect 'redirect' argument");
+    }
+    else
+        return " ";
+}
+
 
 
 /* DEBUG */

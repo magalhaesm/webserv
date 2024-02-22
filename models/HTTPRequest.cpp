@@ -1,4 +1,6 @@
 #include <sstream>
+#include <iostream>
+
 
 #include "HTTPRequest.hpp"
 #include "Connection.hpp"

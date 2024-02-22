@@ -1,7 +1,10 @@
 #ifndef ConfigSpec_HPP
 #define ConfigSpec_HPP
 
-#include "Libs.hpp"
+#include <map>
+#include <string>
+#include <vector>
+
 
 class ConfigSpec
 {
@@ -22,15 +25,19 @@ class ConfigSpec
         void setDirectives(const std::map<std::string, std::vector<std::string> > &directives);
         void setLocationBlocks(const std::map<std::string, std::map<std::string, std::string> > &locationBlocks);
 
-        //getters:
-        std::vector<std::string> getDirective(const std::string& key) const;
-        bool getLocationBlock(const std::string& path, std::map<std::string, std::string>& blockConfig) const;
+        //directive getters:
+        int getPort() const;
+        std::string getServerName() const;
+        std::string getIndex() const;
+        std::string getRoot() const;
+        std::string getAutoindex() const;
+        std::vector<std::string> getErrorPage() const;
+        std::string getCgi() const;
+        std::string getRedirect() const;
 
         //debug:
         void printParsedDirectives(void) const;
         void printParsedLocationBlocks(void) const;
-
-
 
     private:
     std::map<std::string, std::vector<std::string> > _directives;

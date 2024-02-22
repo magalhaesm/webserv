@@ -3,50 +3,24 @@
 
 #include <map>
 #include <string>
+#include "ConfigParser.hpp"
 
 class Connection;
-
-class ConfigSpec
-{
-public:
-    ConfigSpec(int port, std::string name)
-        : m_port(port)
-        , m_name(name)
-    {
-    }
-
-    int getPort() const
-    {
-        return m_port;
-    }
-    std::string getServerName() const
-    {
-        return m_name;
-    }
-    std::string getHostName() const
-    {
-        return "www.42sp.com.br";
-    }
-    int getBodySizeLimit() const
-    {
-        return 1024;
-    }
-
-private:
-    int m_port;
-    std::string m_name;
-};
 
 class Server
 {
 public:
-    Server(const ConfigSpec& cfg);
+    Server(ConfigSpec& cfg);
     ~Server();
     void listen();
     int accept();
     bool read(Connection* conn);
     bool write(Connection* conn);
     int getSocket() const;
+
+    //CGI test
+    bool serveCGIPage(Connection* conn);
+
 
 private:
     std::string m_name;

@@ -9,19 +9,24 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
+#include "ConfigParser.hpp"
 #include "Server.hpp"
 #include "Connection.hpp"
 #include "HTTPRequest.hpp"
 #include "HTTPResponse.hpp"
+#include "CGIScriptController.hpp"
+
+/* CGI */
+#include <fstream>
+#include <sstream>
+
 
 const int BACKLOG = 10;
 
 static void fatalError(const std::string& errMsg);
 
-Server::Server(const ConfigSpec& cfg)
-    : m_name(cfg.getServerName())
-    , m_host(cfg.getHostName())
-    , m_port(cfg.getPort())
+Server::Server(ConfigSpec& cfg)
+    : m_port(cfg.getPort())
 {
     m_socket = createSocket();
 }
@@ -48,20 +53,67 @@ int Server::accept()
 bool Server::read(Connection* conn)
 {
     HTTPRequest* request = conn->request();
-    std::cout << "Recebido: " << request->method() << std::endl;
-    std::cout << "Host: " << request->get("Host") << std::endl;
-    std::cout << "User-Agent: " << request->get("User-Agent") << std::endl;
+
+    /* CGI */
+    CGIScriptController cgi;
+
+    std::string request_url = request->URL();
+    if (request_url.find("/cgi/") != std::string::npos)
+    {
+        if (request->method() == "POST")
+        {
+            std::string httpResponse = cgi.handleRequest(*request);
+            conn->write(httpResponse);
+        }
+        else
+            return serveCGIPage(conn);
+    }
+    /* end CGI */
+
     return true;
 }
 
 bool Server::write(Connection* conn)
 {
-    HTTPResponse* response = conn->response();
-    const std::string html = "<html><body><h1>Hello, World!</h1></body></html>";
+    /* CGI */
+    HTTPRequest* request = conn->request();
+ 
+    HTTPResponse* response = conn->response(); /**/
+
+    /* CGI */
+    // Verifica se a URL da requisição corresponde à página cgi.html
+    if (request->URL() == "/cgi/cgi.html") {
+        // Tenta abrir e ler o arquivo cgi.html
+        std::ifstream file("cgi/cgi.html");
+        if (file.is_open()) {
+            std::stringstream buffer;    return true;
+
+            buffer << file.rdbuf();
+            std::string content = buffer.str();
+
+            // Configura a resposta com o conteúdo do arquivo cgi.html
+            response->setStatus(200);
+            response->set("Content-Type", "text/html");
+            response->setBody(content);
+
+            // Converte a resposta HTTP em uma string para envio
+            std::string httpResponse = response->toString();
+
+            // Envia a resposta HTTP para o cliente
+            conn->write(httpResponse);
+
+            return true; // Retorna true para indicar que a resposta foi enviada com sucesso
+        }
+    }
+
+    /**/ //Se não for uma requisição para cgi.html, use a resposta hardcoded padrão
+    const std::string html = "<html><body><h1>Hello, World! HELLO! </h1></body></html>";
     response->setStatus(200);
     response->set("Content-Type", "text/html");
     response->setBody(html);
     return true;
+
+    
 }
 
 int Server::getSocket() const
@@ -79,6 +131,8 @@ int Server::createSocket()
 
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
+
+//    std::cout << "createSocket: m_port: " << m_port <<std::endl;
     addr.sin_port = htons(m_port);
     addr.sin_addr.s_addr = INADDR_ANY;
 
@@ -97,4 +151,29 @@ void fatalError(const std::string& errMsg)
 {
     std::cerr << errMsg << ": " << strerror(errno) << std::endl;
     exit(EXIT_FAILURE);
+}
+
+
+/* CGI */
+
+bool Server::serveCGIPage(Connection* conn)
+{
+    std::string path = conn->request()->URL();
+
+    if (path == "/cgi/cgi.html")
+    {
+        std::ifstream file("cgi/cgi.html");
+        std::stringstream buffer;
+
+        buffer << file.rdbuf();
+        std::string content = buffer.str();
+
+        HTTPResponse* response = conn->response();
+        response->setStatus(200);
+        response->set("Content-Type", "text/html");
+        response->setBody(content);
+
+        return true;
+    }
+    return false;
 }
