@@ -1,10 +1,11 @@
+#include <sstream>
 #include <algorithm>
 
 #include "strings.hpp"
 
-ft::StringArray ft::split(const std::string& input, const std::string& delimiter)
+ft::Strings ft::split(const std::string& input, const std::string& delimiter)
 {
-    StringArray tokens;
+    Strings tokens;
     size_t start = 0;
     size_t end = input.find(delimiter);
 
@@ -21,7 +22,7 @@ ft::StringArray ft::split(const std::string& input, const std::string& delimiter
 
 std::string ft::split(const std::string& input, const std::string& delimiter, int idx)
 {
-    StringArray tokens = split(input, delimiter);
+    Strings tokens = split(input, delimiter);
     return tokens[idx];
 }
 
@@ -30,4 +31,55 @@ std::string ft::toLower(const std::string& input)
     std::string s = input;
     std::transform(s.begin(), s.end(), s.begin(), ::tolower);
     return s;
+}
+
+bool ft::startsWith(const std::string& input, const std::string& prefix)
+{
+    if (input.length() < prefix.length())
+    {
+        return false;
+    }
+
+    return input.substr(0, prefix.length()) == prefix;
+}
+
+inline std::string& ltrim(std::string& s)
+{
+    s.erase(
+        s.begin(),
+        std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
+    return s;
+}
+
+inline std::string& rtrim(std::string& s)
+{
+    s.erase(
+        std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(),
+        s.end());
+    return s;
+}
+
+std::string& ft::trim(std::string& s)
+{
+    return ltrim(rtrim(s));
+}
+
+std::string ft::itoa(int n)
+{
+    std::stringstream s;
+    s << n;
+    return s.str();
+}
+
+ft::Strings ft::strip(const Strings& content)
+{
+    Strings result;
+    for (Strings::const_iterator it = content.begin(); it != content.end(); ++it)
+    {
+        if (!it->empty())
+        {
+            result.push_back(*it);
+        }
+    }
+    return result;
 }

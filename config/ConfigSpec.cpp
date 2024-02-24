@@ -1,215 +1,92 @@
-#include <cstdlib>
-#include <iostream>
-
 #include "ConfigSpec.hpp"
+#include "Directives.hpp"
 
-ConfigSpec::ConfigSpec(void)
+ConfigSpec::ConfigSpec(const Directives& directives, const ConfigSpec* parent)
+    : _directives(directives)
+    , _parent(parent)
 {
-    return;
 }
 
-// ConfigSpec::ConfigSpec(const std::map<std::string, std::vector<std::string> >& directives,
-//                         const std::map<std::string, std::map<std::string, std::string> >&
-//                         locationBlocks) : directives(directives), locationBlocks(locationBlocks)
-//                         {}
-
-ConfigSpec::ConfigSpec(ConfigSpec const& src)
+ConfigSpec::ConfigSpec(const ConfigSpec& src)
+    : _directives(src._directives)
 {
-    *this = src;
 }
 
-ConfigSpec::~ConfigSpec(void)
+ConfigSpec::~ConfigSpec()
 {
-    return;
 }
 
 ConfigSpec& ConfigSpec::operator=(const ConfigSpec& rhs)
 {
-    // Check for self-assignment avoiding stack overflow
     if (this != &rhs)
     {
-        this->_directives = rhs._directives;
-        this->_locationBlocks = rhs._locationBlocks;
     }
     return *this;
 }
 
-void ConfigSpec::setDirectives(const std::map<std::string, std::vector<std::string> >& directives)
-{
-    this->_directives = directives;
-}
-
-void ConfigSpec::setLocationBlocks(
-    const std::map<std::string, std::map<std::string, std::string> >& locationBlocks)
-{
-    this->_locationBlocks = locationBlocks;
-}
-
-/* GETTERS */
-
 int ConfigSpec::getPort() const
 {
-    std::map<std::string, std::vector<std::string> >::const_iterator it =
-        _directives.find("listen");
-
-    int port = std::atoi(it->second[0].c_str());
-
-    if (it != _directives.end())
+    if (!_directives.listen)
     {
-        if (port < 1 || port > 65535)
-            throw std::invalid_argument("Usage: invalid port");
-        return port;
+        return _parent->_directives.listen;
     }
-    else
-        return -1;
+    return _directives.listen;
 }
 
-std::string ConfigSpec::getServerName() const
+const std::string& ConfigSpec::getServerName() const
 {
-    std::map<std::string, std::vector<std::string> >::const_iterator it =
-        _directives.find("server_name");
-
-    if (it != _directives.end())
+    if (_directives.server_name.empty())
     {
-        if (it->second[0].empty())
-            throw std::invalid_argument("Usage: Expect argument for server name");
-        return it->second[0];
+        return _parent->_directives.server_name;
     }
-    else
-        return " ";
+    return _directives.server_name;
 }
 
-std::string ConfigSpec::getIndex() const
+const std::string& ConfigSpec::getIndex() const
 {
-    std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("index");
-
-    if (it != _directives.end())
-    {
-        if (it->second[0].empty())
-            throw std::invalid_argument("Usage: Expect argument for index");
-        return it->second[0];
-    }
-    else
-        return " ";
+    return _directives.index;
 }
 
-std::string ConfigSpec::getRoot() const
+const std::string& ConfigSpec::getRoot() const
 {
-    std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("root");
-
-    if (it != _directives.end())
-    {
-        if (it->second[0].empty())
-            throw std::invalid_argument("Usage: Expect argument for root");
-        return it->second[0];
-    }
-    else
-        return " ";
-
-    if (it != _directives.end())
-        return it->second[0];
-    else
-        return " ";
+    return _directives.root;
 }
 
-std::string ConfigSpec::getAutoindex() const
+bool ConfigSpec::hasAutoindex() const
 {
-    std::map<std::string, std::vector<std::string> >::const_iterator it =
-        _directives.find("autoindex");
-
-    if (it != _directives.end())
-    {
-        if (it->second[0].empty())
-            throw std::invalid_argument("Usage: Expect 1 argument for autoindex");
-        if (it->second[0] != "on" && it->second[0] != "off")
-            throw std::invalid_argument(
-                "Usage: Invalid argument for 'autoindex' - expect 'on' or 'off'");
-
-        return it->second[0];
-    }
-    else
-        return " ";
+    return _directives.autoindex;
 }
 
-std::vector<std::string> ConfigSpec::getErrorPage() const
+const std::string& ConfigSpec::getErrorPage(int error) const
 {
-    std::vector<std::string> errorPage;
-
-    std::map<std::string, std::vector<std::string> >::const_iterator it =
-        _directives.find("error_page");
-
-    if (it != _directives.end())
+    if (_directives.error_page.count(error))
     {
-        if (it->second[0].empty())
-            throw std::invalid_argument("Usage: Expect 1 argument for error page");
-
-        for (size_t i = 0; i < it->second.size(); ++i)
-            errorPage.push_back(it->second[i]);
-        return errorPage;
+        return _directives.error_page.at(error);
     }
-    else
-        return std::vector<std::string>();
+    return _empty;
 }
 
-std::string ConfigSpec::getCgi() const
+const std::string& ConfigSpec::getCGI() const
 {
-    std::map<std::string, std::vector<std::string> >::const_iterator it = _directives.find("cgi");
-
-    if (it != _directives.end())
-    {
-        if (it->second.size() == 1 && it->second[0] == ".py python3")
-            return it->second[0];
-        else
-            throw std::invalid_argument("Usage: Invalid argument for 'cgi' - expect '.py python3'");
-    }
-    else
-        return " ";
+    return _directives.cgi;
 }
 
-std::string ConfigSpec::getRedirect() const
+bool ConfigSpec::hasRedirect() const
 {
-    std::map<std::string, std::vector<std::string> >::const_iterator it =
-        _directives.find("redirect");
-
-    if (it != _directives.end())
-    {
-        if (it->second.size() == 1 && (!it->second[0].empty()))
-            return it->second[0];
-        else
-            throw std::invalid_argument("Usage: expect 'redirect' argument");
-    }
-    else
-        return " ";
+    return _directives.redirect.first && !_directives.redirect.second.empty();
 }
 
-/* DEBUG */
-
-void ConfigSpec::printParsedDirectives(void) const
+const Redirect& ConfigSpec::getRedirect() const
 {
-    std::cout << "Parsed Directives:\n" << std::endl;
-    std::map<std::string, std::vector<std::string> >::const_iterator it;
-    for (it = _directives.begin(); it != _directives.end(); ++it)
-    {
-        std::cout << "  " << it->first << ":" << std::endl;
-        std::vector<std::string>::const_iterator vecIt = it->second.begin();
-        for (; vecIt != it->second.end(); ++vecIt)
-            std::cout << "    " << *vecIt << std::endl;
-    }
+    return _directives.redirect;
 }
 
-void ConfigSpec::printParsedLocationBlocks(void) const
+bool ConfigSpec::hasLocation(const std::string& location) const
 {
-    std::cout << "Parsed Location Blocks:\n" << std::endl;
-    std::map<std::string, std::map<std::string, std::string> >::const_iterator it;
-    for (it = _locationBlocks.begin(); it != _locationBlocks.end(); ++it)
-    {
-        std::cout << "Location: " << it->first << std::endl;
+    return _directives.locations.count(location);
+}
 
-        const std::map<std::string, std::string>& directives = it->second;
-        for (std::map<std::string, std::string>::const_iterator innerIt = directives.begin();
-             innerIt != directives.end();
-             ++innerIt)
-            std::cout << "  " << innerIt->first << ": " << innerIt->second << std::endl;
-        std::cout << std::endl;
-    }
+const ConfigSpec ConfigSpec::getLocation(const std::string& location) const
+{
+    return ConfigSpec(_directives.locations.at(location), this);
 }

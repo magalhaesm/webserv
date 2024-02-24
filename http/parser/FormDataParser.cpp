@@ -41,8 +41,8 @@ void FormDataParser::parseRawBody()
     if (end != std::string::npos)
     {
         std::string metaData = m_raw.substr(0, end);
-        ft::StringArray header = ft::split(metaData, CRLF);
-        ft::StringArray disposition = ft::split(header[1], "; ");
+        ft::Strings header = ft::split(metaData, CRLF);
+        ft::Strings disposition = ft::split(header[1], "; ");
 
         std::string name = ft::split(disposition[1], "=", 1);
         removeOuterQuotes(name);

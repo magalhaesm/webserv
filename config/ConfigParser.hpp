@@ -1,90 +1,83 @@
-#ifndef ConfigParser_HPP
-#define ConfigParser_HPP
+#ifndef CONFIG_PARSER_HPP
+#define CONFIG_PARSER_HPP
 
-#include "ConfigSpec.hpp"
+#include <map>
+#include <stack>
 #include <string>
+#include <vector>
+#include <fstream>
+#include <stdexcept>
 
-// - Responsável por ler e interpretar o arquivo de configuração
-// recebe um arquivo de configuração
-// retorna um vector de ConfigSpec
+#include "strings.hpp"
+#include "ConfigSpec.hpp"
+#include "Directives.hpp"
+
+using ft::Strings;
+
+class ConfigParser;
+typedef void (ConfigParser::*ValidationMethod)(const Strings&, Directives*);
+typedef std::map<std::string, ValidationMethod> ValidationMap;
+typedef std::vector<ConfigSpec> ConfigSpecList;
+
 class ConfigParser
 {
+public:
+    ConfigParser(const std::string& filename);
+    ~ConfigParser();
+
+    const ConfigSpecList& getSpecs();
+
+private:
+    enum State
+    {
+        OutsideServerBlock,
+        InsideServerBlock,
+        InsideLocationBlock
+    };
+
+    std::string _filename;
+    std::ifstream _config;
+    ValidationMap _keywords;
+    std::vector<Directives> _directives;
+    State _state;
+    int _openBlocks;
+    Directives* _currentDirectives;
+    int _lineNumber;
+    std::stack<Directives*> _contextStack;
+    ConfigSpecList _specs;
+
+    void parse();
+    bool isCommentOrEmpty(const std::string& line);
+    void findNewServerBlock(Strings& tokens);
+    void parseServerBlock(const Strings& tokens);
+    void parseLocationBlock(const Strings& tokens);
+    void checkOpenBlocks();
+    void initializeValidationMap();
+    std::string fmtError(const std::string& message);
+
+    void validateServer(const Strings& tokens);
+    void validateLocation(const Strings& tokens);
+    void validateListen(const Strings& tokens, Directives* directive);
+    void validateServerName(const Strings& tokens, Directives* directive);
+    void validateIndex(const Strings& tokens, Directives* directive);
+    void validateRoot(const Strings& tokens, Directives* directive);
+    void validateAutoindex(const Strings& tokens, Directives* directive);
+    void validateErrorPage(const Strings& tokens, Directives* directive);
+    void validateCGI(const Strings& tokens, Directives* directive);
+    void validateRedirect(const Strings& tokens, Directives* directive);
+    void validateMethods(const Strings& tokens, Directives* directive);
+    void validateClientBodySize(const Strings& tokens, Directives* directive);
+
+    void enterServerContext();
+    void enterLocationContext(const std::string& location);
+    void exitContext();
+    void checkArgCount(const Strings& tokens, bool badCondition);
+
+    class ParseException : public std::invalid_argument
+    {
     public:
-        // Constructors
-        ConfigParser(void);
-        explicit ConfigParser(std::string const &FilePath);
-
-        // Copy constructor
-        ConfigParser(ConfigParser const &src);
-
-        // Destructor
-        ~ConfigParser(void);
-
-        // Copy assignment operator
-        ConfigParser &operator=(ConfigParser const &rhs);
-
-        void handleConfigFile(char *filePath);
-        bool checkBracketsMatch(void);
-        bool validateServerBlock(void);
-        void extractServerBlocks(void);     
-        void parseServerBlocks(void);
-        void parseDirectives(const std::string &serverBlock);
-        void trim(std::string &string);
-        void extractLocationBlocks(std::string &serverBlock);
-        void parseLocationBlocks(void);
-        void extractLocationPath(const std::string  &block);
-        void parseDirectivesInLocation(const std::string &block);
-
-        //getter:
-        const std::vector<ConfigSpec>& getConfigSpecs() const;
-
-        //debug:
-        void printExtractedServerBlocks(void) const;
-        void printParsedDirectives(void) const;
-        void printLocationBlocks(void) const;
-        void printParsedLocationBlocks(void) const;
-        void printAllConfigSpecs(void) const;
-
-    private:
-        std::string _filePath;
-        std::string _configFile;
-        std::vector<std::string> _serverBlocks;
-        std::map<std::string, std::vector<std::string> > _parsedDirectives;
-        std::vector<std::string> _locationBlocks;  
-        std::string _locationPath;
-        std::map<std::string, std::string> _locationDirectives;    
-        std::map<std::string, std::map<std::string, std::string> > _parsedLocationBlocks; 
-        std::vector<ConfigSpec> _configSpecs;
+        ParseException(const std::string& err);
+    };
 };
 
-#endif
-
-/*
-
-location blocks:
-
-    location /website2 {
-        autoindex off
-        limit_except GET POST
-        error_page 500 custom_500.html
-    }
-
-onde armazenar:
-
-1 - std::map<std::string, std::map<std::string, std::vector<std::string>>>
-
-   [ /website2 ] [ limit_except ] [ get ] [ post ] 
-
-    - mais dificil par armazenar, mais facil para obter as informacoes
-
-2 - std::map<std::string, std::map<std::string, std::string>>
-
-    [ /website ] [ limit_except ] [ get post ]
-
-    - mais facil de armazenar, mais dificil para obter as informacoes
-    - teria que cortar a string " get post " para obter os dois valores
-    - por outro lado so duas diretrizes tem multiplos valores no location: 
-        - limit_except
-        - error_page
-
-*/
+#endif // !CONFIG_PARSER_HPP

@@ -1,470 +1,319 @@
-#include <stack>
-#include <fstream>
+#include <set>
+#include <cstdlib>
 #include <sstream>
+#include <cstring>
+#include <cstring>
 #include <iostream>
-#include <algorithm>
-#include <functional>
 
+#include "strings.hpp"
 #include "ConfigParser.hpp"
 
-ConfigParser::ConfigParser(void)
+ConfigParser::ConfigParser(const std::string& filename)
+    : _filename(filename)
+    , _config(_filename.c_str())
+    , _state(OutsideServerBlock)
+    , _openBlocks(0)
+    , _currentDirectives(NULL)
+    , _lineNumber(0)
 {
-    return;
-}
-
-ConfigParser::ConfigParser(std::string const& filePath)
-{
-    this->_filePath = filePath;
-}
-
-ConfigParser::ConfigParser(ConfigParser const& src)
-{
-    *this = src;
-}
-
-ConfigParser::~ConfigParser(void)
-{
-    return;
-}
-
-ConfigParser& ConfigParser::operator=(const ConfigParser& rhs)
-{
-    if (this != &rhs)
+    if (!_config)
     {
-        *this = rhs;
+        throw std::runtime_error(filename + ": " + strerror(errno));
     }
-    return *this;
+
+    initializeValidationMap();
+    this->parse();
 }
 
-/* Extract information from the server configuation file and then create a ConfigSpec object
-    for each server that exists in the server configuration file.
-    The following functions are part of this */
-
-void ConfigParser::handleConfigFile(char* filePath)
+ConfigParser::~ConfigParser()
 {
-    std::ifstream configFile;
-    std::stringstream content;
-
-    // open file
-    configFile.open(filePath);
-    if (!configFile.is_open())
-        throw std::runtime_error("Failed to open file: " + std::string(filePath));
-
-    std::cout << "Config file opened successfully!" << std::endl;
-
-    // read the file content
-    content << configFile.rdbuf();
-    this->_configFile = content.str();
-    configFile.close();
-
-    // check syntax
-    if (!validateServerBlock() || !checkBracketsMatch())
-        throw std::runtime_error("syntax error detected on input file");
-
-    extractServerBlocks();
-    parseServerBlocks();
-
-    // DEBUG
-    // printAllConfigSpecs();
 }
 
-/* Verify if the first block of the ConfigParseruration file starts with the word "ConfigSpec"
-   followed by an opening curly brace "{"
-
-    BUT:
-    if there is another "ConfigSpec" block with the wrong name (example: serv), this will not be
-   handled
-*/
-
-bool ConfigParser::validateServerBlock()
+const ConfigSpecList& ConfigParser::getSpecs()
 {
-    std::string configFileCopy = this->_configFile;
-
-    // find the start of first word
-    std::size_t nonSpace = configFileCopy.find_first_not_of(" \f\n\r\t\v");
-    if (nonSpace == std::string::npos)
-        return false;
-
-    // look for the end of the first word
-    std::size_t serverWordEnd = configFileCopy.find_first_of(" \f\n\r\t\v{", nonSpace);
-    if (serverWordEnd == std::string::npos)
-        return false;
-
-    // extract the first word and check if it is "ConfigSpec"
-    std::string firstWord = configFileCopy.substr(nonSpace, serverWordEnd - nonSpace);
-    if (firstWord != "Server")
-        return false;
-
-    // find the opening brace after the "ConfigSpec" keyword.
-    std::size_t openingBrace = configFileCopy.find_first_not_of(" \f\n\r\t\v", serverWordEnd);
-    if (openingBrace == std::string::npos || configFileCopy[openingBrace] != '{')
-        return false;
-
-    return true;
-}
-
-/* Ensures that every opening brace "{" has a corresponding closing brace "}" and vice versa.
-    Also, if it finds any mismatch, it throws an exception.   */
-
-bool ConfigParser::checkBracketsMatch()
-{
-    std::stack<char> brackets;
-    std::string configFileCopy = this->_configFile;
-
-    for (std::string::iterator it = configFileCopy.begin(); it != configFileCopy.end(); ++it)
+    if (_specs.empty())
     {
-        char ch = *it;
-        if (ch == '{')
-            brackets.push(ch);
-        else if (ch == '}')
+        for (size_t idx = 0; idx < _directives.size(); ++idx)
         {
-            if (brackets.empty())
-                throw std::runtime_error("Unexpected '}' found");
-            brackets.pop();
+            _specs.push_back(ConfigSpec(_directives[idx]));
         }
     }
-    if (!brackets.empty())
-        throw std::runtime_error("Unclosed '{' found");
-    return true;
+    return _specs;
 }
 
-/* Extract a Server block from ConfigParser file and stores it in a vector of ConfigSpec blocks */
-
-void ConfigParser::extractServerBlocks(void)
+void ConfigParser::parse()
 {
-    int braces = 0;
-    size_t blockStart = 0;
-    bool insideServerBlock = false;
-    std::string configFileCopy = this->_configFile;
-
-    for (size_t i = 0; i < configFileCopy.size(); i++)
-    {
-        char c = configFileCopy[i];
-        if (c == '{')
-        {
-            if (!insideServerBlock)
-            {
-                insideServerBlock = true;
-                blockStart = i;
-            }
-            braces++;
-        }
-        // here a block was found
-        else if (c == '}')
-        {
-            braces--;
-            if (braces == 0)
-            {
-                // extract the ConfigSpec block substring
-                this->_serverBlocks.push_back(
-                    configFileCopy.substr(blockStart, i - blockStart + 1));
-                insideServerBlock = false;
-                blockStart = i;
-            }
-        }
-    }
-    // DEGUB:
-    // printExtractedServerBlocks();
-}
-
-/* Parse each Server block stored in previous vector. First parse directives and then find and parse
-   Location blocks
-
-    DEBUG
-    printParsedDirectives();
-    printLocationBlocks();
-    printParsedLocationBlocks();
-*/
-
-void ConfigParser::parseServerBlocks()
-{
-    _configSpecs.clear();
-
-    for (size_t i = 0; i < this->_serverBlocks.size(); ++i)
-    {
-        ConfigSpec configSpec;
-        std::string serverBlock = this->_serverBlocks[i];
-
-        parseDirectives(serverBlock);
-        extractLocationBlocks(serverBlock);
-        parseLocationBlocks();
-
-        // transfer parsed data to ConfigSpec object;
-        configSpec.setDirectives(_parsedDirectives);
-        configSpec.setLocationBlocks(_parsedLocationBlocks);
-
-        // add the fully populated ConfigSpec object to the vector
-        _configSpecs.push_back(configSpec);
-    }
-}
-
-/* This function is part of previous function parseServerBlocks, it parses all directives and store
- * it in a map */
-
-void ConfigParser::parseDirectives(const std::string& serverBlock)
-{
-    std::istringstream stream(serverBlock);
     std::string line;
-
-    // skip the opening brace
-    std::getline(stream, line);
-
-    _parsedDirectives.clear();
-
-    while (std::getline(stream, line))
+    while (std::getline(_config, line))
     {
-        // remove whitespace from beginning and end of string
-        trim(line);
-
-        // skip empty lines
-        if (line.empty())
+        _lineNumber++;
+        ft::trim(line);
+        if (isCommentOrEmpty(line))
+        {
             continue;
+        }
 
-        // check if the line starts with "location", indicating the start of a location block
-        if (line.find("location") == 0)
-            break; // Exit the loop, as the remaining lines are location directives
-
-        // parse the directive
-        std::istringstream lineStream(line);
-        std::string directive, value;
-        lineStream >> directive;
-
-        std::getline(lineStream, value);
-        trim(value);
-
-        // store the directive in the ConfigSpec object
-        _parsedDirectives[directive].push_back(value);
+        Strings tokens = ft::strip(ft::split(line, " "));
+        switch (_state)
+        {
+        case OutsideServerBlock:
+        {
+            findNewServerBlock(tokens);
+            break;
+        }
+        case InsideServerBlock:
+        {
+            parseServerBlock(tokens);
+            break;
+        }
+        case InsideLocationBlock:
+        {
+            parseLocationBlock(tokens);
+            break;
+        }
+        }
     }
+    checkOpenBlocks();
 }
 
-/* This function is part of previous function parseDirectives and it removes leading and trailing
- * whitespace characters from a string */
-
-void ConfigParser::trim(std::string& string)
+inline bool ConfigParser::isCommentOrEmpty(const std::string& line)
 {
-    // Check if the string is empty
-    if (string.empty())
+    return line[0] == '#' || line.empty();
+}
+
+inline void ConfigParser::findNewServerBlock(Strings& tokens)
+{
+    if (tokens[0] == "server")
+    {
+        validateServer(tokens);
+        enterServerContext();
+        _state = InsideServerBlock;
+        _openBlocks++;
         return;
-
-    // find the first character that is not a whitespace
-    std::string::iterator firstNonWhitespace =
-        std::find_if(string.begin(), string.end(), not1(std::ptr_fun<int, int>(std::isspace)));
-
-    // frase leading whitespace
-    string.erase(string.begin(), firstNonWhitespace);
-
-    // find the last character that is not a whitespace (using reverse iterator)
-    std::string::reverse_iterator lastNonWhitespace =
-        std::find_if(string.rbegin(), string.rend(), not1(std::ptr_fun<int, int>(std::isspace)));
-
-    // erase trailing whitespace
-    // convert reverse iterator to normal iterator before erasing
-    string.erase(lastNonWhitespace.base(), string.end());
+    }
+    throw ParseException(fmtError("expecting 'server', got '" + tokens[0] + "'"));
 }
 
-/* Extract all location blocks inside server configuration file and store it in a string vector */
-
-void ConfigParser::extractLocationBlocks(std::string& serverBlock)
+inline void ConfigParser::parseServerBlock(const Strings& tokens)
 {
-    std::size_t startPos = 0;
-    startPos = serverBlock.find("location", startPos);
-
-    _locationBlocks.clear();
-
-    while (startPos != std::string::npos)
+    if (_keywords.count(tokens[0]))
     {
-        // find the opening curly brace of the location block
-        std::size_t braceOpen = serverBlock.find('{', startPos);
+        ValidationMethod assign = _keywords.at(tokens[0]);
+        (this->*assign)(tokens, _currentDirectives);
+        return;
+    }
+    if (tokens[0] == "}")
+    {
+        _state = OutsideServerBlock;
+        _openBlocks--;
+        return;
+    }
+    if (tokens[0] == "location")
+    {
+        validateLocation(tokens);
+        enterLocationContext(tokens[1]);
+        _state = InsideLocationBlock;
+        _openBlocks++;
+        return;
+    }
+    throw ParseException(fmtError("unknown directive '" + tokens[0] + "'"));
+}
 
-        // error handling if '{' is not found
-        if (braceOpen == std::string::npos)
-            break;
+inline void ConfigParser::parseLocationBlock(const Strings& tokens)
+{
+    if (tokens[0] == "listen" || tokens[0] == "server_name")
+    {
+        throw ParseException(fmtError("'" + tokens[0] + "' directive is not allowed here"));
+    }
+    if (_keywords.count(tokens[0]))
+    {
+        ValidationMethod assign = _keywords.at(tokens[0]);
+        (this->*assign)(tokens, _currentDirectives);
+        return;
+    }
+    if (tokens[0] == "}")
+    {
+        exitContext();
+        _state = InsideServerBlock;
+        _openBlocks--;
+        return;
+    }
+    throw ParseException(fmtError("unknown directive '" + tokens[0] + "'"));
+}
 
-        // find the closing curly brace, considering nested braces
-        int braceCount = 1;
-        std::size_t braceClose = braceOpen;
-        while (braceCount > 0 && ++braceClose < serverBlock.length())
+inline void ConfigParser::checkOpenBlocks()
+{
+    if (_openBlocks == 0)
+    {
+        return;
+    }
+    throw ParseException(fmtError("unexpected end of file, expecting '}'"));
+}
+
+void ConfigParser::initializeValidationMap()
+{
+    _keywords["listen"] = &ConfigParser::validateListen;
+    _keywords["server_name"] = &ConfigParser::validateServerName;
+    _keywords["index"] = &ConfigParser::validateIndex;
+    _keywords["root"] = &ConfigParser::validateRoot;
+    _keywords["autoindex"] = &ConfigParser::validateAutoindex;
+    _keywords["error_page"] = &ConfigParser::validateErrorPage;
+    _keywords["cgi"] = &ConfigParser::validateCGI;
+    _keywords["redirect"] = &ConfigParser::validateRedirect;
+    _keywords["limit_except"] = &ConfigParser::validateMethods;
+    _keywords["client_body_size"] = &ConfigParser::validateClientBodySize;
+}
+
+std::string ConfigParser::fmtError(const std::string& message)
+{
+    std::stringstream ss;
+    ss << message << " in " << _filename << ":" << _lineNumber;
+    return ss.str();
+}
+
+inline void ConfigParser::validateServer(const Strings& tokens)
+{
+    if (tokens.size() != 2 || tokens[1] != "{")
+    {
+        throw ParseException(fmtError("directive 'server' has no opening '{'"));
+    }
+}
+
+inline void ConfigParser::validateLocation(const Strings& tokens)
+{
+    checkArgCount(tokens, tokens[1] == "{");
+
+    if (tokens.size() != 3)
+    {
+        throw ParseException(fmtError("directive 'location' has no opening '{'"));
+    }
+}
+
+void ConfigParser::validateListen(const Strings& tokens, Directives* directive)
+{
+    checkArgCount(tokens, tokens.size() != 2);
+
+    int port = std::atoi(tokens[1].c_str());
+    if (port < 3 || port > 65535)
+    {
+        throw ParseException(fmtError("invalid port number '" + tokens[1] + "'"));
+    }
+    directive->listen = port;
+}
+
+void ConfigParser::validateServerName(const Strings& tokens, Directives* directive)
+{
+    checkArgCount(tokens, tokens.size() != 2);
+    directive->server_name = tokens[1];
+}
+
+void ConfigParser::validateIndex(const Strings& tokens, Directives* directive)
+{
+    checkArgCount(tokens, tokens.size() != 2);
+    directive->index = tokens[1];
+}
+
+void ConfigParser::validateRoot(const Strings& tokens, Directives* directive)
+{
+    checkArgCount(tokens, tokens.size() != 2);
+    directive->root = tokens[1];
+}
+
+void ConfigParser::validateAutoindex(const Strings& tokens, Directives* directive)
+{
+    checkArgCount(tokens, tokens.size() != 2);
+    if (tokens[1] != "on" && tokens[1] != "off")
+    {
+        throw ParseException(fmtError(
+            "invalid value '" + tokens[1]
+            + "' in 'autoindex' directive, it must be 'on' or 'off'"));
+    }
+    directive->autoindex = (tokens[1] == "on") ? true : false;
+}
+
+void ConfigParser::validateErrorPage(const Strings& tokens, Directives* directive)
+{
+    checkArgCount(tokens, tokens.size() < 3);
+    std::string page = tokens[tokens.size() - 1];
+    for (size_t idx = 1; idx < tokens.size() - 1; ++idx)
+    {
+        int error = std::atoi(tokens[idx].c_str());
+        if (error < 300 || error > 599)
         {
-            if (serverBlock[braceClose] == '{')
-                braceCount++;
-            else if (serverBlock[braceClose] == '}')
-                braceCount--;
+            throw ParseException(
+                fmtError("value '" + tokens[idx] + "' must be between 300 and 599"));
         }
-
-        // error handling for unmatched brace
-        if (braceCount != 0)
-            break;
-
-        // extract the location block
-        std::string locationBlock = serverBlock.substr(startPos, braceClose - startPos + 1);
-        _locationBlocks.push_back(locationBlock);
-
-        // move to the next part of the string
-        startPos = braceClose + 1;
+        directive->error_page[error] = page;
     }
 }
 
-/* Parse location blocks and store id in a map */
-
-void ConfigParser::parseLocationBlocks(void)
+void ConfigParser::validateCGI(const Strings& tokens, Directives* directive)
 {
-    _parsedLocationBlocks.clear();
-
-    for (size_t i = 0; i < _locationBlocks.size(); ++i)
-    {
-        std::string block = _locationBlocks[i];
-
-        extractLocationPath(block);
-        parseDirectivesInLocation(block);
-
-        // store the directives map in the _parsedLocationBlocks
-        _parsedLocationBlocks[_locationPath] = _locationDirectives;
-    }
+    checkArgCount(tokens, tokens.size() != 2);
+    directive->cgi = tokens[1];
 }
 
-/* Part of previous function parseLocationBlocks */
-
-void ConfigParser::extractLocationPath(const std::string& block)
+void ConfigParser::validateRedirect(const Strings& tokens, Directives* directive)
 {
-    _locationPath.clear();
+    checkArgCount(tokens, tokens.size() != 3);
+    int statusCode = std::atoi(tokens[1].c_str());
+    directive->redirect = std::make_pair(statusCode, tokens[2]);
+}
 
-    std::istringstream stream(block);
-    std::string line;
+void ConfigParser::validateMethods(const Strings& tokens, Directives* directive)
+{
+    static std::set<std::string> methods;
+    methods.insert("get");
+    methods.insert("post");
+    methods.insert("delete");
 
-    while (std::getline(stream, line))
+    for (size_t idx = 1; idx < tokens.size(); ++idx)
     {
-        trim(line);
-
-        if (line.empty())
-            continue;
-
-        // the first line should start with "location", followed by the path.
-        std::size_t locationStart = line.find("location");
-        if (locationStart != std::string::npos)
+        std::string method = ft::toLower(tokens[idx]);
+        if (!methods.count(method))
         {
-            std::size_t pathStart =
-                line.find_first_not_of(" ", locationStart + 8); // 8 is the length of "location"
-            std::size_t pathEnd = line.find_first_of(" {", pathStart);
-
-            if (pathStart != std::string::npos && pathEnd != std::string::npos)
-            {
-                _locationPath = line.substr(pathStart, pathEnd - pathStart);
-                return;
-            }
+            throw ParseException(fmtError("invalid method '" + tokens[idx] + "'"));
         }
-        throw std::runtime_error("Location path not found in the location block");
+        directive->limit_except.insert(method);
     }
-    throw std::runtime_error("Empty location block encountered");
 }
 
-/* Part of previous function parseLocationBlocks */
-
-void ConfigParser::parseDirectivesInLocation(const std::string& block)
+void ConfigParser::validateClientBodySize(const Strings& tokens, Directives* directive)
 {
-    _locationDirectives.clear();
+    checkArgCount(tokens, tokens.size() != 2);
+    directive->client_max_body_size = std::atoi(tokens[1].c_str()) << 20;
+}
 
-    std::istringstream stream(block);
-    std::string line;
+inline void ConfigParser::enterServerContext()
+{
+    _directives.push_back(Directives());
+    _contextStack.push(&_directives.back());
+    _currentDirectives = &_directives.back();
+}
 
-    while (std::getline(stream, line))
+inline void ConfigParser::enterLocationContext(const std::string& location)
+{
+    _currentDirectives->locations[location] = Directives();
+    _contextStack.push(&_currentDirectives->locations[location]);
+    _currentDirectives = _contextStack.top();
+}
+
+inline void ConfigParser::exitContext()
+{
+    _contextStack.pop();
+    _currentDirectives = _contextStack.top();
+}
+
+void ConfigParser::checkArgCount(const Strings& tokens, bool badCondition)
+{
+    if (badCondition)
     {
-        // trim whitespace
-        trim(line);
-
-        // skip the empty lines and closing brace
-        if (line.empty() || line == "}" || line.find("location") != std::string::npos)
-            continue;
-
-        std::istringstream lineStream(line);
-        std::string directive, value;
-
-        // get the directive name
-        lineStream >> directive;
-
-        // read the rest of the line as the directive value
-        std::getline(lineStream, value);
-        trim(value);
-
-        // store the directive and its value in the map
-        _locationDirectives[directive] = value;
+        std::string message = "invalid number of arguments for directive '";
+        throw ParseException(fmtError(message + tokens[0] + "'"));
     }
 }
 
-/* getters */
-
-const std::vector<ConfigSpec>& ConfigParser::getConfigSpecs() const
+ConfigParser::ParseException::ParseException(const std::string& err)
+    : std::invalid_argument(err)
 {
-    return _configSpecs;
-}
-
-/* DEBUG */
-
-/*
-    The outer loop iterates over _parsedDirectives to access each directive and its associated
-   vector of values. For each directive (key in the map), the inner loop iterates over its vector of
-   values. Each value associated with a directive is printed, so if a directive has multiple values,
-   they will all be displayed. The for loop has three parts: initialization, condition, and
-   increment. When you already initialize your iterator (or loop variable) outside the loop, you
-   don't need to initialize it again inside the loop. Therefore, the initialization part is left
-   blank.
-*/
-
-void ConfigParser::printExtractedServerBlocks(void) const
-{
-    std::cout << "\nServer Block Found\n" << std::endl;
-    for (size_t i = 0; i < _serverBlocks.size(); ++i)
-        std::cout << _serverBlocks[i] << "\n" << std::endl;
-}
-
-void ConfigParser::printParsedDirectives(void) const
-{
-    std::cout << "Parsed Directives:" << std::endl;
-    std::map<std::string, std::vector<std::string> >::const_iterator it;
-    for (it = _parsedDirectives.begin(); it != _parsedDirectives.end(); ++it)
-    {
-        std::cout << "  " << it->first << ":" << std::endl;
-        std::vector<std::string>::const_iterator vecIt = it->second.begin();
-        for (; vecIt != it->second.end(); ++vecIt)
-            std::cout << "    " << *vecIt << std::endl;
-    }
-}
-
-void ConfigParser::printLocationBlocks(void) const
-{
-    std::cout << "\nExtracted Location Blocks:\n" << std::endl;
-    for (size_t i = 0; i < _locationBlocks.size(); ++i)
-    {
-        std::cout << "Location Block " << (i + 1) << ":" << std::endl;
-        std::cout << _locationBlocks[i] << std::endl;
-    }
-}
-
-void ConfigParser::printParsedLocationBlocks(void) const
-{
-    std::cout << "Parsed Location Blocks:" << std::endl;
-    std::map<std::string, std::map<std::string, std::string> >::const_iterator it;
-    for (it = _parsedLocationBlocks.begin(); it != _parsedLocationBlocks.end(); ++it)
-    {
-        std::cout << "Location: " << it->first << std::endl;
-
-        const std::map<std::string, std::string>& directives = it->second;
-        for (std::map<std::string, std::string>::const_iterator innerIt = directives.begin();
-             innerIt != directives.end();
-             ++innerIt)
-            std::cout << "  " << innerIt->first << ": " << innerIt->second << std::endl;
-        std::cout << std::endl;
-    }
-}
-
-void ConfigParser::printAllConfigSpecs(void) const
-{
-    for (size_t i = 0; i < _configSpecs.size(); ++i)
-    {
-        std::cout << "------- ConfigSpec " << (i + 1) << " -------"
-                  << "\n\n";
-        _configSpecs[i].printParsedDirectives();
-        std::cout << " \n";
-        _configSpecs[i].printParsedLocationBlocks();
-        std::cout << "\n";
-    }
 }

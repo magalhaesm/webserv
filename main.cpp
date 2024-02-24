@@ -15,10 +15,8 @@ int main(int argc, char** argv)
 
     try
     {
-        ConfigParser configParser;
-        configParser.handleConfigFile(argv[1]);
-        ConfigSpecList specs = configParser.getConfigSpecs();
-
+        ConfigParser parser(argv[1]);
+        ConfigSpecList specs = parser.getSpecs();
         EventListener listener;
         for (size_t idx = 0; idx < specs.size(); ++idx)
         {

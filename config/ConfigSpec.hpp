@@ -1,48 +1,35 @@
-#ifndef ConfigSpec_HPP
-#define ConfigSpec_HPP
+#ifndef CONFIG_SPEC_HPP
+#define CONFIG_SPEC_HPP
 
-#include <map>
 #include <string>
-#include <vector>
 
+#include "Directives.hpp"
 
 class ConfigSpec
 {
-    public:
-        // Constructors
-        ConfigSpec(void);
+public:
+    ConfigSpec(const Directives& directives, const ConfigSpec* parent = NULL);
+    ConfigSpec(const ConfigSpec& src);
+    ~ConfigSpec();
+    ConfigSpec& operator=(const ConfigSpec& rhs);
 
-        // Copy constructor
-        ConfigSpec(ConfigSpec const &src);
+    int getPort() const;
+    const std::string& getServerName() const;
+    const std::string& getIndex() const;
+    const std::string& getRoot() const;
+    bool hasAutoindex() const;
+    bool hasErrorPage(int error) const;
+    const std::string& getErrorPage(int error) const;
+    const std::string& getCGI() const;
+    bool hasRedirect() const;
+    const Redirect& getRedirect() const;
+    bool hasLocation(const std::string& location) const;
+    const ConfigSpec getLocation(const std::string& location) const;
 
-        // Destructor
-        ~ConfigSpec(void);
-
-        // Copy assignment operator
-        ConfigSpec &operator=(ConfigSpec const &rhs);
-
-        //methods:
-        void setDirectives(const std::map<std::string, std::vector<std::string> > &directives);
-        void setLocationBlocks(const std::map<std::string, std::map<std::string, std::string> > &locationBlocks);
-
-        //directive getters:
-        int getPort() const;
-        std::string getServerName() const;
-        std::string getIndex() const;
-        std::string getRoot() const;
-        std::string getAutoindex() const;
-        std::vector<std::string> getErrorPage() const;
-        std::string getCgi() const;
-        std::string getRedirect() const;
-
-        //debug:
-        void printParsedDirectives(void) const;
-        void printParsedLocationBlocks(void) const;
-
-    private:
-    std::map<std::string, std::vector<std::string> > _directives;
-    std::map<std::string, std::map<std::string, std::string> > _locationBlocks;
+private:
+    const Directives& _directives;
+    const ConfigSpec* _parent;
+    std::string _empty;
 };
 
-#endif
-
+#endif // !CONFIG_SPEC_HPP
