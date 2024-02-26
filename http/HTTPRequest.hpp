@@ -16,7 +16,6 @@ public:
     Method method() const;
     const std::string& path() const;
     const std::string& getHeader(const std::string& field) const;
-    void setPath(const std::string& path);
 
 private:
     Message& m_msg;

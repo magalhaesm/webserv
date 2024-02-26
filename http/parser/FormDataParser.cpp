@@ -10,6 +10,17 @@ static void removeOuterQuotes(std::string& str);
 FormDataParser::FormDataParser(std::string& raw, Message& msg)
     : ABodyParser(raw, msg)
 {
+    this->setBoundary();
+}
+
+Body* FormDataParser::createBody()
+{
+    parseRawBody();
+    return new Body(FormData, m_content);
+}
+
+inline void FormDataParser::setBoundary()
+{
     Headers::const_iterator it = m_msg.headers.find("content-type");
     if (it != m_msg.headers.end())
     {
@@ -29,13 +40,7 @@ FormDataParser::FormDataParser(std::string& raw, Message& msg)
     }
 }
 
-Body* FormDataParser::createBody()
-{
-    parseRawBody();
-    return new Body(FormData, m_content);
-}
-
-void FormDataParser::parseRawBody()
+inline void FormDataParser::parseRawBody()
 {
     size_t end = m_raw.find(DELIMITER);
     if (end != std::string::npos)

@@ -39,8 +39,3 @@ const std::string& HTTPRequest::getHeader(const std::string& field) const
     }
     return m_empty;
 }
-
-void HTTPRequest::setPath(const std::string& path)
-{
-    m_msg.path = path;
-}

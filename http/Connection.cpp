@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <unistd.h>
 #include <strings.h>
 #include <sys/socket.h>
@@ -6,9 +7,9 @@
 #include "HTTPParser.hpp"
 #include "EventListener.hpp"
 
-const int BUFSIZE = 8192;
+// const int BUFSIZE = 8192;
+const int BUFSIZE = 10;
 
-// TODO: receber do servidor as restrições de parsing
 Connection::Connection(EventListener* listener, Server* server)
     : m_server(server)
     , m_listener(listener)
@@ -23,15 +24,6 @@ Connection::~Connection()
     ::close(m_clientSocket);
 }
 
-void Connection::processRequest()
-{
-    HTTPRequest request(m_msg);
-    HTTPResponse response;
-    m_server->handleRequest(request, response);
-    this->setPersistent(response.isKeepAlive());
-    this->send(response.toString());
-}
-
 bool Connection::read()
 {
     char buffer[BUFSIZE];
@@ -41,16 +33,19 @@ bool Connection::read()
         return this->close();
     }
 
+    this->updateLastActivityTime();
     m_raw.append(buffer, bytesRead);
 
-    if (HTTPParser::parseRequest(m_raw, m_msg) == false)
+    if (processHeader())
     {
+        if (processBody())
+        {
+            processRequest();
+            return true;
+        }
         return false;
     }
-
-    this->processRequest();
-    this->updateLastActivityTime();
-    return true;
+    return false;
 }
 
 bool Connection::write()
@@ -75,6 +70,50 @@ bool Connection::write()
         return m_persistent ? true : this->close();
     }
     return false;
+}
+
+inline bool Connection::processHeader()
+{
+    if (m_msg.state != HEADERS)
+    {
+        return true;
+    }
+
+    if (HTTPParser::parseHeader(m_raw, m_msg))
+    {
+        switch (m_msg.method)
+        {
+        case GET:
+        case DELETE:
+        case UNKNOWN:
+            m_msg.state = FINISH;
+            break;
+        case POST:
+            m_msg.state = BODY_TYPE;
+            break;
+        }
+        return true;
+    }
+    return false;
+}
+
+inline bool Connection::processBody()
+{
+    if (m_msg.method != POST)
+    {
+        return true;
+    }
+    int maxBodySize = m_server->getClientMaxBodySize();
+    return HTTPParser::parseBody(m_raw, m_msg, maxBodySize);
+}
+
+inline void Connection::processRequest()
+{
+    HTTPRequest request(m_msg);
+    HTTPResponse response;
+    m_server->handleRequest(request, response);
+    this->setPersistent(response.isKeepAlive());
+    this->send(response.toString());
 }
 
 inline void Connection::send(const std::string& response)

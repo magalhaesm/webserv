@@ -33,6 +33,8 @@ private:
     Message m_msg;
 
     void send(const std::string& response);
+    bool processHeader();
+    bool processBody();
     void processRequest();
     void updateLastActivityTime();
 };

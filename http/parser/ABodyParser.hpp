@@ -21,11 +21,10 @@ protected:
     size_t m_bodySize;
 
 private:
-    typedef bool (ABodyParser::*CheckMethod)();
-    CheckMethod m_contentCheckMethod;
+    typedef bool (*TransferMethod)(std::string& raw, size_t bodySize);
+    TransferMethod m_stopReading;
 
-    bool findFinalChunk();
-    bool readContentLength();
+    void setStopReadingMethod(Message& msg);
 };
 
 #endif // !ABODY_PARSER_HPP

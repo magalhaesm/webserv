@@ -12,48 +12,43 @@ const bool DONE = true;
 
 void readRequestLine(std::istringstream& stream, Message& msg);
 void readHeaders(std::istringstream& stream, Message& msg);
+void setBodySize(Message& msg);
 
 void setMethod(const std::string& method, Message& msg);
 void removeCR(std::string& s);
 bool has(const std::string& term, const Headers::const_iterator& it);
 
-// Return false whenever there isn't enough data to be parsed.
-// bool HTTPParser::parseRequest(const std::string& raw, Message& msg, const ConfigSpec& cfg);
-bool HTTPParser::parseRequest(std::string& raw, Message& msg)
+bool HTTPParser::parseHeader(std::string& raw, Message& msg)
+{
+    size_t end = raw.find(DELIMITER);
+    if (end == std::string::npos)
+    {
+        return AGAIN;
+    }
+
+    std::istringstream stream(raw.substr(0, end));
+    readRequestLine(stream, msg);
+    readHeaders(stream, msg);
+    setBodySize(msg);
+
+    raw.erase(0, end + DELIMITER.length());
+    return DONE;
+}
+
+void setBodySize(Message& msg)
+{
+    if (msg.headers.count("content-length"))
+    {
+        int bodySize = std::atoi(msg.headers.at("content-length").c_str());
+        msg.bodySize = bodySize;
+    }
+}
+
+bool HTTPParser::parseBody(std::string& raw, Message& msg, int maxBodySize)
 {
     switch (msg.state)
     {
     case HEADERS:
-    {
-        size_t end = raw.find(DELIMITER);
-        if (end == std::string::npos)
-        {
-            return AGAIN;
-        }
-
-        std::istringstream stream(raw.substr(0, end));
-        readRequestLine(stream, msg);
-        readHeaders(stream, msg);
-
-        raw.erase(0, end + DELIMITER.length());
-        msg.state = BODY;
-        return parseRequest(raw, msg);
-    }
-    case BODY:
-    {
-        switch (msg.method)
-        {
-        case GET:
-        case DELETE:
-        case UNKNOWN:
-            msg.state = FINISH;
-            break;
-        case POST:
-            msg.state = BODY_TYPE;
-            break;
-        }
-        return parseRequest(raw, msg);
-    }
     case BODY_TYPE:
     {
         Headers::const_iterator it = msg.headers.find("content-type");
@@ -69,7 +64,7 @@ bool HTTPParser::parseRequest(std::string& raw, Message& msg)
             }
         }
         msg.state = BODY_CONTENT;
-        return parseRequest(raw, msg);
+        return parseBody(raw, msg, maxBodySize);
     }
     case BODY_CONTENT:
     {

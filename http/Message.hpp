@@ -16,6 +16,7 @@ struct Message
     std::string query;
     Headers headers;
     Body* body;
+    int bodySize;
     ABodyParser* parser;
     ParsingState state;
 

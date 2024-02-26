@@ -16,6 +16,7 @@ void clear(Message& msg)
     msg.query.clear();
     msg.headers.clear();
     msg.state = HEADERS;
+    msg.bodySize = 0;
 
     if (msg.body != NULL)
     {

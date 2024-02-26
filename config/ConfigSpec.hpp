@@ -26,6 +26,7 @@ public:
     const Redirect& getRedirect() const;
     bool hasLocation(const std::string& location) const;
     ConfigSpec getLocation(const std::string& location) const;
+    int getClientBodySize() const;
 
 private:
     Directives& _directives;

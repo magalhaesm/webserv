@@ -1,5 +1,4 @@
 #include <cstdlib>
-#include <iostream>
 #include <sstream>
 
 #include "Message.hpp"
@@ -8,25 +7,15 @@
 const std::string FINAL_CHUNK = "0" + DELIMITER;
 
 void unchunkBody(std::string& raw);
+bool findFinalChunk(std::string& raw, size_t bodySize);
+bool readContentLength(std::string& raw, size_t bodySize);
 
 ABodyParser::ABodyParser(std::string& raw, Message& msg)
     : m_raw(raw)
     , m_msg(msg)
-    , m_bodySize(0)
+    , m_bodySize(msg.bodySize)
 {
-    Headers::const_iterator it = msg.headers.find("transfer-encoding");
-    if (it != msg.headers.end() && it->second.find("chunked") != std::string::npos)
-    {
-        m_contentCheckMethod = &ABodyParser::findFinalChunk;
-        return;
-    }
-
-    it = m_msg.headers.find("content-length");
-    if (it != m_msg.headers.end())
-    {
-        m_bodySize = std::atoi(it->second.c_str());
-        m_contentCheckMethod = &ABodyParser::readContentLength;
-    }
+    setStopReadingMethod(msg);
 }
 
 ABodyParser::~ABodyParser()
@@ -35,25 +24,38 @@ ABodyParser::~ABodyParser()
 
 bool ABodyParser::needsMoreContent()
 {
-    return (this->*m_contentCheckMethod)();
+    return m_stopReading(m_raw, m_bodySize);
 }
 
-bool ABodyParser::findFinalChunk()
+inline void ABodyParser::setStopReadingMethod(Message& msg)
 {
-    size_t lastChunk = m_raw.rfind(FINAL_CHUNK);
+    Headers::const_iterator it = msg.headers.find("transfer-encoding");
+    if (it != msg.headers.end() && it->second.find("chunked") != std::string::npos)
+    {
+        m_stopReading = &findFinalChunk;
+        return;
+    }
+
+    m_stopReading = &readContentLength;
+}
+
+bool findFinalChunk(std::string& raw, size_t)
+{
+    size_t lastChunk = raw.rfind(FINAL_CHUNK);
     if (lastChunk == std::string::npos)
     {
         return true;
     }
-    unchunkBody(m_raw);
+    unchunkBody(raw);
     return false;
 }
 
-bool ABodyParser::readContentLength()
+bool readContentLength(std::string& raw, size_t bodySize)
 {
-    return m_raw.size() < m_bodySize;
+    return raw.size() < bodySize;
 }
 
+// TODO: must be a loop
 void unchunkBody(std::string& raw)
 {
     size_t offset = 0;

@@ -17,6 +17,7 @@ private:
     static const size_t BOUNDARY_LENGTH;
     std::ofstream file;
 
+    void setBoundary();
     void parseRawBody();
 };
 

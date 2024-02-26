@@ -19,10 +19,11 @@ public:
     Server(const ConfigSpec& cfg);
     ~Server();
 
-    void handleRequest(HTTPRequest& req, HTTPResponse& res);
+    void handleRequest(const HTTPRequest& req, HTTPResponse& res);
     void listen();
     int accept();
     int getSocket() const;
+    int getClientMaxBodySize() const;
 
 private:
     const ConfigSpec& m_cfg;
@@ -34,10 +35,7 @@ private:
     HTMLController htmlController;
     CGIController cgiController;
 
-    // NOTE: o servidor mantém um ponteiro/ref para o primeiro handler
-
     int createSocket();
-    void setupHandlers();
 };
 
 #endif // !SERVER_HPP

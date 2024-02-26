@@ -98,3 +98,8 @@ ConfigSpec ConfigSpec::getLocation(const std::string& location) const
 {
     return ConfigSpec(_directives.locations.at(location), this);
 }
+
+int ConfigSpec::getClientBodySize() const
+{
+    return _directives.client_max_body_size;
+}
