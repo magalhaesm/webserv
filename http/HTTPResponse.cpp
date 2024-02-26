@@ -29,6 +29,11 @@ void HTTPResponse::setBody(const std::string& body)
     m_body = body;
 }
 
+int HTTPResponse::getStatus()
+{
+    return m_statusCode;
+}
+
 const std::string& HTTPResponse::getHeader(const std::string& field)
 {
     Headers::const_iterator it = m_headers.find(field);

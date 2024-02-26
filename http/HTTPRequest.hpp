@@ -8,7 +8,7 @@
 class HTTPRequest
 {
 public:
-    HTTPRequest(const Message& message);
+    HTTPRequest(Message& message);
     HTTPRequest(const HTTPRequest& rhs);
     HTTPRequest& operator=(const HTTPRequest& rhs);
     ~HTTPRequest();
@@ -16,9 +16,10 @@ public:
     Method method() const;
     const std::string& path() const;
     const std::string& getHeader(const std::string& field) const;
+    void setPath(const std::string& path);
 
 private:
-    const Message& m_msg;
+    Message& m_msg;
     const std::string m_empty;
 };
 

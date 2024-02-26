@@ -16,11 +16,8 @@ ConfigSpec::~ConfigSpec()
 {
 }
 
-ConfigSpec& ConfigSpec::operator=(const ConfigSpec& rhs)
+ConfigSpec& ConfigSpec::operator=(const ConfigSpec&)
 {
-    if (this != &rhs)
-    {
-    }
     return *this;
 }
 
@@ -57,13 +54,19 @@ bool ConfigSpec::hasAutoindex() const
     return _directives.autoindex;
 }
 
+bool ConfigSpec::hasErrorPage(int error) const
+{
+    return _directives.error_page.count(error);
+}
+
 const std::string& ConfigSpec::getErrorPage(int error) const
 {
-    if (_directives.error_page.count(error))
-    {
-        return _directives.error_page.at(error);
-    }
-    return _empty;
+    return _directives.error_page.at(error);
+}
+
+bool ConfigSpec::hasCGI() const
+{
+    return !_directives.cgi.empty();
 }
 
 const std::string& ConfigSpec::getCGI() const

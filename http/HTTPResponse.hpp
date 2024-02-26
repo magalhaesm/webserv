@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "Message.hpp"
+#include "definitions.hpp"
 
 class HTTPResponse
 {
@@ -14,6 +14,8 @@ public:
     void setStatus(int status);
     void setHeader(const std::string& field, const std::string& value);
     void setBody(const std::string& body);
+
+    int getStatus();
 
     const std::string& getHeader(const std::string& field);
     const std::string& toString();

@@ -11,6 +11,10 @@
 #include "Server.hpp"
 #include "Connection.hpp"
 
+#include "RedirectHandler.hpp"
+#include "ErrorPageHandler.hpp"
+#include "RouteHandler.hpp"
+
 const int BACKLOG = 10;
 
 const std::string ERROR_MESSAGE_TEMPLATE =
@@ -32,25 +36,32 @@ const std::string ERROR_MESSAGE_TEMPLATE =
 static void fatalError(const std::string& errMsg);
 
 Server::Server(const ConfigSpec& cfg)
-    : m_name(cfg.getServerName())
+    : m_cfg(cfg)
+    , m_name(cfg.getServerName())
     , m_port(cfg.getPort())
 {
     m_socket = createSocket();
+    setupHandlers();
 }
 
 Server::~Server()
 {
+    for (size_t idx = 0; idx < m_handlers.size(); ++idx)
+    {
+        delete m_handlers[idx];
+    }
     close(m_socket);
 }
 
-void Server::handleRequest(const HTTPRequest& request, HTTPResponse& response)
+void Server::handleRequest(HTTPRequest& req, HTTPResponse& res)
 {
-    if (cgiController.isCGI(request))
-    {
-        cgiController.handleCGIRequest(request, response);
-        return;
-    }
-    htmlController.handleHTMLRequest(request, response);
+    // if (cgiController.isCGI(req))
+    // {
+    //     cgiController.handleCGIRequest(req, res);
+    //     return;
+    // }
+    m_handler->handle(req, res);
+    htmlController.handleHTMLRequest(req, res);
 }
 
 void Server::listen()
@@ -92,6 +103,22 @@ int Server::createSocket()
     }
 
     return fd;
+}
+
+void Server::setupHandlers()
+{
+    ARequestHandler* router = new RouteHandler(m_cfg);
+    m_handlers.push_back(router);
+
+    ARequestHandler* redirect = new RedirectHandler(m_cfg);
+    m_handlers.push_back(redirect);
+
+    ARequestHandler* erroPage = new ErrorPageHandler(m_cfg);
+    m_handlers.push_back(erroPage);
+
+    m_handler = router;
+    router->setNext(redirect);
+    redirect->setNext(erroPage);
 }
 
 void fatalError(const std::string& errMsg)

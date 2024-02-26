@@ -6,7 +6,7 @@ CHECK := \342\234\224
 LOG   := printf "[$(CYAN)$(CHECK)$(RESET)] %s\n"
 
 OBJ_DIR := obj
-DIRS    := http http/parser events config controllers helpers
+DIRS    := http http/parser events config controllers helpers handlers
 
 vpath %.hpp $(DIRS)
 vpath %.cpp $(DIRS)
@@ -17,12 +17,16 @@ HEADERS += HTMLController.hpp CGIController.hpp strings.hpp
 HEADERS += HTTPParser.hpp ABodyParser.hpp URLEncodedParser.hpp
 HEADERS += FormDataParser.hpp Body.hpp ConfigParser.hpp ConfigSpec.hpp
 HEADERS += definitions.hpp
+HEADERS += ARequestHandler.hpp RedirectHandler.hpp ErrorPageHandler.hpp
+HEADERS += RouteHandler.hpp
 
 SOURCES := main.cpp Server.cpp EventListener.cpp Connection.cpp
 SOURCES += HTTPRequest.cpp HTTPResponse.cpp Message.cpp
 SOURCES += HTMLController.cpp CGIController.cpp strings.cpp
 SOURCES += HTTPParser.cpp ABodyParser.cpp URLEncodedParser.cpp
 SOURCES += FormDataParser.cpp Body.cpp ConfigParser.cpp ConfigSpec.cpp
+SOURCES += ARequestHandler.cpp RedirectHandler.cpp ErrorPageHandler.cpp
+SOURCES += RouteHandler.cpp
 
 OBJS     := $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
 CXXFLAGS := -Wall -Werror -Wextra -std=c++98 -O2 $(addprefix -I,$(DIRS))

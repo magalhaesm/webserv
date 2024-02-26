@@ -1,7 +1,7 @@
 #include "strings.hpp"
 #include "HTTPRequest.hpp"
 
-HTTPRequest::HTTPRequest(const Message& message)
+HTTPRequest::HTTPRequest(Message& message)
     : m_msg(message)
 {
 }
@@ -38,4 +38,9 @@ const std::string& HTTPRequest::getHeader(const std::string& field) const
         return it->second;
     }
     return m_empty;
+}
+
+void HTTPRequest::setPath(const std::string& path)
+{
+    m_msg.path = path;
 }

@@ -121,7 +121,7 @@ inline void ConfigParser::parseServerBlock(const Strings& tokens)
 
 inline void ConfigParser::parseLocationBlock(const Strings& tokens)
 {
-    if (tokens[0] == "listen" || tokens[0] == "server_name")
+    if (tokens[0] == "listen" || tokens[0] == "server_name" || tokens[0] == "index")
     {
         throw ParseException(fmtError("'" + tokens[0] + "' directive is not allowed here"));
     }

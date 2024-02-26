@@ -20,6 +20,7 @@ public:
     bool hasAutoindex() const;
     bool hasErrorPage(int error) const;
     const std::string& getErrorPage(int error) const;
+    bool hasCGI() const;
     const std::string& getCGI() const;
     bool hasRedirect() const;
     const Redirect& getRedirect() const;
