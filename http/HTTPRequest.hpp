@@ -15,6 +15,7 @@ public:
 
     Method method() const;
     const std::string& path() const;
+    const std::string& query() const;
     const std::string& getHeader(const std::string& field) const;
 
 private:

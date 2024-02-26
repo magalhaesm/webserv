@@ -30,6 +30,11 @@ const std::string& HTTPRequest::path() const
     return m_msg.path;
 }
 
+const std::string& HTTPRequest::query() const
+{
+    return m_msg.query;
+}
+
 const std::string& HTTPRequest::getHeader(const std::string& field) const
 {
     Headers::const_iterator it = m_msg.headers.find(ft::toLower(field));

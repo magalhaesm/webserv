@@ -88,6 +88,13 @@ inline void readRequestLine(std::istringstream& stream, Message& msg)
 
     stream >> method >> msg.path >> msg.version;
     setMethod(method, msg);
+
+    size_t question = msg.path.find("?");
+    if (question != std::string::npos)
+    {
+        msg.query = URLEncodedParser::decode(msg.path.substr(question + 1));
+        msg.path = msg.path.substr(0, question);
+    }
 }
 
 inline void readHeaders(std::istringstream& stream, Message& msg)
