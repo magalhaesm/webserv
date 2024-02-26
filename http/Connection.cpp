@@ -7,8 +7,7 @@
 #include "HTTPParser.hpp"
 #include "EventListener.hpp"
 
-// const int BUFSIZE = 8192;
-const int BUFSIZE = 10;
+const int BUFSIZE = 8192;
 
 Connection::Connection(EventListener* listener, Server* server)
     : m_server(server)
@@ -17,6 +16,7 @@ Connection::Connection(EventListener* listener, Server* server)
     , m_persistent(true)
 {
     m_clientSocket = server->accept();
+    m_maxBodySize = m_server->getClientMaxBodySize();
 }
 
 Connection::~Connection()
@@ -36,14 +36,10 @@ bool Connection::read()
     this->updateLastActivityTime();
     m_raw.append(buffer, bytesRead);
 
-    if (processHeader())
+    if (HTTPParser::parseRequest(m_raw, m_msg, m_maxBodySize))
     {
-        if (processBody())
-        {
-            processRequest();
-            return true;
-        }
-        return false;
+        this->processRequest();
+        return true;
     }
     return false;
 }
@@ -70,41 +66,6 @@ bool Connection::write()
         return m_persistent ? true : this->close();
     }
     return false;
-}
-
-inline bool Connection::processHeader()
-{
-    if (m_msg.state != HEADERS)
-    {
-        return true;
-    }
-
-    if (HTTPParser::parseHeader(m_raw, m_msg))
-    {
-        switch (m_msg.method)
-        {
-        case GET:
-        case DELETE:
-        case UNKNOWN:
-            m_msg.state = FINISH;
-            break;
-        case POST:
-            m_msg.state = BODY_TYPE;
-            break;
-        }
-        return true;
-    }
-    return false;
-}
-
-inline bool Connection::processBody()
-{
-    if (m_msg.method != POST)
-    {
-        return true;
-    }
-    int maxBodySize = m_server->getClientMaxBodySize();
-    return HTTPParser::parseBody(m_raw, m_msg, maxBodySize);
 }
 
 inline void Connection::processRequest()

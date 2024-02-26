@@ -37,6 +37,7 @@ enum Method
 enum ParsingState
 {
     HEADERS,
+    BODY,
     BODY_TYPE,
     BODY_CONTENT,
     FINISH

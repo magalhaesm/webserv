@@ -8,8 +8,7 @@
 class HTTPParser
 {
 public:
-    static bool parseHeader(std::string& raw, Message& msg);
-    static bool parseBody(std::string& raw, Message& msg, int maxBodySize);
+    static bool parseRequest(std::string& raw, Message& msg, int maxBodySize = 0);
 };
 
 #endif // !HTTP_PARSER_HPP

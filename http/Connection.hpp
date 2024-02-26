@@ -31,10 +31,9 @@ private:
     bool m_persistent;
     std::string m_raw;
     Message m_msg;
+    int m_maxBodySize;
 
     void send(const std::string& response);
-    bool processHeader();
-    bool processBody();
     void processRequest();
     void updateLastActivityTime();
 };

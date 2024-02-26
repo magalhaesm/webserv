@@ -51,7 +51,7 @@ inline void ABodyParser::setStopReadingMethod(Message& msg)
 
 bool findFinalChunk(std::string& raw, size_t, size_t maxSize)
 {
-    if (raw.size() >= maxSize)
+    if (maxSize > 0 && raw.size() >= maxSize)
     {
         throw HTTPException(413);
     }
@@ -67,7 +67,7 @@ bool findFinalChunk(std::string& raw, size_t, size_t maxSize)
 
 bool readContentLength(std::string& raw, size_t size, size_t maxSize)
 {
-    if (size >= maxSize)
+    if (maxSize > 0 && size >= maxSize)
     {
         throw HTTPException(413);
     }
