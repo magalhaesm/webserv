@@ -1,7 +1,7 @@
 #include "ConfigSpec.hpp"
 #include "Directives.hpp"
 
-ConfigSpec::ConfigSpec(const Directives& directives, const ConfigSpec* parent)
+ConfigSpec::ConfigSpec(Directives& directives, const ConfigSpec* parent)
     : _directives(directives)
     , _parent(parent)
 {
@@ -16,8 +16,13 @@ ConfigSpec::~ConfigSpec()
 {
 }
 
-ConfigSpec& ConfigSpec::operator=(const ConfigSpec&)
+ConfigSpec& ConfigSpec::operator=(const ConfigSpec& rhs)
 {
+    if (this != &rhs)
+    {
+        this->_directives = rhs._directives;
+        this->_parent = rhs._parent;
+    }
     return *this;
 }
 
@@ -89,7 +94,7 @@ bool ConfigSpec::hasLocation(const std::string& location) const
     return _directives.locations.count(location);
 }
 
-const ConfigSpec ConfigSpec::getLocation(const std::string& location) const
+ConfigSpec ConfigSpec::getLocation(const std::string& location) const
 {
     return ConfigSpec(_directives.locations.at(location), this);
 }
