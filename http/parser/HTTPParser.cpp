@@ -4,7 +4,7 @@
 #include "HTTPParser.hpp"
 #include "FormDataParser.hpp"
 #include "URLEncodedParser.hpp"
-#include "definitions.hpp"
+#include "HTTPConstants.hpp"
 #include "strings.hpp"
 
 const bool AGAIN = false;
@@ -44,7 +44,7 @@ void setBodySize(Message& msg)
     }
 }
 
-bool HTTPParser::parseBody(std::string& raw, Message& msg, int maxBodySize)
+bool HTTPParser::parseBody(std::string& raw, Message& msg, int maxSize)
 {
     switch (msg.state)
     {
@@ -56,15 +56,15 @@ bool HTTPParser::parseBody(std::string& raw, Message& msg, int maxBodySize)
         {
             if (has("x-www-form-urlencoded", it))
             {
-                msg.parser = new URLEncodedParser(raw, msg);
+                msg.parser = new URLEncodedParser(raw, msg, maxSize);
             }
             else if (has("multipart/form-data", it))
             {
-                msg.parser = new FormDataParser(raw, msg);
+                msg.parser = new FormDataParser(raw, msg, maxSize);
             }
         }
         msg.state = BODY_CONTENT;
-        return parseBody(raw, msg, maxBodySize);
+        return parseBody(raw, msg, maxSize);
     }
     case BODY_CONTENT:
     {

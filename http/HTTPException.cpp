@@ -1,12 +1,13 @@
+#include "HTTPConstants.hpp"
 #include "HTTPException.hpp"
 
 HTTPException::HTTPException(int status)
-    : std::runtime_error("TODO: implement http error message")
+    : std::runtime_error(httpStatusCode(status))
     , _status(status)
 {
 }
 
-int HTTPException::statusCode()
+int HTTPException::statusCode() const
 {
     return _status;
 }

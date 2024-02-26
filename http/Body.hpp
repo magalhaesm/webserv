@@ -1,7 +1,7 @@
 #ifndef BODY_HPP
 #define BODY_HPP
 
-#include "definitions.hpp"
+#include "HTTPConstants.hpp"
 
 class Body
 {

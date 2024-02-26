@@ -1,14 +1,14 @@
 #include "strings.hpp"
 #include "Message.hpp"
-#include "definitions.hpp"
+#include "HTTPConstants.hpp"
 #include "FormDataParser.hpp"
 
 const size_t FormDataParser::BOUNDARY_LENGTH = 9;
 
 static void removeOuterQuotes(std::string& str);
 
-FormDataParser::FormDataParser(std::string& raw, Message& msg)
-    : ABodyParser(raw, msg)
+FormDataParser::FormDataParser(std::string& raw, Message& msg, size_t maxSize)
+    : ABodyParser(raw, msg, maxSize)
 {
     this->setBoundary();
 }

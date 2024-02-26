@@ -4,7 +4,6 @@
 #include <string>
 
 #include "Body.hpp"
-#include "definitions.hpp"
 
 class ABodyParser;
 
@@ -17,6 +16,7 @@ struct Message
     Headers headers;
     Body* body;
     int bodySize;
+    int error;
     ABodyParser* parser;
     ParsingState state;
 

@@ -7,7 +7,7 @@ class HTTPException : public std::runtime_error
 {
 public:
     HTTPException(int status);
-    int statusCode();
+    int statusCode() const;
 
 private:
     int _status;

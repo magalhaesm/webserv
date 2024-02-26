@@ -16,13 +16,14 @@ HEADERS += HTTPRequest.hpp HTTPResponse.hpp Message.hpp
 HEADERS += HTMLController.hpp CGIController.hpp strings.hpp
 HEADERS += HTTPParser.hpp ABodyParser.hpp URLEncodedParser.hpp
 HEADERS += FormDataParser.hpp Body.hpp ConfigParser.hpp ConfigSpec.hpp
-HEADERS += definitions.hpp
+HEADERS += HTTPConstants.hpp HTTPException.hpp
 
 SOURCES := main.cpp Server.cpp EventListener.cpp Connection.cpp
 SOURCES += HTTPRequest.cpp HTTPResponse.cpp Message.cpp
 SOURCES += HTMLController.cpp CGIController.cpp strings.cpp
 SOURCES += HTTPParser.cpp ABodyParser.cpp URLEncodedParser.cpp
 SOURCES += FormDataParser.cpp Body.cpp ConfigParser.cpp ConfigSpec.cpp
+SOURCES += HTTPConstants.cpp HTTPException.cpp
 
 OBJS     := $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
 CXXFLAGS := -Wall -Werror -Wextra -std=c++98 -g $(addprefix -I,$(DIRS))

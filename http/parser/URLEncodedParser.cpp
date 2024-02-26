@@ -5,8 +5,8 @@
 
 bool isURLHexEncoded(const std::string& str, size_t i);
 
-URLEncodedParser::URLEncodedParser(std::string& raw, Message& msg)
-    : ABodyParser(raw, msg)
+URLEncodedParser::URLEncodedParser(std::string& raw, Message& msg, size_t maxSize)
+    : ABodyParser(raw, msg, maxSize)
 {
 }
 

@@ -6,7 +6,7 @@
 class URLEncodedParser : public ABodyParser
 {
 public:
-    URLEncodedParser(std::string& raw, Message& msg);
+    URLEncodedParser(std::string& raw, Message& msg, size_t maxSize);
     Body* createBody();
     static std::string decode(const std::string& str);
 };

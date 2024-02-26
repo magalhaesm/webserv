@@ -1,10 +1,7 @@
 #include <sstream>
 
-#include "definitions.hpp"
 #include "Connection.hpp"
 #include "HTTPResponse.hpp"
-
-const std::string& httpStatusCode(int code);
 
 HTTPResponse::HTTPResponse()
 {
@@ -68,23 +65,4 @@ const std::string& HTTPResponse::HTTPResponse::toString()
 bool HTTPResponse::isKeepAlive()
 {
     return getHeader("Connection") != "close";
-}
-
-const std::string& httpStatusCode(int code)
-{
-    static std::map<int, std::string> status;
-
-    status[100] = "Continue";
-    status[200] = "OK";
-    status[201] = "Created";
-    status[301] = "Moved Permanently";
-    status[400] = "Bad Request";
-    status[404] = "Not Found";
-    status[405] = "Method not allowed";
-    status[500] = "Internal Server Error";
-    status[501] = "Not Implemented";
-    status[503] = "Service Unavailable";
-    status[505] = "HTTP Version Not Supported";
-
-    return status[code];
 }

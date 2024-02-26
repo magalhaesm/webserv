@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "definitions.hpp"
+#include "HTTPConstants.hpp"
 
 class HTTPResponse
 {

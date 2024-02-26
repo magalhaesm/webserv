@@ -8,7 +8,7 @@
 class FormDataParser : public ABodyParser
 {
 public:
-    FormDataParser(std::string& raw, Message& msg);
+    FormDataParser(std::string& raw, Message& msg, size_t maxSize);
     Body* createBody();
 
 private:

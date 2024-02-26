@@ -1,5 +1,5 @@
-#ifndef DEFINITIONS_HPP
-#define DEFINITIONS_HPP
+#ifndef HTTP_CONTANTS_HPP
+#define HTTP_CONTANTS_HPP
 
 #include <map>
 #include <string>
@@ -48,4 +48,6 @@ enum BodyType
     FormData,
 };
 
-#endif // !DEFINITIONS_HPP
+const std::string& httpStatusCode(int code);
+
+#endif // !HTTP_CONTANTS_HPP
