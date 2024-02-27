@@ -15,10 +15,10 @@ public:
     const std::string& get(const std::string& key);
 
 private:
-    BodyType m_type;
-    BodyContent m_content;
+    BodyType _type;
+    BodyContent _content;
 
-    std::string m_empty;
+    std::string _empty;
 };
 
 #endif // !BODY_HPP

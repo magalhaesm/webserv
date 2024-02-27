@@ -22,10 +22,10 @@ public:
     bool isKeepAlive();
 
 private:
-    int m_statusCode;
-    Headers m_headers;
-    std::string m_body;
-    std::string m_text;
+    int _statusCode;
+    Headers _headers;
+    std::string _body;
+    std::string _text;
 
     const std::string m_empty;
 };

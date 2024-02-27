@@ -24,14 +24,14 @@ public:
     void setPersistent(bool persistent);
 
 private:
-    int m_clientSocket;
-    Server* m_server;
-    EventListener* m_listener;
-    std::time_t m_lastActivityTime;
-    bool m_persistent;
-    std::string m_raw;
-    Message m_msg;
-    int m_maxBodySize;
+    int _clientSocket;
+    Server* _server;
+    EventListener* _listener;
+    std::time_t _lastActivityTime;
+    bool _persistent;
+    std::string _raw;
+    Message _msg;
+    int _maxBodySize;
 
     void send(const std::string& response);
     void processRequest();

@@ -14,15 +14,15 @@ public:
     virtual Body* createBody() = 0;
 
 protected:
-    std::string& m_raw;
-    Message& m_msg;
-    BodyContent m_content;
-    size_t m_size;
-    size_t m_maxSize;
+    std::string& _raw;
+    Message& _msg;
+    BodyContent _content;
+    size_t _size;
+    size_t _maxSize;
 
 private:
     typedef bool (*TransferMethod)(std::string&, size_t, size_t);
-    TransferMethod m_stopReading;
+    TransferMethod _stopReading;
 
     void setStopReadingMethod(Message& msg);
 };

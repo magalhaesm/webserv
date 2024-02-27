@@ -12,10 +12,10 @@ bool findFinalChunk(std::string& raw, size_t size, size_t maxSize);
 bool readContentLength(std::string& raw, size_t size, size_t maxSize);
 
 ABodyParser::ABodyParser(std::string& raw, Message& msg, size_t maxSize)
-    : m_raw(raw)
-    , m_msg(msg)
-    , m_size(msg.bodySize)
-    , m_maxSize(maxSize)
+    : _raw(raw)
+    , _msg(msg)
+    , _size(msg.bodySize)
+    , _maxSize(maxSize)
 {
     setStopReadingMethod(msg);
 }
@@ -28,12 +28,12 @@ bool ABodyParser::needsMoreContent()
 {
     try
     {
-        return m_stopReading(m_raw, m_size, m_maxSize);
+        return _stopReading(_raw, _size, _maxSize);
     }
     catch (const HTTPException& err)
     {
-        m_msg.error = err.statusCode();
-        m_msg.state = FINISH;
+        _msg.error = err.statusCode();
+        _msg.state = FINISH;
     }
     return false;
 }
@@ -43,10 +43,10 @@ inline void ABodyParser::setStopReadingMethod(Message& msg)
     Headers::const_iterator it = msg.headers.find("transfer-encoding");
     if (it != msg.headers.end() && it->second.find("chunked") != std::string::npos)
     {
-        m_stopReading = &findFinalChunk;
+        _stopReading = &findFinalChunk;
         return;
     }
-    m_stopReading = &readContentLength;
+    _stopReading = &readContentLength;
 }
 
 bool findFinalChunk(std::string& raw, size_t, size_t maxSize)

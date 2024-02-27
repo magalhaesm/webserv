@@ -13,28 +13,28 @@ HTTPResponse::~HTTPResponse()
 
 void HTTPResponse::setStatus(int status)
 {
-    m_statusCode = status;
+    _statusCode = status;
 }
 
 void HTTPResponse::setHeader(const std::string& field, const std::string& value)
 {
-    m_headers[field] = value;
+    _headers[field] = value;
 }
 
 void HTTPResponse::setBody(const std::string& body)
 {
-    m_body = body;
+    _body = body;
 }
 
 int HTTPResponse::getStatus()
 {
-    return m_statusCode;
+    return _statusCode;
 }
 
 const std::string& HTTPResponse::getHeader(const std::string& field)
 {
-    Headers::const_iterator it = m_headers.find(field);
-    if (it != m_headers.end())
+    Headers::const_iterator it = _headers.find(field);
+    if (it != _headers.end())
     {
         return it->second;
     }
@@ -43,23 +43,23 @@ const std::string& HTTPResponse::getHeader(const std::string& field)
 
 const std::string& HTTPResponse::HTTPResponse::toString()
 {
-    if (m_text.empty())
+    if (_text.empty())
     {
         std::ostringstream oss;
 
-        oss << "HTTP/1.1 " << m_statusCode << " ";
-        oss << httpStatusCode(m_statusCode) << CRLF;
+        oss << "HTTP/1.1 " << _statusCode << " ";
+        oss << httpStatusCode(_statusCode) << CRLF;
 
         Headers::const_iterator it;
-        for (it = m_headers.begin(); it != m_headers.end(); ++it)
+        for (it = _headers.begin(); it != _headers.end(); ++it)
         {
             oss << it->first << ": " << it->second << CRLF;
         }
 
-        oss << CRLF << m_body;
-        m_text = oss.str();
+        oss << CRLF << _body;
+        _text = oss.str();
     }
-    return m_text;
+    return _text;
 }
 
 bool HTTPResponse::isKeepAlive()

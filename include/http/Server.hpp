@@ -26,12 +26,12 @@ public:
     int getClientMaxBodySize() const;
 
 private:
-    const ConfigSpec& m_cfg;
-    std::string m_name;
-    int m_port;
-    int m_socket;
-    ARequestHandler* m_handler;
-    std::vector<ARequestHandler*> m_handlers;
+    const ConfigSpec& _cfg;
+    std::string _name;
+    int _port;
+    int _socket;
+    ARequestHandler* _handler;
+    std::vector<ARequestHandler*> _handlers;
     HTMLController htmlController;
     CGIController cgiController;
 

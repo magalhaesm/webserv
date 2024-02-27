@@ -19,8 +19,8 @@ public:
     const std::string& getHeader(const std::string& field) const;
 
 private:
-    Message& m_msg;
-    const std::string m_empty;
+    Message& _msg;
+    const std::string _empty;
 };
 
 std::ostream& operator<<(std::ostream& os, const HTTPRequest& request);

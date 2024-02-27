@@ -16,20 +16,20 @@ const int BACKLOG = 10;
 static void fatalError(const std::string& errMsg);
 
 Server::Server(const ConfigSpec& cfg)
-    : m_cfg(cfg)
-    , m_name(cfg.getServerName())
-    , m_port(cfg.getPort())
+    : _cfg(cfg)
+    , _name(cfg.getServerName())
+    , _port(cfg.getPort())
 {
-    m_socket = createSocket();
+    _socket = createSocket();
 }
 
 Server::~Server()
 {
-    for (size_t idx = 0; idx < m_handlers.size(); ++idx)
+    for (size_t idx = 0; idx < _handlers.size(); ++idx)
     {
-        delete m_handlers[idx];
+        delete _handlers[idx];
     }
-    close(m_socket);
+    close(_socket);
 }
 
 void Server::handleRequest(const HTTPRequest& req, HTTPResponse& res)
@@ -39,7 +39,7 @@ void Server::handleRequest(const HTTPRequest& req, HTTPResponse& res)
 
 void Server::listen()
 {
-    if (::listen(m_socket, BACKLOG) == -1)
+    if (::listen(_socket, BACKLOG) == -1)
     {
         fatalError("Error while listening");
     }
@@ -47,17 +47,17 @@ void Server::listen()
 
 int Server::accept()
 {
-    return ::accept(m_socket, NULL, NULL);
+    return ::accept(_socket, NULL, NULL);
 }
 
 int Server::getSocket() const
 {
-    return m_socket;
+    return _socket;
 }
 
 int Server::getClientMaxBodySize() const
 {
-    return m_cfg.getClientBodySize();
+    return _cfg.getClientBodySize();
 }
 
 int Server::createSocket()
@@ -70,7 +70,7 @@ int Server::createSocket()
 
     struct sockaddr_in addr = {};
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(m_port);
+    addr.sin_port = htons(_port);
     addr.sin_addr.s_addr = INADDR_ANY;
 
     int yes = 1;

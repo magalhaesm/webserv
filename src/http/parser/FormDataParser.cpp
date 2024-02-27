@@ -16,13 +16,13 @@ FormDataParser::FormDataParser(std::string& raw, Message& msg, size_t maxSize)
 Body* FormDataParser::createBody()
 {
     parseRawBody();
-    return new Body(FormData, m_content);
+    return new Body(FormData, _content);
 }
 
 inline void FormDataParser::setBoundary()
 {
-    Headers::const_iterator it = m_msg.headers.find("content-type");
-    if (it != m_msg.headers.end())
+    Headers::const_iterator it = _msg.headers.find("content-type");
+    if (it != _msg.headers.end())
     {
         size_t boundaryPos = it->second.find("boundary");
         if (boundaryPos != std::string::npos)
@@ -34,18 +34,18 @@ inline void FormDataParser::setBoundary()
                 end = it->second.find(CRLF, start);
             }
             std::string boundary = it->second.substr(start, end - start);
-            m_boundaryStart = "--" + boundary;
-            m_boundaryEnd = m_boundaryStart + "--";
+            _boundaryStart = "--" + boundary;
+            _boundaryEnd = _boundaryStart + "--";
         }
     }
 }
 
 inline void FormDataParser::parseRawBody()
 {
-    size_t end = m_raw.find(DELIMITER);
+    size_t end = _raw.find(DELIMITER);
     if (end != std::string::npos)
     {
-        std::string metaData = m_raw.substr(0, end);
+        std::string metaData = _raw.substr(0, end);
         ft::Strings header = ft::split(metaData, CRLF);
         ft::Strings disposition = ft::split(header[1], "; ");
 
@@ -54,16 +54,16 @@ inline void FormDataParser::parseRawBody()
         std::string filename = ft::split(disposition[2], "=", 1);
         removeOuterQuotes(filename);
 
-        m_content[name] = filename;
+        _content[name] = filename;
 
-        file.open(filename.c_str());
-        m_raw.erase(0, end + DELIMITER.length());
+        _file.open(filename.c_str());
+        _raw.erase(0, end + DELIMITER.length());
     }
-    end = m_raw.find(CRLF + m_boundaryEnd);
+    end = _raw.find(CRLF + _boundaryEnd);
     if (end != std::string::npos)
     {
-        file << m_raw.substr(0, end);
-        file.close();
+        _file << _raw.substr(0, end);
+        _file.close();
     }
 }
 

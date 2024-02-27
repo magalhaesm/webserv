@@ -12,8 +12,8 @@ URLEncodedParser::URLEncodedParser(std::string& raw, Message& msg, size_t maxSiz
 
 Body* URLEncodedParser::createBody()
 {
-    m_content["content"] = decode(m_raw);
-    return new Body(URLEncoded, m_content);
+    _content["content"] = decode(_raw);
+    return new Body(URLEncoded, _content);
 }
 
 std::string URLEncodedParser::decode(const std::string& str)

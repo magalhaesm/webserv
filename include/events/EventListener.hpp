@@ -48,10 +48,10 @@ private:
      */
     static const int MAX_EVENTS = 10;
 
-    int m_epfd;                              /** File descriptor for epoll. */
-    struct epoll_event m_events[MAX_EVENTS]; /** Array to store epoll events. */
-    std::map<int, Server*> m_servers;        /** Map to store server instances. */
-    std::map<int, Connection*> m_active;     /** Map to store active connections. */
+    int _epfd;                              /** File descriptor for epoll. */
+    struct epoll_event _events[MAX_EVENTS]; /** Array to store epoll events. */
+    std::map<int, Server*> _servers;        /** Map to store server instances. */
+    std::map<int, Connection*> _active;     /** Map to store active connections. */
 
     /**
      * @brief Starts the subscribed servers.

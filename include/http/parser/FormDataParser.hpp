@@ -12,10 +12,10 @@ public:
     Body* createBody();
 
 private:
-    std::string m_boundaryStart;
-    std::string m_boundaryEnd;
+    std::string _boundaryStart;
+    std::string _boundaryEnd;
     static const size_t BOUNDARY_LENGTH;
-    std::ofstream file;
+    std::ofstream _file;
 
     void setBoundary();
     void parseRawBody();
