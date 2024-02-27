@@ -83,3 +83,19 @@ ft::Strings ft::strip(const Strings& content)
     }
     return result;
 }
+
+void ft::replace(std::string& text, const std::string& search, const std::string& replace)
+{
+    size_t position = 0;
+    const size_t searchLength = search.length();
+    const size_t replaceLength = replace.length();
+
+    position = text.find(search, position);
+    while (position != std::string::npos)
+    {
+        text.erase(position, searchLength);
+        text.insert(position, replace);
+        position += replaceLength;
+        position = text.find(search, position);
+    }
+}

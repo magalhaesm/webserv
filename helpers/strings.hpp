@@ -15,5 +15,7 @@ namespace ft
     bool startsWith(const std::string& input, const std::string& prefix);
     std::string itoa(int n);
     Strings strip(const Strings& content);
+    void replace(std::string& text, const std::string& search, const std::string& replace);
+
 }
 #endif // !STRING_HPP
