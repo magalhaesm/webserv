@@ -9,7 +9,7 @@ DIRS     = http http/parser events config helpers
 SRC_DIRS = $(addprefix $(SRC_DIR)/, $(DIRS))
 INC_DIRS = $(addprefix $(INC_DIR)/, $(DIRS))
 OBJS     = $(shell find $(OBJ_DIR) -name '*.o')
-OBJS     = $(filter-out $(OBJ_DIR)/main.o, $(OBJS))
+OBJS     := $(filter-out $(OBJ_DIR)/main.o, $(OBJS))
 
 CXXFLAGS = $(addprefix -I ,$(INC_DIRS))
 
