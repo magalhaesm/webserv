@@ -1,14 +1,17 @@
-TESTS     := parser
-TEST_LIB  := doctest.h
+TESTS    = parser
+TEST_LIB = doctest.h
 
-SRC_DIR   := ..
-OBJ_DIR   := ../obj
-SRC_DIRS  := http http/parser events config helpers
-SRC_DIRS  := $(addprefix $(SRC_DIR)/, $(SRC_DIRS))
-OBJS      := $(shell find $(OBJ_DIR) -name '*.o')
-OBJS      := $(filter-out $(OBJ_DIR)/main.o, $(OBJS))
+SRC_DIR  = ../src
+INC_DIR  = ../include
+OBJ_DIR  = ../obj
+DIRS     = http http/parser events config helpers
 
-CXXFLAGS  := $(addprefix -I ,$(SRC_DIRS))
+SRC_DIRS = $(addprefix $(SRC_DIR)/, $(DIRS))
+INC_DIRS = $(addprefix $(INC_DIR)/, $(DIRS))
+OBJS     = $(shell find $(OBJ_DIR) -name '*.o')
+OBJS     = $(filter-out $(OBJ_DIR)/main.o, $(OBJS))
+
+CXXFLAGS = $(addprefix -I ,$(INC_DIRS))
 
 # NOTE: To include successful assertions in the output
 # $(CXX) $(CXXFLAGS) $^ -o $@ && ./$@ -s -ni

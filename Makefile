@@ -5,11 +5,15 @@ CYAN  := \033[1;36m
 CHECK := \342\234\224
 LOG   := printf "[$(CYAN)$(CHECK)$(RESET)] %s\n"
 
-OBJ_DIR := obj
-DIRS    := http http/parser events config controllers helpers handlers
+OBJ_DIR  := obj
+DIRS     := http http/parser events config handlers helpers controllers
+SRC_DIRS := $(addprefix src/, $(DIRS))
+SRC_DIRS += src
+INC_DIRS := $(addprefix include/, $(DIRS))
+INC_DIRS += include
 
-vpath %.hpp $(DIRS)
-vpath %.cpp $(DIRS)
+vpath %.hpp $(INC_DIRS)
+vpath %.cpp $(SRC_DIRS)
 
 HEADERS := Server.hpp EventListener.hpp Connection.hpp
 HEADERS += HTTPRequest.hpp HTTPResponse.hpp Message.hpp
@@ -26,7 +30,7 @@ SOURCES += FormDataParser.cpp Body.cpp ConfigParser.cpp ConfigSpec.cpp
 SOURCES += HTTPConstants.cpp HTTPException.cpp
 
 OBJS     := $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
-CXXFLAGS := -Wall -Werror -Wextra -std=c++98 -g $(addprefix -I,$(DIRS))
+CXXFLAGS := -Wall -Werror -Wextra -std=c++98 -g $(addprefix -I ,$(INC_DIRS))
 
 all: $(NAME)
 
@@ -38,7 +42,7 @@ $(NAME): $(OBJS)
 	@$(LOG) "Building $@"
 	@$(CXX) $^ -o $@
 
-$(OBJ_DIR)/%.o: %.cpp $(HEADERS) | $(OBJ_DIR)
+$(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)
 	@$(LOG) "Compiling $(notdir $<)"
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
