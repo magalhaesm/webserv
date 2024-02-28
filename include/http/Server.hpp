@@ -19,7 +19,7 @@ public:
     Server(const ConfigSpec& cfg);
     ~Server();
 
-    void handleRequest(const HTTPRequest& req, HTTPResponse& res);
+    void handleRequest(HTTPRequest& req, HTTPResponse& res);
     void listen();
     int accept();
     int getSocket() const;
@@ -30,12 +30,13 @@ private:
     std::string _name;
     int _port;
     int _socket;
-    ARequestHandler* _handler;
+    ARequestHandler* _initHandler;
     std::vector<ARequestHandler*> _handlers;
     HTMLController htmlController;
     CGIController cgiController;
 
     int createSocket();
+    void setupHandlers();
 };
 
 #endif // !SERVER_HPP

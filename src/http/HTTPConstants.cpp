@@ -1,6 +1,6 @@
 #include "HTTPConstants.hpp"
 
-const std::string& httpStatusCode(int code)
+const std::string& statusText(int code)
 {
     static std::map<int, std::string> status;
 

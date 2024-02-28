@@ -8,7 +8,7 @@
 class ConfigSpec
 {
 public:
-    ConfigSpec(Directives& directives, const ConfigSpec* parent = NULL);
+    ConfigSpec(Directives* directives, const ConfigSpec* parent = NULL);
     ConfigSpec(const ConfigSpec& src);
     ~ConfigSpec();
     ConfigSpec& operator=(const ConfigSpec& rhs);
@@ -16,7 +16,7 @@ public:
     int getPort() const;
     const std::string& getServerName() const;
     const std::string& getIndex() const;
-    const std::string& getRoot() const;
+    const std::string getRoot() const;
     bool hasAutoindex() const;
     bool hasErrorPage(int error) const;
     const std::string& getErrorPage(int error) const;
@@ -27,9 +27,10 @@ public:
     bool hasLocation(const std::string& location) const;
     ConfigSpec getLocation(const std::string& location) const;
     int getClientBodySize() const;
+    bool allow(const std::string& method) const;
 
 private:
-    Directives& _directives;
+    Directives* _directives;
     const ConfigSpec* _parent;
     std::string _empty;
 };

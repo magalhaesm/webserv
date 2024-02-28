@@ -2,7 +2,7 @@
 #include "HTTPException.hpp"
 
 HTTPException::HTTPException(int status)
-    : std::runtime_error(httpStatusCode(status))
+    : std::runtime_error(statusText(status))
     , _status(status)
 {
 }

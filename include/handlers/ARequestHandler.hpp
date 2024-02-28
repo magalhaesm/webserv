@@ -8,13 +8,19 @@
 class ARequestHandler
 {
 public:
-    ARequestHandler(ARequestHandler* next);
+    ARequestHandler();
     virtual ~ARequestHandler();
 
-    virtual void handle(const HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg) = 0;
+    virtual void handle(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg) = 0;
+    void setNext(ARequestHandler* next);
 
 protected:
     ARequestHandler* _next;
+
+    void sendErrorPage(int code, HTTPResponse& res, const ConfigSpec& cfg);
+
+private:
+    void sendDefaultErrorPage(int code, HTTPResponse& res);
 };
 
 #endif // !AREQUEST_HANDLER_HPP

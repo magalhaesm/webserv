@@ -14,9 +14,12 @@ public:
     ~HTTPRequest();
 
     Method method() const;
+    const std::string methodText() const;
     const std::string& path() const;
+    void setPath(const std::string& path) const;
     const std::string& query() const;
     const std::string& getHeader(const std::string& field) const;
+    int error() const;
 
 private:
     Message& _msg;

@@ -1,5 +1,7 @@
+#include <fstream>
 #include <sstream>
 
+#include "strings.hpp"
 #include "Connection.hpp"
 #include "HTTPResponse.hpp"
 
@@ -21,9 +23,24 @@ void HTTPResponse::setHeader(const std::string& field, const std::string& value)
     _headers[field] = value;
 }
 
+void HTTPResponse::setHeader(const std::string& field, int value)
+{
+    _headers[field] = ft::itoa(value);
+}
+
 void HTTPResponse::setBody(const std::string& body)
 {
     _body = body;
+    setHeader("Content-Length", _body.size());
+}
+
+void HTTPResponse::setBody(const std::ifstream& body)
+{
+    std::stringstream buffer;
+
+    buffer << body.rdbuf();
+    _body = buffer.str();
+    setHeader("Content-Length", _body.size());
 }
 
 int HTTPResponse::getStatus()
@@ -48,7 +65,7 @@ const std::string& HTTPResponse::HTTPResponse::toString()
         std::ostringstream oss;
 
         oss << "HTTP/1.1 " << _statusCode << " ";
-        oss << httpStatusCode(_statusCode) << CRLF;
+        oss << statusText(_statusCode) << CRLF;
 
         Headers::const_iterator it;
         for (it = _headers.begin(); it != _headers.end(); ++it)

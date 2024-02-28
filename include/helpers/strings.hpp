@@ -18,4 +18,5 @@ namespace ft
     void replace(std::string& text, const std::string& search, const std::string& replace);
 
 }
+
 #endif // !STRING_HPP

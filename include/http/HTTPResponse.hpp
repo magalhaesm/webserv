@@ -13,11 +13,13 @@ public:
 
     void setStatus(int status);
     void setHeader(const std::string& field, const std::string& value);
+    void setHeader(const std::string& field, int value);
     void setBody(const std::string& body);
+    void setBody(const std::ifstream& body);
 
     int getStatus();
-
     const std::string& getHeader(const std::string& field);
+
     const std::string& toString();
     bool isKeepAlive();
 

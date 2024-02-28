@@ -35,7 +35,7 @@ const ConfigSpecList& ConfigParser::getSpecs()
     {
         for (size_t idx = 0; idx < _directives.size(); ++idx)
         {
-            _specs.push_back(ConfigSpec(_directives[idx]));
+            _specs.push_back(ConfigSpec(&_directives[idx]));
         }
     }
     return _specs;

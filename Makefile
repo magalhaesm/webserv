@@ -21,6 +21,8 @@ HEADERS += HTMLController.hpp CGIController.hpp strings.hpp
 HEADERS += HTTPParser.hpp ABodyParser.hpp URLEncodedParser.hpp
 HEADERS += FormDataParser.hpp Body.hpp ConfigParser.hpp ConfigSpec.hpp
 HEADERS += HTTPConstants.hpp HTTPException.hpp
+HEADERS += ARequestHandler.hpp LocationHandler.hpp StaticHandler.hpp
+HEADERS += DynamicHandler.hpp filesystem.hpp
 
 SOURCES := main.cpp Server.cpp EventListener.cpp Connection.cpp
 SOURCES += HTTPRequest.cpp HTTPResponse.cpp Message.cpp
@@ -28,6 +30,8 @@ SOURCES += HTMLController.cpp CGIController.cpp strings.cpp
 SOURCES += HTTPParser.cpp ABodyParser.cpp URLEncodedParser.cpp
 SOURCES += FormDataParser.cpp Body.cpp ConfigParser.cpp ConfigSpec.cpp
 SOURCES += HTTPConstants.cpp HTTPException.cpp
+SOURCES += ARequestHandler.cpp LocationHandler.cpp StaticHandler.cpp
+SOURCES += DynamicHandler.cpp filesystem.cpp
 
 OBJS     := $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
 CXXFLAGS := -Wall -Werror -Wextra -std=c++98 -g $(addprefix -I ,$(INC_DIRS))
@@ -42,7 +46,7 @@ $(NAME): $(OBJS)
 	@$(LOG) "Building $@"
 	@$(CXX) $^ -o $@
 
-$(OBJ_DIR)/%.o: %.cpp | $(OBJ_DIR)
+$(OBJ_DIR)/%.o: %.cpp $(HEADERS) | $(OBJ_DIR)
 	@$(LOG) "Compiling $(notdir $<)"
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
 

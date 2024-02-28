@@ -25,9 +25,30 @@ Method HTTPRequest::method() const
     return _msg.method;
 }
 
+const std::string HTTPRequest::methodText() const
+{
+    switch (_msg.method)
+    {
+    case GET:
+        return "GET";
+    case POST:
+        return "POST";
+    case DELETE:
+        return "DELETE";
+    case UNKNOWN:
+        return "UNKNOWN";
+    }
+    return _empty;
+}
+
 const std::string& HTTPRequest::path() const
 {
     return _msg.path;
+}
+
+void HTTPRequest::setPath(const std::string& path) const
+{
+    _msg.path = path;
 }
 
 const std::string& HTTPRequest::query() const
@@ -43,4 +64,9 @@ const std::string& HTTPRequest::getHeader(const std::string& field) const
         return it->second;
     }
     return _empty;
+}
+
+int HTTPRequest::error() const
+{
+    return _msg.error;
 }

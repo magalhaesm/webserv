@@ -9,9 +9,14 @@
 #include <sys/socket.h>
 
 #include "Server.hpp"
+#include "AccessControlHandler.hpp"
+#include "ConfigSpec.hpp"
 #include "Connection.hpp"
+#include "DynamicHandler.hpp"
+#include "StaticHandler.hpp"
+#include "LocationHandler.hpp"
 
-const int BACKLOG = 10;
+const int BACKLOG = SOMAXCONN;
 
 static void fatalError(const std::string& errMsg);
 
@@ -21,6 +26,7 @@ Server::Server(const ConfigSpec& cfg)
     , _port(cfg.getPort())
 {
     _socket = createSocket();
+    setupHandlers();
 }
 
 Server::~Server()
@@ -32,9 +38,9 @@ Server::~Server()
     close(_socket);
 }
 
-void Server::handleRequest(const HTTPRequest& req, HTTPResponse& res)
+void Server::handleRequest(HTTPRequest& req, HTTPResponse& res)
 {
-    htmlController.handleHTMLRequest(req, res);
+    _initHandler->handle(req, res, _cfg);
 }
 
 void Server::listen()
@@ -81,6 +87,26 @@ int Server::createSocket()
     }
 
     return fd;
+}
+
+void Server::setupHandlers()
+{
+    ARequestHandler* location = new LocationHandler();
+    _handlers.push_back(location);
+
+    ARequestHandler* access = new AccessControlHandler();
+    _handlers.push_back(access);
+
+    ARequestHandler* dynamicContent = new DynamicHandler();
+    _handlers.push_back(dynamicContent);
+
+    ARequestHandler* staticContent = new StaticHandler();
+    _handlers.push_back(staticContent);
+
+    _initHandler = location;
+    location->setNext(access);
+    access->setNext(dynamicContent);
+    dynamicContent->setNext(staticContent);
 }
 
 void fatalError(const std::string& errMsg)

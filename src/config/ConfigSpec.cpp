@@ -1,10 +1,17 @@
 #include "ConfigSpec.hpp"
 #include "Directives.hpp"
 
-ConfigSpec::ConfigSpec(Directives& directives, const ConfigSpec* parent)
+ConfigSpec::ConfigSpec(Directives* directives, const ConfigSpec* parent)
     : _directives(directives)
     , _parent(parent)
 {
+    if (_parent)
+    {
+        _directives->root = _parent->_directives->root;
+        _directives->listen = _parent->_directives->listen;
+        _directives->server_name = _parent->_directives->server_name;
+        _directives->index = _parent->_directives->index;
+    }
 }
 
 ConfigSpec::ConfigSpec(const ConfigSpec& src)
@@ -28,78 +35,79 @@ ConfigSpec& ConfigSpec::operator=(const ConfigSpec& rhs)
 
 int ConfigSpec::getPort() const
 {
-    if (!_directives.listen)
-    {
-        return _parent->_directives.listen;
-    }
-    return _directives.listen;
+    return _directives->listen;
 }
 
 const std::string& ConfigSpec::getServerName() const
 {
-    if (_directives.server_name.empty())
-    {
-        return _parent->_directives.server_name;
-    }
-    return _directives.server_name;
+    return _directives->server_name;
 }
 
 const std::string& ConfigSpec::getIndex() const
 {
-    return _directives.index;
+    return _directives->index;
 }
 
-const std::string& ConfigSpec::getRoot() const
+const std::string ConfigSpec::getRoot() const
 {
-    return _directives.root;
+    if (_directives->root.empty())
+    {
+        return "./";
+    }
+    return _directives->root + "/";
 }
 
 bool ConfigSpec::hasAutoindex() const
 {
-    return _directives.autoindex;
+    return _directives->autoindex;
 }
 
 bool ConfigSpec::hasErrorPage(int error) const
 {
-    return _directives.error_page.count(error);
+    return _directives->error_page.count(error);
 }
 
 const std::string& ConfigSpec::getErrorPage(int error) const
 {
-    return _directives.error_page.at(error);
+    return _directives->error_page.at(error);
 }
 
 bool ConfigSpec::hasCGI() const
 {
-    return !_directives.cgi.empty();
+    return !_directives->cgi.empty();
 }
 
 const std::string& ConfigSpec::getCGI() const
 {
-    return _directives.cgi;
+    return _directives->cgi;
 }
 
 bool ConfigSpec::hasRedirect() const
 {
-    return _directives.redirect.first && !_directives.redirect.second.empty();
+    return _directives->redirect.first && !_directives->redirect.second.empty();
 }
 
 const Redirect& ConfigSpec::getRedirect() const
 {
-    return _directives.redirect;
+    return _directives->redirect;
 }
 
 bool ConfigSpec::hasLocation(const std::string& location) const
 {
-    return _directives.locations.count(location);
+    return _directives->locations.count(location);
 }
 
 ConfigSpec ConfigSpec::getLocation(const std::string& location) const
 {
-    return ConfigSpec(_directives.locations.at(location), this);
+    return ConfigSpec(&_directives->locations.at(location), this);
 }
 
 int ConfigSpec::getClientBodySize() const
 {
-    return _directives.client_max_body_size;
+    return _directives->client_max_body_size;
+}
+
+bool ConfigSpec::allow(const std::string& method) const
+{
+    return _directives->limit_except.empty() || _directives->limit_except.count(method);
 }
