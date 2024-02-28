@@ -6,7 +6,7 @@ DynamicHandler::DynamicHandler()
 
 void DynamicHandler::handle(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg)
 {
-    if (!cfg.hasCGI() && _next)
+    if (!cfg.hasCGI())
     {
         _next->handle(req, res, cfg);
         return;

@@ -9,12 +9,12 @@
 #include <sys/socket.h>
 
 #include "Server.hpp"
-#include "AccessControlHandler.hpp"
 #include "ConfigSpec.hpp"
 #include "Connection.hpp"
-#include "DynamicHandler.hpp"
 #include "StaticHandler.hpp"
 #include "LocationHandler.hpp"
+#include "DynamicHandler.hpp"
+#include "AccessControlHandler.hpp"
 
 const int BACKLOG = SOMAXCONN;
 

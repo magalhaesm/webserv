@@ -10,7 +10,7 @@ const std::string& statusText(int code)
     status[301] = "Moved Permanently";
     status[400] = "Bad Request";
     status[404] = "Not Found";
-    status[405] = "Method not allowed";
+    status[405] = "Method Not Allowed";
     status[413] = "Request Entity Too Large";
     status[500] = "Internal Server Error";
     status[501] = "Not Implemented";
