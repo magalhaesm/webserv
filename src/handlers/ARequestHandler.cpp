@@ -17,7 +17,7 @@ void ARequestHandler::sendErrorPage(int code, HTTPResponse& res, const ConfigSpe
 {
     if (cfg.hasErrorPage(code))
     {
-        std::string pageName = cfg.getErrorPage(code);
+        std::string pageName = cfg.getRoot() + cfg.getErrorPage(code);
         std::ifstream page(pageName.c_str());
         if (page)
         {
