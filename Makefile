@@ -7,6 +7,7 @@ LOG   := printf "[$(CYAN)$(CHECK)$(RESET)] %s\n"
 
 OBJ_DIR  := obj
 DIRS     := http http/parser events config handlers helpers controllers
+DIRS     += logger
 SRC_DIRS := $(addprefix src/, $(DIRS))
 SRC_DIRS += src
 INC_DIRS := $(addprefix include/, $(DIRS))
@@ -23,6 +24,7 @@ HEADERS += FormDataParser.hpp Body.hpp ConfigParser.hpp ConfigSpec.hpp
 HEADERS += HTTPConstants.hpp HTTPException.hpp
 HEADERS += ARequestHandler.hpp LocationHandler.hpp StaticHandler.hpp
 HEADERS += DynamicHandler.hpp AccessControlHandler.hpp filesystem.hpp
+HEADERS += Logger.hpp
 
 SOURCES := main.cpp Server.cpp EventListener.cpp Connection.cpp
 SOURCES += HTTPRequest.cpp HTTPResponse.cpp Message.cpp
@@ -32,6 +34,7 @@ SOURCES += FormDataParser.cpp Body.cpp ConfigParser.cpp ConfigSpec.cpp
 SOURCES += HTTPConstants.cpp HTTPException.cpp
 SOURCES += ARequestHandler.cpp LocationHandler.cpp StaticHandler.cpp
 SOURCES += DynamicHandler.cpp AccessControlHandler.cpp filesystem.cpp
+SOURCES += Logger.cpp
 
 OBJS     := $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
 CXXFLAGS := -Wall -Werror -Wextra -std=c++98 -g $(addprefix -I ,$(INC_DIRS))
@@ -39,7 +42,7 @@ CXXFLAGS := -Wall -Werror -Wextra -std=c++98 -g $(addprefix -I ,$(INC_DIRS))
 all: $(NAME)
 
 run: $(NAME)
-	@ echo "--> Running $@"
+	@ echo "--> Running $(NAME)"
 	@ ./$(NAME) server.conf
 
 $(NAME): $(OBJS)

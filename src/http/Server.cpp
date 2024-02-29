@@ -15,6 +15,7 @@
 #include "LocationHandler.hpp"
 #include "DynamicHandler.hpp"
 #include "AccessControlHandler.hpp"
+#include "Logger.hpp"
 
 const int BACKLOG = SOMAXCONN;
 
@@ -41,6 +42,7 @@ Server::~Server()
 void Server::handleRequest(HTTPRequest& req, HTTPResponse& res)
 {
     _initHandler->handle(req, res, _cfg);
+    Logger::log(req, res, _cfg);
 }
 
 void Server::listen()
