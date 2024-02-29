@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 #include "ConfigSpec.hpp"
 #include "Directives.hpp"
 
@@ -94,12 +96,28 @@ const Redirect& ConfigSpec::getRedirect() const
 
 bool ConfigSpec::hasLocation(const std::string& location) const
 {
-    return _directives->locations.count(location);
+    Locations::iterator it = _directives->locations.begin();
+    for (; it != _directives->locations.end(); ++it)
+    {
+        if (location.find(it->first) != std::string::npos)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 ConfigSpec ConfigSpec::getLocation(const std::string& location) const
 {
-    return ConfigSpec(&_directives->locations.at(location), this);
+    Locations::iterator it = _directives->locations.begin();
+    for (; it != _directives->locations.end(); ++it)
+    {
+        if (location.find(it->first) != std::string::npos)
+        {
+            return ConfigSpec(&it->second, this);
+        }
+    }
+    throw std::runtime_error("location not found");
 }
 
 int ConfigSpec::getClientBodySize() const
