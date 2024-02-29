@@ -3,7 +3,6 @@
 
 #include "Message.hpp"
 #include "ABodyParser.hpp"
-#include "HTTPException.hpp"
 
 const std::string FINAL_CHUNK = "0" + DELIMITER;
 
@@ -26,16 +25,12 @@ ABodyParser::~ABodyParser()
 
 bool ABodyParser::needsMoreContent()
 {
-    try
+    if (_maxSize > 0 && _raw.size() > _maxSize)
     {
-        return _stopReading(_raw, _size, _maxSize);
+        _msg.error = 413;
     }
-    catch (const HTTPException& err)
-    {
-        _msg.error = err.statusCode();
-        _msg.state = FINISH;
-    }
-    return false;
+
+    return _stopReading(_raw, _size, _maxSize);
 }
 
 inline void ABodyParser::setStopReadingMethod(Message& msg)
@@ -49,13 +44,8 @@ inline void ABodyParser::setStopReadingMethod(Message& msg)
     _stopReading = &readContentLength;
 }
 
-bool findFinalChunk(std::string& raw, size_t, size_t maxSize)
+bool findFinalChunk(std::string& raw, size_t, size_t)
 {
-    if (maxSize > 0 && raw.size() >= maxSize)
-    {
-        throw HTTPException(413);
-    }
-
     size_t lastChunk = raw.rfind(FINAL_CHUNK);
     if (lastChunk == std::string::npos)
     {
@@ -65,13 +55,9 @@ bool findFinalChunk(std::string& raw, size_t, size_t maxSize)
     return false;
 }
 
-bool readContentLength(std::string& raw, size_t size, size_t maxSize)
+// PERF: para descartar o excesso, preciso controlar quanto foi lido
+bool readContentLength(std::string& raw, size_t size, size_t)
 {
-    if (maxSize > 0 && size >= maxSize)
-    {
-        throw HTTPException(413);
-    }
-
     return raw.size() < size;
 }
 

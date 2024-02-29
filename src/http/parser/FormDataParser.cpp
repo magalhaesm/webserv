@@ -15,7 +15,10 @@ FormDataParser::FormDataParser(std::string& raw, Message& msg, size_t maxSize)
 
 Body* FormDataParser::createBody()
 {
-    parseRawBody();
+    if (!_msg.error)
+    {
+        parseRawBody();
+    }
     return new Body(FormData, _content);
 }
 
