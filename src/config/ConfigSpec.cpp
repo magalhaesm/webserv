@@ -12,7 +12,11 @@ ConfigSpec::ConfigSpec(Directives* directives, const ConfigSpec* parent)
         _directives->root = _parent->_directives->root;
         _directives->listen = _parent->_directives->listen;
         _directives->server_name = _parent->_directives->server_name;
-        _directives->index = _parent->_directives->index;
+    }
+
+    if (_directives->index.empty())
+    {
+        _directives->index = "index.html";
     }
 }
 
