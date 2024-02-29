@@ -1,4 +1,5 @@
 #include "AccessControlHandler.hpp"
+#include "strings.hpp"
 
 AccessControlHandler::AccessControlHandler()
 {
@@ -6,20 +7,16 @@ AccessControlHandler::AccessControlHandler()
 
 void AccessControlHandler::handle(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg)
 {
-    if (cfg.allow(req.methodText()) == false)
+    if (!cfg.allow(req.methodText()))
     {
         sendErrorPage(405, res, cfg);
         return;
     }
 
-    if (req.path() == "/")
-    {
-        req.setPath(cfg.getRoot() + cfg.getIndex());
-    }
-    else
-    {
-        req.setPath(cfg.getRoot() + req.path());
-    }
+    std::string filename = (req.path() == "/") ? cfg.getIndex() : req.path();
+    filename = cfg.getRoot() + filename;
+    ft::replace(filename, "//", "/");
+    req.setPath(filename);
 
     if (_next)
     {
