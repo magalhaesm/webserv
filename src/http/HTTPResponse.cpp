@@ -55,7 +55,7 @@ const std::string& HTTPResponse::getHeader(const std::string& field)
     {
         return it->second;
     }
-    return m_empty;
+    return _empty;
 }
 
 const std::string& HTTPResponse::HTTPResponse::toString()
@@ -77,9 +77,4 @@ const std::string& HTTPResponse::HTTPResponse::toString()
         _text = oss.str();
     }
     return _text;
-}
-
-bool HTTPResponse::isKeepAlive()
-{
-    return getHeader("Connection") != "close";
 }

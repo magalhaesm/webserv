@@ -13,7 +13,6 @@ Connection::Connection(EventListener* listener, Server* server)
     : _server(server)
     , _listener(listener)
     , _lastActivityTime(time(NULL))
-    , _persistent(true)
 {
     _clientSocket = server->accept();
     _maxBodySize = _server->getClientMaxBodySize();
@@ -63,7 +62,7 @@ bool Connection::write()
 
     if (_raw.empty())
     {
-        return _persistent ? true : this->close();
+        return true;
     }
     return false;
 }
@@ -73,7 +72,6 @@ inline void Connection::processRequest()
     HTTPRequest request(_msg);
     HTTPResponse response;
     _server->handleRequest(request, response);
-    this->setPersistent(response.isKeepAlive());
     this->send(response.toString());
 }
 
@@ -97,11 +95,6 @@ int Connection::getID() const
 std::time_t Connection::getLastActivityTime() const
 {
     return _lastActivityTime;
-}
-
-void Connection::setPersistent(bool persistent)
-{
-    _persistent = persistent;
 }
 
 void Connection::updateLastActivityTime()

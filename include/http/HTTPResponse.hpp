@@ -19,17 +19,14 @@ public:
 
     int getStatus();
     const std::string& getHeader(const std::string& field);
-
     const std::string& toString();
-    bool isKeepAlive();
 
 private:
     int _statusCode;
     Headers _headers;
     std::string _body;
     std::string _text;
-
-    const std::string m_empty;
+    const std::string _empty;
 };
 
 #endif // !HTTP_RESPONSE_HPP

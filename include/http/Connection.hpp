@@ -21,14 +21,12 @@ public:
     bool close();
     int getID() const;
     std::time_t getLastActivityTime() const;
-    void setPersistent(bool persistent);
 
 private:
     int _clientSocket;
     Server* _server;
     EventListener* _listener;
     std::time_t _lastActivityTime;
-    bool _persistent;
     std::string _raw;
     Message _msg;
     int _maxBodySize;
