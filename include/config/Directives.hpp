@@ -6,8 +6,8 @@
 #include <string>
 
 struct Directives;
-typedef std::map<std::string, Directives> Locations;
 typedef std::pair<int, std::string> Redirect;
+typedef std::map<std::string, Directives> Locations;
 
 struct Directives
 {

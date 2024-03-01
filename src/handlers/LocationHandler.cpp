@@ -6,21 +6,22 @@ LocationHandler::LocationHandler()
 
 void LocationHandler::handle(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg)
 {
+    if (!_next)
+    {
+        return;
+    }
+
     if (req.error())
     {
         sendErrorPage(req.error(), res, cfg);
         return;
     }
 
-    ConfigSpec context = cfg;
-    std::string path = req.path();
-    if (cfg.hasLocation(path))
+    std::string location = cfg.getLocation(req.path());
+    if (!location.empty())
     {
-        context = cfg.getLocation(path);
+        _next->handle(req, res, cfg.getContext(location));
+        return;
     }
-
-    if (_next)
-    {
-        _next->handle(req, res, context);
-    }
+    _next->handle(req, res, cfg);
 }

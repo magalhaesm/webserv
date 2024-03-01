@@ -1,19 +1,9 @@
-#include <stdexcept>
-
 #include "ConfigSpec.hpp"
 #include "Directives.hpp"
 
-ConfigSpec::ConfigSpec(Directives* directives, const ConfigSpec* parent)
+ConfigSpec::ConfigSpec(Directives* directives)
     : _directives(directives)
-    , _parent(parent)
 {
-    if (_parent)
-    {
-        _directives->root = _parent->_directives->root;
-        _directives->listen = _parent->_directives->listen;
-        _directives->server_name = _parent->_directives->server_name;
-    }
-
     if (_directives->index.empty())
     {
         _directives->index = "index.html";
@@ -34,7 +24,6 @@ ConfigSpec& ConfigSpec::operator=(const ConfigSpec& rhs)
     if (this != &rhs)
     {
         this->_directives = rhs._directives;
-        this->_parent = rhs._parent;
     }
     return *this;
 }
@@ -98,30 +87,33 @@ const Redirect& ConfigSpec::getRedirect() const
     return _directives->redirect;
 }
 
-bool ConfigSpec::hasLocation(const std::string& location) const
+std::string ConfigSpec::getLocation(const std::string& path) const
 {
     Locations::iterator it = _directives->locations.begin();
     for (; it != _directives->locations.end(); ++it)
     {
-        if (location.find(it->first) != std::string::npos)
+        if (path.find(it->first) != std::string::npos)
         {
-            return true;
+            return it->first;
         }
     }
-    return false;
+    return _empty;
 }
 
-ConfigSpec ConfigSpec::getLocation(const std::string& location) const
+ConfigSpec ConfigSpec::getContext(const std::string& path) const
 {
-    Locations::iterator it = _directives->locations.begin();
-    for (; it != _directives->locations.end(); ++it)
+    Directives* ctx = &_directives->locations.at(path);
+    ctx->listen = _directives->listen;
+    ctx->server_name = _directives->server_name;
+    if (ctx->root.empty())
     {
-        if (location.find(it->first) != std::string::npos)
-        {
-            return ConfigSpec(&it->second, this);
-        }
+        ctx->root = _directives->root;
     }
-    throw std::runtime_error("location not found");
+    if (ctx->index.empty())
+    {
+        ctx->index = _directives->index;
+    }
+    return ConfigSpec(ctx);
 }
 
 int ConfigSpec::getClientBodySize() const

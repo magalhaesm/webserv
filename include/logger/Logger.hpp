@@ -9,7 +9,7 @@
 class Logger
 {
 public:
-    static void log(HTTPRequest& req, HTTPResponse res, const ConfigSpec& cfg);
+    static void log(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg);
     static void log(const std::string& message);
 
 private:
