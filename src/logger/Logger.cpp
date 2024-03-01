@@ -26,3 +26,8 @@ void Logger::log(HTTPRequest& req, HTTPResponse res, const ConfigSpec& cfg)
     }
     std::cout << std::endl;
 }
+
+void Logger::log(const std::string& message)
+{
+    std::cout << getTimeStamp() << " " << message << std::endl;
+}

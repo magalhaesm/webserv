@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "Logger.hpp"
 #include "Server.hpp"
 #include "ConfigParser.hpp"
 #include "EventListener.hpp"
@@ -9,7 +10,7 @@ int main(int argc, char** argv)
 {
     if (argc != 2)
     {
-        std::cout << "Usage: " << argv[0] << " <config_file>" << std::endl;
+        std::cout << "Usage: " << argv[0] << " [CONFIGURATION FILE]" << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -26,6 +27,6 @@ int main(int argc, char** argv)
     }
     catch (const std::exception& e)
     {
-        std::cerr << e.what() << std::endl;
+        Logger::log(e.what());
     }
 }

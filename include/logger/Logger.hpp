@@ -6,12 +6,11 @@
 #include "HTTPRequest.hpp"
 #include "HTTPResponse.hpp"
 
-// REF: cpp -> módulo 1 -> ex 05-06
-
 class Logger
 {
 public:
     static void log(HTTPRequest& req, HTTPResponse res, const ConfigSpec& cfg);
+    static void log(const std::string& message);
 
 private:
     static std::string getTimeStamp();
