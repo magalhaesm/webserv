@@ -18,6 +18,11 @@ std::string Logger::getTimeStamp()
 void Logger::log(HTTPRequest& req, HTTPResponse res, const ConfigSpec& cfg)
 {
     std::cout << getTimeStamp() << " " << cfg.getServerName() << ": " << req.methodText() << " "
-              << req.path() << " - " << res.getStatus() << " " << statusText(res.getStatus())
-              << std::endl;
+              << req.path() << " - " << res.getStatus() << " " << statusText(res.getStatus());
+
+    if (req.method() == POST)
+    {
+        std::cout << " " << req.getHeader("Referer");
+    }
+    std::cout << std::endl;
 }
