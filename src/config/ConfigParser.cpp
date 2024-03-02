@@ -257,7 +257,8 @@ void ConfigParser::validateRedirect(const Strings& tokens, Directives* directive
 {
     checkArgCount(tokens, tokens.size() != 3);
     int statusCode = std::atoi(tokens[1].c_str());
-    directive->redirect = std::make_pair(statusCode, tokens[2]);
+    directive->redirect.code = statusCode;
+    directive->redirect.url = tokens[2];
 }
 
 void ConfigParser::validateMethods(const Strings& tokens, Directives* directive)

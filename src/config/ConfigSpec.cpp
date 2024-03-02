@@ -79,7 +79,7 @@ const std::string& ConfigSpec::getCGI() const
 
 bool ConfigSpec::hasRedirect() const
 {
-    return _directives->redirect.first && !_directives->redirect.second.empty();
+    return _directives->redirect.code && !_directives->redirect.url.empty();
 }
 
 const Redirect& ConfigSpec::getRedirect() const
@@ -121,7 +121,7 @@ int ConfigSpec::getClientBodySize() const
     return _directives->client_max_body_size;
 }
 
-bool ConfigSpec::allow(const std::string& method) const
+bool ConfigSpec::isMethodAllowed(const std::string& method) const
 {
     return _directives->limit_except.empty() || _directives->limit_except.count(method);
 }
