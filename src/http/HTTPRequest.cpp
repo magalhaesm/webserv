@@ -3,6 +3,7 @@
 
 HTTPRequest::HTTPRequest(Message& message)
     : _msg(message)
+    , _realPath("/")
 {
 }
 
@@ -46,9 +47,14 @@ const std::string& HTTPRequest::path() const
     return _msg.path;
 }
 
-void HTTPRequest::setPath(const std::string& path) const
+void HTTPRequest::setRealPath(const std::string& path)
 {
-    _msg.path = path;
+    _realPath = path;
+}
+
+const std::string& HTTPRequest::realPath() const
+{
+    return _realPath;
 }
 
 const std::string& HTTPRequest::query() const

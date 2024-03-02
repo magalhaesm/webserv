@@ -16,6 +16,7 @@ namespace ft
     std::string itoa(int n);
     Strings strip(const Strings& content);
     void replace(std::string& text, const std::string& search, const std::string& replace);
+    std::string strClean(const std::string& str, char c);
 
 }
 

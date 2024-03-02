@@ -3,6 +3,22 @@
 #include "strings.hpp"
 #include "ARequestHandler.hpp"
 
+const std::string ERROR_PAGE_TEMPLATE =
+
+    "<!DOCTYPE html>\n"
+    "<html lang=\"en\">\n"
+    "  <head>\n"
+    "    <title>ERROR_MESSAGE</title>\n"
+    "  </head>\n"
+    "  <body>\n"
+    "    <center>\n"
+    "      <h1>ERROR_MESSAGE</h1>\n"
+    "    </center>\n"
+    "    <hr>\n"
+    "    <center>webserv</center>\n"
+    "  </body>\n"
+    "</html>";
+
 ARequestHandler ::ARequestHandler()
     : _next(NULL)
 {
@@ -31,7 +47,7 @@ void ARequestHandler::sendErrorPage(int code, HTTPResponse& res, const ConfigSpe
 
 void ARequestHandler::sendDefaultErrorPage(int code, HTTPResponse& res)
 {
-    std::string page = ERROR_MESSAGE_TEMPLATE;
+    std::string page = ERROR_PAGE_TEMPLATE;
     std::string search = "ERROR_MESSAGE";
     std::string replace = ft::itoa(code) + " " + statusText(code);
     ft::replace(page, search, replace);

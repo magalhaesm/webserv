@@ -1,8 +1,10 @@
 #include "ConfigSpec.hpp"
 #include "Directives.hpp"
 
-ConfigSpec::ConfigSpec(Directives* directives)
+ConfigSpec::ConfigSpec(Directives* directives, const std::string& location)
     : _directives(directives)
+    , _location(location)
+
 {
     if (_directives->index.empty())
     {
@@ -12,6 +14,7 @@ ConfigSpec::ConfigSpec(Directives* directives)
 
 ConfigSpec::ConfigSpec(const ConfigSpec& src)
     : _directives(src._directives)
+    , _location(src._location)
 {
 }
 
@@ -23,7 +26,8 @@ ConfigSpec& ConfigSpec::operator=(const ConfigSpec& rhs)
 {
     if (this != &rhs)
     {
-        this->_directives = rhs._directives;
+        _directives = rhs._directives;
+        _location = rhs._location;
     }
     return *this;
 }
@@ -87,7 +91,7 @@ const Redirect& ConfigSpec::getRedirect() const
     return _directives->redirect;
 }
 
-std::string ConfigSpec::getLocation(const std::string& path) const
+std::string ConfigSpec::match(const std::string& path) const
 {
     Locations::iterator it = _directives->locations.begin();
     for (; it != _directives->locations.end(); ++it)
@@ -113,7 +117,12 @@ ConfigSpec ConfigSpec::getContext(const std::string& path) const
     {
         ctx->index = _directives->index;
     }
-    return ConfigSpec(ctx);
+    return ConfigSpec(ctx, path);
+}
+
+std::string ConfigSpec::getLocation() const
+{
+    return _location;
 }
 
 int ConfigSpec::getClientBodySize() const

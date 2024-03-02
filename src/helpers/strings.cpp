@@ -99,3 +99,26 @@ void ft::replace(std::string& text, const std::string& search, const std::string
         position = text.find(search, position);
     }
 }
+
+std::string ft::strClean(const std::string& str, char c)
+{
+    std::string result;
+    char lastChar = '\0';
+    for (size_t idx = 0; idx < str.length(); ++idx)
+    {
+        char currentChar = str[idx];
+        if (currentChar == c)
+        {
+            if (lastChar != currentChar)
+            {
+                result += currentChar;
+            }
+        }
+        else
+        {
+            result += currentChar;
+        }
+        lastChar = currentChar;
+    }
+    return result;
+}

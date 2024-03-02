@@ -9,6 +9,7 @@ const std::string& statusText(int code)
     status[201] = "Created";
     status[301] = "Moved Permanently";
     status[400] = "Bad Request";
+    status[403] = "Forbidden";
     status[404] = "Not Found";
     status[405] = "Method Not Allowed";
     status[413] = "Request Entity Too Large";

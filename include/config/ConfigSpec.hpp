@@ -8,7 +8,7 @@
 class ConfigSpec
 {
 public:
-    ConfigSpec(Directives* directives);
+    ConfigSpec(Directives* directives, const std::string& location = "/");
     ConfigSpec(const ConfigSpec& src);
     ~ConfigSpec();
     ConfigSpec& operator=(const ConfigSpec& rhs);
@@ -24,13 +24,15 @@ public:
     const std::string& getCGI() const;
     bool hasRedirect() const;
     const Redirect& getRedirect() const;
-    std::string getLocation(const std::string& path) const;
+    std::string match(const std::string& path) const;
     ConfigSpec getContext(const std::string& path) const;
+    std::string getLocation() const;
     int getClientBodySize() const;
-    bool allow(const std::string& method) const;
+    bool isMethodAllowed(const std::string& method) const;
 
 private:
     Directives* _directives;
+    std::string _location;
     std::string _empty;
 };
 

@@ -17,7 +17,7 @@ void LocationHandler::handle(HTTPRequest& req, HTTPResponse& res, const ConfigSp
         return;
     }
 
-    std::string location = cfg.getLocation(req.path());
+    std::string location = cfg.match(req.path());
     if (!location.empty())
     {
         _next->handle(req, res, cfg.getContext(location));
