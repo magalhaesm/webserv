@@ -29,7 +29,7 @@ void ARequestHandler::setNext(ARequestHandler* next)
     _next = next;
 }
 
-void ARequestHandler::sendErrorPage(int code, Response& res, const ConfigSpec& cfg)
+void ARequestHandler::sendStatusPage(int code, Response& res, const ConfigSpec& cfg)
 {
     if (cfg.hasErrorPage(code))
     {

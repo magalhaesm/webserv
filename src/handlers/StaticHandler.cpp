@@ -49,7 +49,7 @@ void StaticHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
         handleDelete(req, res, cfg);
         break;
     default:
-        sendErrorPage(405, res, cfg);
+        sendStatusPage(405, res, cfg);
     }
 
     if (_next)
@@ -70,7 +70,7 @@ void StaticHandler::handleGet(Request& req, Response& res, const ConfigSpec& cfg
         {
             return;
         }
-        sendErrorPage(403, res, cfg);
+        sendStatusPage(403, res, cfg);
         return;
     }
 
@@ -81,7 +81,7 @@ void StaticHandler::handleGet(Request& req, Response& res, const ConfigSpec& cfg
         res.setBody(resource);
         return;
     }
-    sendErrorPage(404, res, cfg);
+    sendStatusPage(404, res, cfg);
 }
 
 void StaticHandler::handlePost(Request& req, Response& res, const ConfigSpec& cfg)
@@ -96,31 +96,31 @@ void StaticHandler::handlePost(Request& req, Response& res, const ConfigSpec& cf
 
         if (rename(filename.c_str(), fullPath.c_str()) == 0)
         {
-            sendErrorPage(200, res, cfg);
+            sendStatusPage(200, res, cfg);
             return;
         }
         break;
     }
     case URLEncoded:
-        sendErrorPage(501, res, cfg);
+        sendStatusPage(501, res, cfg);
         return;
     }
-    sendErrorPage(404, res, cfg);
+    sendStatusPage(404, res, cfg);
 }
 
 void StaticHandler::handleDelete(Request& req, Response& res, const ConfigSpec& cfg)
 {
     if (ft::isDir(req.fullPath()))
     {
-        sendErrorPage(403, res, cfg);
+        sendStatusPage(403, res, cfg);
         return;
     }
     if (remove(req.fullPath().c_str()) != 0)
     {
-        sendErrorPage(500, res, cfg);
+        sendStatusPage(500, res, cfg);
         return;
     }
-    sendErrorPage(200, res, cfg);
+    sendStatusPage(200, res, cfg);
 }
 
 bool StaticHandler::sendIndex(Request& req, Response& res, const ConfigSpec& cfg)
@@ -150,7 +150,7 @@ bool StaticHandler::sendAutoIndex(Request& req, Response& res, const ConfigSpec&
     }
     catch (const std::exception& e)
     {
-        sendErrorPage(500, res, cfg);
+        sendStatusPage(500, res, cfg);
     }
     return true;
 }

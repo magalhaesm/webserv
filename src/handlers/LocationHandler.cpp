@@ -14,7 +14,7 @@ void LocationHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
 
     if (req.error())
     {
-        sendErrorPage(req.error(), res, cfg);
+        sendStatusPage(req.error(), res, cfg);
         return;
     }
 

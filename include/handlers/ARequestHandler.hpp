@@ -17,7 +17,7 @@ public:
 protected:
     ARequestHandler* _next;
 
-    void sendErrorPage(int code, Response& res, const ConfigSpec& cfg);
+    void sendStatusPage(int code, Response& res, const ConfigSpec& cfg);
 
 private:
     void sendDefaultErrorPage(int code, Response& res);

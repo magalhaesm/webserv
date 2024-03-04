@@ -8,7 +8,7 @@ void AccessControlHandler::handle(Request& req, Response& res, const ConfigSpec&
 {
     if (!cfg.isMethodAllowed(req.methodText()))
     {
-        sendErrorPage(405, res, cfg);
+        sendStatusPage(405, res, cfg);
         return;
     }
 

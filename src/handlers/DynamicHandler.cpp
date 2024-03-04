@@ -21,7 +21,7 @@ void DynamicHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
         handlePost(req, res, cfg);
         break;
     default:
-        sendErrorPage(405, res, cfg);
+        sendStatusPage(405, res, cfg);
     }
 }
 
