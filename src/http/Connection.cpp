@@ -69,8 +69,8 @@ bool Connection::write()
 
 inline void Connection::processRequest()
 {
-    HTTPRequest request(_msg);
-    HTTPResponse response;
+    Request request(_msg);
+    Response response;
     _server->handleRequest(request, response);
     this->send(response.toString());
 }

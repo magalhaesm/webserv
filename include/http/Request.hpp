@@ -5,13 +5,13 @@
 
 #include "Message.hpp"
 
-class HTTPRequest
+class Request
 {
 public:
-    HTTPRequest(Message& message);
-    HTTPRequest(const HTTPRequest& rhs);
-    HTTPRequest& operator=(const HTTPRequest& rhs);
-    ~HTTPRequest();
+    Request(Message& message);
+    Request(const Request& rhs);
+    Request& operator=(const Request& rhs);
+    ~Request();
 
     Method method() const;
     const std::string methodText() const;
@@ -29,6 +29,6 @@ private:
     const std::string _empty;
 };
 
-std::ostream& operator<<(std::ostream& os, const HTTPRequest& request);
+std::ostream& operator<<(std::ostream& os, const Request& request);
 
 #endif // !HTTP_REQUEST_HPP

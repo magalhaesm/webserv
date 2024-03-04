@@ -4,7 +4,7 @@ AccessControlHandler::AccessControlHandler()
 {
 }
 
-void AccessControlHandler::handle(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg)
+void AccessControlHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
 {
     if (!cfg.isMethodAllowed(req.methodText()))
     {

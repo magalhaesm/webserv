@@ -39,7 +39,7 @@ Server::~Server()
     close(_socket);
 }
 
-void Server::handleRequest(HTTPRequest& req, HTTPResponse& res)
+void Server::handleRequest(Request& req, Response& res)
 {
     _initHandler->handle(req, res, _cfg);
     Logger::log(req, res, _cfg);

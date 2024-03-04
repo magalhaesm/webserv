@@ -15,7 +15,7 @@ std::string Logger::getTimeStamp()
     return timestamp;
 }
 
-void Logger::log(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg)
+void Logger::log(Request& req, Response& res, const ConfigSpec& cfg)
 {
     std::cout << getTimeStamp() << " " << cfg.getServerName() << ": " << req.methodText() << " "
               << req.path() << " - " << res.getStatus() << " " << statusText(res.getStatus());

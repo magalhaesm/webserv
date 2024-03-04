@@ -4,8 +4,8 @@
 #include "Body.hpp"
 #include "strings.hpp"
 #include "filesystem.hpp"
-#include "HTTPRequest.hpp"
-#include "HTTPResponse.hpp"
+#include "Request.hpp"
+#include "Response.hpp"
 #include "HTTPConstants.hpp"
 #include "StaticHandler.hpp"
 
@@ -35,7 +35,7 @@ StaticHandler::StaticHandler()
 {
 }
 
-void StaticHandler::handle(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg)
+void StaticHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
 {
     switch (req.method())
     {
@@ -58,7 +58,7 @@ void StaticHandler::handle(HTTPRequest& req, HTTPResponse& res, const ConfigSpec
     }
 }
 
-void StaticHandler::handleGet(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg)
+void StaticHandler::handleGet(Request& req, Response& res, const ConfigSpec& cfg)
 {
     if (ft::isDir(req.fullPath()))
     {
@@ -84,7 +84,7 @@ void StaticHandler::handleGet(HTTPRequest& req, HTTPResponse& res, const ConfigS
     sendErrorPage(404, res, cfg);
 }
 
-void StaticHandler::handlePost(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg)
+void StaticHandler::handlePost(Request& req, Response& res, const ConfigSpec& cfg)
 {
     Body* body = req.body();
     switch (body->getType())
@@ -108,7 +108,7 @@ void StaticHandler::handlePost(HTTPRequest& req, HTTPResponse& res, const Config
     sendErrorPage(404, res, cfg);
 }
 
-void StaticHandler::handleDelete(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg)
+void StaticHandler::handleDelete(Request& req, Response& res, const ConfigSpec& cfg)
 {
     if (ft::isDir(req.fullPath()))
     {
@@ -123,20 +123,20 @@ void StaticHandler::handleDelete(HTTPRequest& req, HTTPResponse& res, const Conf
     sendErrorPage(200, res, cfg);
 }
 
-bool StaticHandler::sendIndex(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg)
+bool StaticHandler::sendIndex(Request& req, Response& res, const ConfigSpec& cfg)
 {
     std::string index = req.fullPath() + '/' + cfg.getIndex();
-    std::ifstream resource(index.c_str());
-    if (resource.is_open())
+    std::ifstream page(index.c_str());
+    if (page.is_open())
     {
         res.setStatus(200);
-        res.setBody(resource);
+        res.setBody(page);
         return true;
     }
     return false;
 }
 
-bool StaticHandler::sendAutoIndex(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg)
+bool StaticHandler::sendAutoIndex(Request& req, Response& res, const ConfigSpec& cfg)
 {
     if (!cfg.hasAutoIndex())
     {

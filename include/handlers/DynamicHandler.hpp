@@ -7,11 +7,11 @@ class DynamicHandler : public ARequestHandler
 {
 public:
     DynamicHandler();
-    void handle(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg);
+    void handle(Request& req, Response& res, const ConfigSpec& cfg);
 
 private:
-    void handleGet(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg);
-    void handlePost(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg);
+    void handleGet(Request& req, Response& res, const ConfigSpec& cfg);
+    void handlePost(Request& req, Response& res, const ConfigSpec& cfg);
 };
 
 #endif // !DYNAMIC_HANDLER_HPP

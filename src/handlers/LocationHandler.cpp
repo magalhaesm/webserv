@@ -5,7 +5,7 @@ LocationHandler::LocationHandler()
 {
 }
 
-void LocationHandler::handle(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg)
+void LocationHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
 {
     if (!_next)
     {

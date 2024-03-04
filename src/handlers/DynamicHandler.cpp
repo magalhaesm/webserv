@@ -4,7 +4,7 @@ DynamicHandler::DynamicHandler()
 {
 }
 
-void DynamicHandler::handle(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg)
+void DynamicHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
 {
     if (!cfg.hasCGI())
     {
@@ -25,10 +25,10 @@ void DynamicHandler::handle(HTTPRequest& req, HTTPResponse& res, const ConfigSpe
     }
 }
 
-void DynamicHandler::handleGet(HTTPRequest&, HTTPResponse&, const ConfigSpec&)
+void DynamicHandler::handleGet(Request&, Response&, const ConfigSpec&)
 {
 }
 
-void DynamicHandler::handlePost(HTTPRequest&, HTTPResponse&, const ConfigSpec&)
+void DynamicHandler::handlePost(Request&, Response&, const ConfigSpec&)
 {
 }

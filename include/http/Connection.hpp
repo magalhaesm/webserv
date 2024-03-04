@@ -7,7 +7,7 @@
 #include "Message.hpp"
 
 class Server;
-class HTTPResponse;
+class Response;
 class EventListener;
 
 class Connection

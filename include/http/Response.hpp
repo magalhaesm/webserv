@@ -5,11 +5,11 @@
 
 #include "HTTPConstants.hpp"
 
-class HTTPResponse
+class Response
 {
 public:
-    HTTPResponse();
-    ~HTTPResponse();
+    Response();
+    ~Response();
 
     void setStatus(int status);
     void setHeader(const std::string& field, const std::string& value);

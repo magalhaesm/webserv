@@ -1,31 +1,31 @@
 #include "strings.hpp"
-#include "HTTPRequest.hpp"
+#include "Request.hpp"
 
-HTTPRequest::HTTPRequest(Message& message)
+Request::Request(Message& message)
     : _msg(message)
 {
 }
 
-HTTPRequest::HTTPRequest(const HTTPRequest& rhs)
+Request::Request(const Request& rhs)
     : _msg(rhs._msg)
 {
 }
 
-HTTPRequest& HTTPRequest::operator=(const HTTPRequest&)
+Request& Request::operator=(const Request&)
 {
     return *this;
 }
 
-HTTPRequest::~HTTPRequest()
+Request::~Request()
 {
 }
 
-Method HTTPRequest::method() const
+Method Request::method() const
 {
     return _msg.method;
 }
 
-const std::string HTTPRequest::methodText() const
+const std::string Request::methodText() const
 {
     switch (_msg.method)
     {
@@ -41,27 +41,27 @@ const std::string HTTPRequest::methodText() const
     return _empty;
 }
 
-const std::string& HTTPRequest::path() const
+const std::string& Request::path() const
 {
     return _msg.path;
 }
 
-void HTTPRequest::setFullPath(const std::string& path)
+void Request::setFullPath(const std::string& path)
 {
     _fullPath = path;
 }
 
-const std::string& HTTPRequest::fullPath() const
+const std::string& Request::fullPath() const
 {
     return _fullPath;
 }
 
-const std::string& HTTPRequest::query() const
+const std::string& Request::query() const
 {
     return _msg.query;
 }
 
-const std::string& HTTPRequest::getHeader(const std::string& field) const
+const std::string& Request::getHeader(const std::string& field) const
 {
     Headers::const_iterator it = _msg.headers.find(ft::toLower(field));
     if (it != _msg.headers.end())
@@ -71,12 +71,12 @@ const std::string& HTTPRequest::getHeader(const std::string& field) const
     return _empty;
 }
 
-Body* HTTPRequest::body() const
+Body* Request::body() const
 {
     return _msg.body;
 }
 
-int HTTPRequest::error() const
+int Request::error() const
 {
     return _msg.error;
 }

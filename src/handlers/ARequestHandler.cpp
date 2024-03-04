@@ -29,7 +29,7 @@ void ARequestHandler::setNext(ARequestHandler* next)
     _next = next;
 }
 
-void ARequestHandler::sendErrorPage(int code, HTTPResponse& res, const ConfigSpec& cfg)
+void ARequestHandler::sendErrorPage(int code, Response& res, const ConfigSpec& cfg)
 {
     if (cfg.hasErrorPage(code))
     {
@@ -45,7 +45,7 @@ void ARequestHandler::sendErrorPage(int code, HTTPResponse& res, const ConfigSpe
     sendDefaultErrorPage(code, res);
 }
 
-void ARequestHandler::sendDefaultErrorPage(int code, HTTPResponse& res)
+void ARequestHandler::sendDefaultErrorPage(int code, Response& res)
 {
     std::string page = ERROR_PAGE_TEMPLATE;
     std::string search = "ERROR_MESSAGE";

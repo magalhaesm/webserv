@@ -7,7 +7,7 @@ class LocationHandler : public ARequestHandler
 {
 public:
     LocationHandler();
-    void handle(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg);
+    void handle(Request& req, Response& res, const ConfigSpec& cfg);
 };
 
 #endif // !LOCATION_HANDLER_HPP

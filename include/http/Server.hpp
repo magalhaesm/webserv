@@ -4,11 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "HTTPRequest.hpp"
-#include "HTTPResponse.hpp"
+#include "Request.hpp"
+#include "Response.hpp"
 #include "ARequestHandler.hpp"
-#include "HTMLController.hpp"
-#include "CGIController.hpp"
 #include "ConfigSpec.hpp"
 
 class Connection;
@@ -19,7 +17,7 @@ public:
     Server(const ConfigSpec& cfg);
     ~Server();
 
-    void handleRequest(HTTPRequest& req, HTTPResponse& res);
+    void handleRequest(Request& req, Response& res);
     void listen();
     int accept();
     int getSocket() const;
@@ -32,8 +30,6 @@ private:
     int _socket;
     ARequestHandler* _initHandler;
     std::vector<ARequestHandler*> _handlers;
-    HTMLController htmlController;
-    CGIController cgiController;
 
     int createSocket();
     void setupHandlers();

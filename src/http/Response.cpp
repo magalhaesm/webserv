@@ -3,38 +3,38 @@
 
 #include "strings.hpp"
 #include "Connection.hpp"
-#include "HTTPResponse.hpp"
+#include "Response.hpp"
 
-HTTPResponse::HTTPResponse()
+Response::Response()
 {
 }
 
-HTTPResponse::~HTTPResponse()
+Response::~Response()
 {
 }
 
-void HTTPResponse::setStatus(int status)
+void Response::setStatus(int status)
 {
     _statusCode = status;
 }
 
-void HTTPResponse::setHeader(const std::string& field, const std::string& value)
+void Response::setHeader(const std::string& field, const std::string& value)
 {
     _headers[field] = value;
 }
 
-void HTTPResponse::setHeader(const std::string& field, int value)
+void Response::setHeader(const std::string& field, int value)
 {
     _headers[field] = ft::itoa(value);
 }
 
-void HTTPResponse::setBody(const std::string& body)
+void Response::setBody(const std::string& body)
 {
     _body = body;
     setHeader("Content-Length", _body.size());
 }
 
-void HTTPResponse::setBody(const std::ifstream& body)
+void Response::setBody(const std::ifstream& body)
 {
     std::stringstream buffer;
 
@@ -43,12 +43,12 @@ void HTTPResponse::setBody(const std::ifstream& body)
     setHeader("Content-Length", _body.size());
 }
 
-int HTTPResponse::getStatus()
+int Response::getStatus()
 {
     return _statusCode;
 }
 
-const std::string& HTTPResponse::getHeader(const std::string& field)
+const std::string& Response::getHeader(const std::string& field)
 {
     Headers::const_iterator it = _headers.find(field);
     if (it != _headers.end())
@@ -58,7 +58,7 @@ const std::string& HTTPResponse::getHeader(const std::string& field)
     return _empty;
 }
 
-const std::string& HTTPResponse::HTTPResponse::toString()
+const std::string& Response::Response::toString()
 {
     if (_text.empty())
     {

@@ -7,15 +7,15 @@ class StaticHandler : public ARequestHandler
 {
 public:
     StaticHandler();
-    void handle(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg);
+    void handle(Request& req, Response& res, const ConfigSpec& cfg);
 
 private:
-    void handleGet(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg);
-    void handlePost(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg);
-    void handleDelete(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg);
+    void handleGet(Request& req, Response& res, const ConfigSpec& cfg);
+    void handlePost(Request& req, Response& res, const ConfigSpec& cfg);
+    void handleDelete(Request& req, Response& res, const ConfigSpec& cfg);
 
-    bool sendIndex(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg);
-    bool sendAutoIndex(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg);
+    bool sendIndex(Request& req, Response& res, const ConfigSpec& cfg);
+    bool sendAutoIndex(Request& req, Response& res, const ConfigSpec& cfg);
 };
 
 #endif // !STATIC_HANDLER_HPP
