@@ -56,7 +56,7 @@ const std::string ConfigSpec::getRoot() const
     return _directives->root + "/";
 }
 
-bool ConfigSpec::hasAutoindex() const
+bool ConfigSpec::hasAutoIndex() const
 {
     return _directives->autoindex;
 }

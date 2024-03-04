@@ -1,9 +1,12 @@
+#include <cstdio>
 #include <fstream>
 
+#include "Body.hpp"
 #include "strings.hpp"
 #include "filesystem.hpp"
 #include "HTTPRequest.hpp"
 #include "HTTPResponse.hpp"
+#include "HTTPConstants.hpp"
 #include "StaticHandler.hpp"
 
 const std::string AUTOINDEX_TEMPLATE =
@@ -27,7 +30,6 @@ const std::string AUTOINDEX_TEMPLATE =
 const std::string A_TAG = "    <a href=\"CONTENT\">CONTENT</a>\n";
 
 static std::string genAutoIndex(const std::string& root, const std::string& location);
-static bool sendIndex(const std::string& path, HTTPResponse& res, const ConfigSpec& cfg);
 
 StaticHandler::StaticHandler()
 {
@@ -58,57 +60,72 @@ void StaticHandler::handle(HTTPRequest& req, HTTPResponse& res, const ConfigSpec
 
 void StaticHandler::handleGet(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg)
 {
-    std::string path = cfg.getRoot() + req.path();
-    path = ft::strClean(path, '/');
-
-    if (ft::isDir(path))
+    if (ft::isDir(req.fullPath()))
     {
-        if (sendIndex(path, res, cfg))
+        if (sendIndex(req, res, cfg))
         {
             return;
         }
-        if (cfg.hasAutoindex())
+        if (sendAutoIndex(req, res, cfg))
         {
-            try
-            {
-                std::string autoindex = genAutoIndex(path, req.realPath());
-                res.setStatus(200);
-                res.setBody(autoindex);
-                return;
-            }
-            catch (const std::exception& e)
-            {
-                sendErrorPage(500, res, cfg);
-                return;
-            }
+            return;
         }
-        sendErrorPage(404, res, cfg);
+        sendErrorPage(403, res, cfg);
         return;
     }
 
-    std::ifstream resource(path.c_str());
-    if (!resource.is_open())
+    std::ifstream resource(req.fullPath().c_str());
+    if (resource.is_open())
     {
-        sendErrorPage(404, res, cfg);
+        res.setStatus(200);
+        res.setBody(resource);
         return;
     }
-    res.setStatus(200);
-    res.setBody(resource);
+    sendErrorPage(404, res, cfg);
 }
 
-void StaticHandler::handlePost(HTTPRequest&, HTTPResponse& res, const ConfigSpec& cfg)
+void StaticHandler::handlePost(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg)
 {
-    sendErrorPage(501, res, cfg);
+    Body* body = req.body();
+    switch (body->getType())
+    {
+    case FormData:
+    {
+        const std::string filename = body->get("filename");
+        const std::string fullPath = req.fullPath() + "/" + filename;
+
+        if (rename(filename.c_str(), fullPath.c_str()) == 0)
+        {
+            sendErrorPage(200, res, cfg);
+            return;
+        }
+        break;
+    }
+    case URLEncoded:
+        sendErrorPage(501, res, cfg);
+        return;
+    }
+    sendErrorPage(404, res, cfg);
 }
 
-void StaticHandler::handleDelete(HTTPRequest&, HTTPResponse& res, const ConfigSpec& cfg)
+void StaticHandler::handleDelete(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg)
 {
-    sendErrorPage(501, res, cfg);
+    if (ft::isDir(req.fullPath()))
+    {
+        sendErrorPage(403, res, cfg);
+        return;
+    }
+    if (remove(req.fullPath().c_str()) != 0)
+    {
+        sendErrorPage(500, res, cfg);
+        return;
+    }
+    sendErrorPage(200, res, cfg);
 }
 
-bool sendIndex(const std::string& path, HTTPResponse& res, const ConfigSpec& cfg)
+bool StaticHandler::sendIndex(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg)
 {
-    std::string index = path + '/' + cfg.getIndex();
+    std::string index = req.fullPath() + '/' + cfg.getIndex();
     std::ifstream resource(index.c_str());
     if (resource.is_open())
     {
@@ -117,6 +134,25 @@ bool sendIndex(const std::string& path, HTTPResponse& res, const ConfigSpec& cfg
         return true;
     }
     return false;
+}
+
+bool StaticHandler::sendAutoIndex(HTTPRequest& req, HTTPResponse& res, const ConfigSpec& cfg)
+{
+    if (!cfg.hasAutoIndex())
+    {
+        return false;
+    }
+    try
+    {
+        std::string autoindex = genAutoIndex(req.fullPath(), cfg.getLocation());
+        res.setStatus(200);
+        res.setBody(autoindex);
+    }
+    catch (const std::exception& e)
+    {
+        sendErrorPage(500, res, cfg);
+    }
+    return true;
 }
 
 std::string genAutoIndex(const std::string& path, const std::string& location)

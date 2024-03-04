@@ -3,7 +3,6 @@
 
 HTTPRequest::HTTPRequest(Message& message)
     : _msg(message)
-    , _realPath("/")
 {
 }
 
@@ -47,14 +46,14 @@ const std::string& HTTPRequest::path() const
     return _msg.path;
 }
 
-void HTTPRequest::setRealPath(const std::string& path)
+void HTTPRequest::setFullPath(const std::string& path)
 {
-    _realPath = path;
+    _fullPath = path;
 }
 
-const std::string& HTTPRequest::realPath() const
+const std::string& HTTPRequest::fullPath() const
 {
-    return _realPath;
+    return _fullPath;
 }
 
 const std::string& HTTPRequest::query() const
@@ -70,6 +69,11 @@ const std::string& HTTPRequest::getHeader(const std::string& field) const
         return it->second;
     }
     return _empty;
+}
+
+Body* HTTPRequest::body() const
+{
+    return _msg.body;
 }
 
 int HTTPRequest::error() const

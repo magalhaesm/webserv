@@ -1,3 +1,4 @@
+#include "strings.hpp"
 #include "LocationHandler.hpp"
 
 LocationHandler::LocationHandler()
@@ -16,6 +17,9 @@ void LocationHandler::handle(HTTPRequest& req, HTTPResponse& res, const ConfigSp
         sendErrorPage(req.error(), res, cfg);
         return;
     }
+
+    std::string fullPath = cfg.getRoot() + req.path();
+    req.setFullPath(ft::strClean(fullPath, '/'));
 
     std::string location = cfg.match(req.path());
     if (!location.empty())

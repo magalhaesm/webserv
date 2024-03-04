@@ -17,7 +17,7 @@ public:
     const std::string& getServerName() const;
     const std::string& getIndex() const;
     const std::string getRoot() const;
-    bool hasAutoindex() const;
+    bool hasAutoIndex() const;
     bool hasErrorPage(int error) const;
     const std::string& getErrorPage(int error) const;
     bool hasCGI() const;
