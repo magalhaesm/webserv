@@ -1,3 +1,4 @@
+#include "HTTPConstants.hpp"
 #include "DynamicContentHandler.hpp"
 
 DynamicContentHandler::DynamicContentHandler()
@@ -21,14 +22,16 @@ void DynamicContentHandler::handle(Request& req, Response& res, const ConfigSpec
         handlePost(req, res, cfg);
         break;
     default:
-        sendStatusPage(405, res, cfg);
+        sendStatusPage(METHOD_NOT_ALLOWED, res, cfg);
     }
 }
 
-void DynamicContentHandler::handleGet(Request&, Response&, const ConfigSpec&)
+void DynamicContentHandler::handleGet(Request&, Response& res, const ConfigSpec& cfg)
 {
+    sendStatusPage(NOT_IMPLEMENTED, res, cfg);
 }
 
-void DynamicContentHandler::handlePost(Request&, Response&, const ConfigSpec&)
+void DynamicContentHandler::handlePost(Request&, Response& res, const ConfigSpec& cfg)
 {
+    sendStatusPage(NOT_IMPLEMENTED, res, cfg);
 }

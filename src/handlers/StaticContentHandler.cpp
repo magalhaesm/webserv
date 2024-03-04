@@ -49,7 +49,7 @@ void StaticContentHandler::handle(Request& req, Response& res, const ConfigSpec&
         handleDelete(req, res, cfg);
         break;
     default:
-        sendStatusPage(405, res, cfg);
+        sendStatusPage(METHOD_NOT_ALLOWED, res, cfg);
     }
 
     if (_next)
@@ -70,18 +70,18 @@ void StaticContentHandler::handleGet(Request& req, Response& res, const ConfigSp
         {
             return;
         }
-        sendStatusPage(403, res, cfg);
+        sendStatusPage(FORBIDDEN, res, cfg);
         return;
     }
 
     std::ifstream resource(req.realPath().c_str());
     if (resource.is_open())
     {
-        res.setStatus(200);
+        res.setStatus(OK);
         res.setBody(resource);
         return;
     }
-    sendStatusPage(404, res, cfg);
+    sendStatusPage(NOT_FOUND, res, cfg);
 }
 
 void StaticContentHandler::handlePost(Request& req, Response& res, const ConfigSpec& cfg)
@@ -96,31 +96,31 @@ void StaticContentHandler::handlePost(Request& req, Response& res, const ConfigS
 
         if (rename(filename.c_str(), fullPath.c_str()) == 0)
         {
-            sendStatusPage(200, res, cfg);
+            sendStatusPage(OK, res, cfg);
             return;
         }
         break;
     }
     case URLEncoded:
-        sendStatusPage(501, res, cfg);
+        sendStatusPage(NOT_IMPLEMENTED, res, cfg);
         return;
     }
-    sendStatusPage(404, res, cfg);
+    sendStatusPage(NOT_FOUND, res, cfg);
 }
 
 void StaticContentHandler::handleDelete(Request& req, Response& res, const ConfigSpec& cfg)
 {
     if (ft::isDir(req.realPath()))
     {
-        sendStatusPage(403, res, cfg);
+        sendStatusPage(FORBIDDEN, res, cfg);
         return;
     }
     if (remove(req.realPath().c_str()) != 0)
     {
-        sendStatusPage(500, res, cfg);
+        sendStatusPage(INTERNAL_SERVER_ERROR, res, cfg);
         return;
     }
-    sendStatusPage(200, res, cfg);
+    sendStatusPage(OK, res, cfg);
 }
 
 bool StaticContentHandler::sendIndex(Request& req, Response& res, const ConfigSpec& cfg)
@@ -129,7 +129,7 @@ bool StaticContentHandler::sendIndex(Request& req, Response& res, const ConfigSp
     std::ifstream page(index.c_str());
     if (page.is_open())
     {
-        res.setStatus(200);
+        res.setStatus(OK);
         res.setBody(page);
         return true;
     }
@@ -145,12 +145,12 @@ bool StaticContentHandler::sendAutoIndex(Request& req, Response& res, const Conf
     try
     {
         std::string autoindex = generateAutoIndex(req);
-        res.setStatus(200);
+        res.setStatus(OK);
         res.setBody(autoindex);
     }
     catch (...)
     {
-        sendStatusPage(500, res, cfg);
+        sendStatusPage(INTERNAL_SERVER_ERROR, res, cfg);
     }
     return true;
 }

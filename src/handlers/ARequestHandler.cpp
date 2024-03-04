@@ -35,7 +35,7 @@ void ARequestHandler::sendStatusPage(int code, Response& res, const ConfigSpec& 
     {
         std::string pageName = cfg.getRoot() + cfg.getErrorPage(code);
         std::ifstream page(pageName.c_str());
-        if (page)
+        if (page.is_open())
         {
             res.setStatus(code);
             res.setBody(page);

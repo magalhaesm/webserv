@@ -68,7 +68,7 @@ bool HTTPParser::parseRequest(std::string& raw, Message& msg, int maxSize)
             msg.state = BODY_CONTENT;
             return parseRequest(raw, msg, maxSize);
         }
-        msg.error = 400;
+        msg.error = BAD_REQUEST;
         msg.state = FINISH;
         return DONE;
     }
@@ -121,7 +121,7 @@ inline void readRequestLine(std::istringstream& stream, Message& msg)
     stream >> method >> msg.path >> msg.version;
     if (method.empty() || msg.path.empty() || msg.version.empty())
     {
-        msg.error = 400;
+        msg.error = BAD_REQUEST;
         msg.state = FINISH;
         return;
     }
@@ -149,7 +149,7 @@ inline void readHeaders(std::istringstream& stream, Message& msg)
             std::string value = line.substr(colonPos + 2);
             if (value.empty())
             {
-                msg.error = 400;
+                msg.error = BAD_REQUEST;
                 msg.state = FINISH;
                 break;
             }

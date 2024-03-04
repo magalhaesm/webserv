@@ -3,6 +3,7 @@
 
 #include "Message.hpp"
 #include "ABodyParser.hpp"
+#include "HTTPConstants.hpp"
 
 const std::string FINAL_CHUNK = "0" + DELIMITER;
 
@@ -27,7 +28,7 @@ bool ABodyParser::needsMoreContent()
 {
     if (_maxSize > 0 && _raw.size() > _maxSize)
     {
-        _msg.error = 413;
+        _msg.error = REQUEST_ENTITY_TOO_LARGE;
     }
 
     return _stopReading(_raw, _size, _maxSize);
