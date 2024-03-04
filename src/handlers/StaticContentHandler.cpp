@@ -7,7 +7,7 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "HTTPConstants.hpp"
-#include "StaticHandler.hpp"
+#include "StaticContentHandler.hpp"
 
 const std::string AUTOINDEX_TEMPLATE =
 
@@ -31,11 +31,11 @@ const std::string A_TAG = "    <a href=\"CONTENT\">CONTENT</a>\n";
 
 static std::string generateAutoIndex(const Request& req);
 
-StaticHandler::StaticHandler()
+StaticContentHandler::StaticContentHandler()
 {
 }
 
-void StaticHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
+void StaticContentHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
 {
     switch (req.method())
     {
@@ -58,7 +58,7 @@ void StaticHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
     }
 }
 
-void StaticHandler::handleGet(Request& req, Response& res, const ConfigSpec& cfg)
+void StaticContentHandler::handleGet(Request& req, Response& res, const ConfigSpec& cfg)
 {
     if (ft::isDir(req.realPath()))
     {
@@ -84,7 +84,7 @@ void StaticHandler::handleGet(Request& req, Response& res, const ConfigSpec& cfg
     sendStatusPage(404, res, cfg);
 }
 
-void StaticHandler::handlePost(Request& req, Response& res, const ConfigSpec& cfg)
+void StaticContentHandler::handlePost(Request& req, Response& res, const ConfigSpec& cfg)
 {
     Body* body = req.body();
     switch (body->getType())
@@ -108,7 +108,7 @@ void StaticHandler::handlePost(Request& req, Response& res, const ConfigSpec& cf
     sendStatusPage(404, res, cfg);
 }
 
-void StaticHandler::handleDelete(Request& req, Response& res, const ConfigSpec& cfg)
+void StaticContentHandler::handleDelete(Request& req, Response& res, const ConfigSpec& cfg)
 {
     if (ft::isDir(req.realPath()))
     {
@@ -123,7 +123,7 @@ void StaticHandler::handleDelete(Request& req, Response& res, const ConfigSpec& 
     sendStatusPage(200, res, cfg);
 }
 
-bool StaticHandler::sendIndex(Request& req, Response& res, const ConfigSpec& cfg)
+bool StaticContentHandler::sendIndex(Request& req, Response& res, const ConfigSpec& cfg)
 {
     std::string index = req.realPath() + '/' + cfg.getIndex();
     std::ifstream page(index.c_str());
@@ -136,7 +136,7 @@ bool StaticHandler::sendIndex(Request& req, Response& res, const ConfigSpec& cfg
     return false;
 }
 
-bool StaticHandler::sendAutoIndex(Request& req, Response& res, const ConfigSpec& cfg)
+bool StaticContentHandler::sendAutoIndex(Request& req, Response& res, const ConfigSpec& cfg)
 {
     if (!cfg.hasAutoIndex())
     {
@@ -148,7 +148,7 @@ bool StaticHandler::sendAutoIndex(Request& req, Response& res, const ConfigSpec&
         res.setStatus(200);
         res.setBody(autoindex);
     }
-    catch (const std::exception&)
+    catch (...)
     {
         sendStatusPage(500, res, cfg);
     }

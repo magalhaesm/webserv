@@ -17,20 +17,20 @@ vpath %.hpp $(INC_DIRS)
 vpath %.cpp $(SRC_DIRS)
 
 HEADERS := Server.hpp EventListener.hpp Connection.hpp
-HEADERS += Request.hpp Response.hpp Message.hpp strings.hpp
+HEADERS += Request.hpp Response.hpp Message.hpp HTTPConstants.hpp
 HEADERS += HTTPParser.hpp ABodyParser.hpp URLEncodedParser.hpp
 HEADERS += FormDataParser.hpp Body.hpp ConfigParser.hpp ConfigSpec.hpp
-HEADERS += HTTPConstants.hpp Logger.hpp
-HEADERS += ARequestHandler.hpp LocationHandler.hpp StaticHandler.hpp
-HEADERS += DynamicHandler.hpp AccessControlHandler.hpp filesystem.hpp
+HEADERS += Logger.hpp strings.hpp filesystem.hpp
+HEADERS += ARequestHandler.hpp LocationHandler.hpp StaticContentHandler.hpp
+HEADERS += DynamicContentHandler.hpp AccessControlHandler.hpp
 
 SOURCES := main.cpp Server.cpp EventListener.cpp Connection.cpp
-SOURCES += Request.cpp Response.cpp Message.cpp strings.cpp
+SOURCES += Request.cpp Response.cpp Message.cpp HTTPConstants.cpp
 SOURCES += HTTPParser.cpp ABodyParser.cpp URLEncodedParser.cpp
 SOURCES += FormDataParser.cpp Body.cpp ConfigParser.cpp ConfigSpec.cpp
-SOURCES += HTTPConstants.cpp Logger.cpp
-SOURCES += ARequestHandler.cpp LocationHandler.cpp StaticHandler.cpp
-SOURCES += DynamicHandler.cpp AccessControlHandler.cpp filesystem.cpp
+SOURCES += Logger.cpp strings.cpp filesystem.cpp
+SOURCES += ARequestHandler.cpp LocationHandler.cpp StaticContentHandler.cpp
+SOURCES += DynamicContentHandler.cpp AccessControlHandler.cpp
 
 OBJS     := $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
 CXXFLAGS := -Wall -Werror -Wextra -std=c++98 -g $(addprefix -I ,$(INC_DIRS))

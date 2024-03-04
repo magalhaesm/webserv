@@ -1,12 +1,12 @@
-#ifndef STATIC_HANDLER_HPP
-#define STATIC_HANDLER_HPP
+#ifndef STATIC_CONTENT_HANDLER_HPP
+#define STATIC_CONTENT_HANDLER_HPP
 
 #include "ARequestHandler.hpp"
 
-class StaticHandler : public ARequestHandler
+class StaticContentHandler : public ARequestHandler
 {
 public:
-    StaticHandler();
+    StaticContentHandler();
     void handle(Request& req, Response& res, const ConfigSpec& cfg);
 
 private:
@@ -18,4 +18,4 @@ private:
     bool sendAutoIndex(Request& req, Response& res, const ConfigSpec& cfg);
 };
 
-#endif // !STATIC_HANDLER_HPP
+#endif // !STATIC_CONTENT_HANDLER_HPP

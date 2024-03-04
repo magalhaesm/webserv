@@ -11,9 +11,9 @@
 #include "Server.hpp"
 #include "ConfigSpec.hpp"
 #include "Connection.hpp"
-#include "StaticHandler.hpp"
+#include "StaticContentHandler.hpp"
 #include "LocationHandler.hpp"
-#include "DynamicHandler.hpp"
+#include "DynamicContentHandler.hpp"
 #include "AccessControlHandler.hpp"
 #include "Logger.hpp"
 
@@ -99,10 +99,10 @@ void Server::setupHandlers()
     ARequestHandler* access = new AccessControlHandler();
     _handlers.push_back(access);
 
-    ARequestHandler* dynamicContent = new DynamicHandler();
+    ARequestHandler* dynamicContent = new DynamicContentHandler();
     _handlers.push_back(dynamicContent);
 
-    ARequestHandler* staticContent = new StaticHandler();
+    ARequestHandler* staticContent = new StaticContentHandler();
     _handlers.push_back(staticContent);
 
     _initHandler = location;

@@ -1,12 +1,12 @@
-#ifndef DYNAMIC_HANDLER_HPP
-#define DYNAMIC_HANDLER_HPP
+#ifndef DYNAMIC_CONTENT_HANDLER_HPP
+#define DYNAMIC_CONTENT_HANDLER_HPP
 
 #include "ARequestHandler.hpp"
 
-class DynamicHandler : public ARequestHandler
+class DynamicContentHandler : public ARequestHandler
 {
 public:
-    DynamicHandler();
+    DynamicContentHandler();
     void handle(Request& req, Response& res, const ConfigSpec& cfg);
 
 private:
@@ -14,4 +14,4 @@ private:
     void handlePost(Request& req, Response& res, const ConfigSpec& cfg);
 };
 
-#endif // !DYNAMIC_HANDLER_HPP
+#endif // !DYNAMIC_CONTENT_HANDLER_HPP

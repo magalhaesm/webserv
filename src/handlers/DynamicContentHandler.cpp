@@ -1,10 +1,10 @@
-#include "DynamicHandler.hpp"
+#include "DynamicContentHandler.hpp"
 
-DynamicHandler::DynamicHandler()
+DynamicContentHandler::DynamicContentHandler()
 {
 }
 
-void DynamicHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
+void DynamicContentHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
 {
     if (!cfg.hasCGI())
     {
@@ -25,10 +25,10 @@ void DynamicHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
     }
 }
 
-void DynamicHandler::handleGet(Request&, Response&, const ConfigSpec&)
+void DynamicContentHandler::handleGet(Request&, Response&, const ConfigSpec&)
 {
 }
 
-void DynamicHandler::handlePost(Request&, Response&, const ConfigSpec&)
+void DynamicContentHandler::handlePost(Request&, Response&, const ConfigSpec&)
 {
 }
