@@ -19,13 +19,13 @@ public:
     const std::string& query() const;
     const std::string& getHeader(const std::string& field) const;
     Body* body() const;
-    void setFullPath(const std::string& path);
-    const std::string& fullPath() const;
+    void setRealPath(const std::string& path);
+    const std::string& realPath() const;
     int error() const;
 
 private:
     Message& _msg;
-    std::string _fullPath;
+    std::string _realPath;
     const std::string _empty;
 };
 

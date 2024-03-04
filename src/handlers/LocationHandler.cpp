@@ -18,8 +18,8 @@ void LocationHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
         return;
     }
 
-    std::string fullPath = cfg.getRoot() + req.path();
-    req.setFullPath(ft::strClean(fullPath, '/'));
+    std::string realPath = cfg.getRoot() + req.path();
+    req.setRealPath(ft::strClean(realPath, '/'));
 
     std::string location = cfg.match(req.path());
     if (!location.empty())

@@ -46,14 +46,14 @@ const std::string& Request::path() const
     return _msg.path;
 }
 
-void Request::setFullPath(const std::string& path)
+void Request::setRealPath(const std::string& path)
 {
-    _fullPath = path;
+    _realPath = path;
 }
 
-const std::string& Request::fullPath() const
+const std::string& Request::realPath() const
 {
-    return _fullPath;
+    return _realPath;
 }
 
 const std::string& Request::query() const

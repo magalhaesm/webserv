@@ -29,7 +29,7 @@ const std::string AUTOINDEX_TEMPLATE =
 
 const std::string A_TAG = "    <a href=\"CONTENT\">CONTENT</a>\n";
 
-static std::string genAutoIndex(const std::string& root, const std::string& location);
+static std::string generateAutoIndex(const Request& req);
 
 StaticHandler::StaticHandler()
 {
@@ -60,7 +60,7 @@ void StaticHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
 
 void StaticHandler::handleGet(Request& req, Response& res, const ConfigSpec& cfg)
 {
-    if (ft::isDir(req.fullPath()))
+    if (ft::isDir(req.realPath()))
     {
         if (sendIndex(req, res, cfg))
         {
@@ -74,7 +74,7 @@ void StaticHandler::handleGet(Request& req, Response& res, const ConfigSpec& cfg
         return;
     }
 
-    std::ifstream resource(req.fullPath().c_str());
+    std::ifstream resource(req.realPath().c_str());
     if (resource.is_open())
     {
         res.setStatus(200);
@@ -92,7 +92,7 @@ void StaticHandler::handlePost(Request& req, Response& res, const ConfigSpec& cf
     case FormData:
     {
         const std::string filename = body->get("filename");
-        const std::string fullPath = req.fullPath() + "/" + filename;
+        const std::string fullPath = req.realPath() + "/" + filename;
 
         if (rename(filename.c_str(), fullPath.c_str()) == 0)
         {
@@ -110,12 +110,12 @@ void StaticHandler::handlePost(Request& req, Response& res, const ConfigSpec& cf
 
 void StaticHandler::handleDelete(Request& req, Response& res, const ConfigSpec& cfg)
 {
-    if (ft::isDir(req.fullPath()))
+    if (ft::isDir(req.realPath()))
     {
         sendStatusPage(403, res, cfg);
         return;
     }
-    if (remove(req.fullPath().c_str()) != 0)
+    if (remove(req.realPath().c_str()) != 0)
     {
         sendStatusPage(500, res, cfg);
         return;
@@ -125,7 +125,7 @@ void StaticHandler::handleDelete(Request& req, Response& res, const ConfigSpec& 
 
 bool StaticHandler::sendIndex(Request& req, Response& res, const ConfigSpec& cfg)
 {
-    std::string index = req.fullPath() + '/' + cfg.getIndex();
+    std::string index = req.realPath() + '/' + cfg.getIndex();
     std::ifstream page(index.c_str());
     if (page.is_open())
     {
@@ -144,20 +144,21 @@ bool StaticHandler::sendAutoIndex(Request& req, Response& res, const ConfigSpec&
     }
     try
     {
-        std::string autoindex = genAutoIndex(req.fullPath(), cfg.getLocation());
+        std::string autoindex = generateAutoIndex(req);
         res.setStatus(200);
         res.setBody(autoindex);
     }
-    catch (const std::exception& e)
+    catch (const std::exception&)
     {
         sendStatusPage(500, res, cfg);
     }
     return true;
 }
 
-std::string genAutoIndex(const std::string& path, const std::string& location)
+std::string generateAutoIndex(const Request& req)
 {
-    ft::Strings dir = ft::listDir(path);
+    ft::Strings dir = ft::listDir(req.realPath());
+
     std::string listing;
     for (ft::Strings::iterator it = dir.begin(); it != dir.end(); ++it)
     {
@@ -165,8 +166,9 @@ std::string genAutoIndex(const std::string& path, const std::string& location)
         ft::replace(tag, "CONTENT", *it);
         listing.append(tag);
     }
+
     std::string page = AUTOINDEX_TEMPLATE;
-    ft::replace(page, "TITLE", location);
+    ft::replace(page, "TITLE", req.path());
     ft::replace(page, "LISTING", listing);
     return page;
 }
