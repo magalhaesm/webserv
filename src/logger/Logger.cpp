@@ -17,8 +17,8 @@ std::string Logger::getTimeStamp()
 
 void Logger::log(Request& req, Response& res, const ConfigSpec& cfg)
 {
-    std::cout << getTimeStamp() << " " << cfg.getServerName() << ": " << req.methodText() << " "
-              << req.path() << " - " << res.getStatus() << " " << statusText(res.getStatus());
+    std::cout << getTimeStamp() << " " << cfg.getServerName() << ": " << req.methodText() << " " << req.path() << " - "
+              << res.getStatus() << " " << statusText(res.getStatus());
 
     if (req.method() == POST)
     {
@@ -29,5 +29,5 @@ void Logger::log(Request& req, Response& res, const ConfigSpec& cfg)
 
 void Logger::log(const std::string& message)
 {
-    std::cout << getTimeStamp() << " " << message << std::endl;
+    std::cerr << getTimeStamp() << " " << message << std::endl;
 }

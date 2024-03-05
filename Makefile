@@ -23,6 +23,7 @@ HEADERS += FormDataParser.hpp Body.hpp ConfigParser.hpp ConfigSpec.hpp
 HEADERS += Logger.hpp strings.hpp filesystem.hpp
 HEADERS += ARequestHandler.hpp LocationHandler.hpp StaticContentHandler.hpp
 HEADERS += DynamicContentHandler.hpp AccessControlHandler.hpp
+HEADERS += InternalErrorException.hpp
 
 SOURCES := main.cpp Server.cpp EventListener.cpp Connection.cpp
 SOURCES += Request.cpp Response.cpp Message.cpp HTTPConstants.cpp
@@ -31,6 +32,7 @@ SOURCES += FormDataParser.cpp Body.cpp ConfigParser.cpp ConfigSpec.cpp
 SOURCES += Logger.cpp strings.cpp filesystem.cpp
 SOURCES += ARequestHandler.cpp LocationHandler.cpp StaticContentHandler.cpp
 SOURCES += DynamicContentHandler.cpp AccessControlHandler.cpp
+SOURCES += InternalErrorException.cpp
 
 OBJS     := $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
 CXXFLAGS := -Wall -Werror -Wextra -std=c++98 -g $(addprefix -I ,$(INC_DIRS))
@@ -57,7 +59,8 @@ test: $(NAME)
 	@make -C test --no-print-directory
 
 leak: $(NAME)
-	valgrind --leak-check=full --show-leak-kinds=all ./$(NAME) server.conf
+	valgrind --leak-check=full --show-leak-kinds=all --track-fds=yes \
+		./$(NAME) server.conf
 
 clean:
 	@$(RM) -r $(OBJS)

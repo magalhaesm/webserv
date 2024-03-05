@@ -130,7 +130,7 @@ inline void EventListener::checkTimeout(std::time_t threshold)
         Connection* conn = it->second;
         std::time_t elapsedTime = time(NULL) - conn->getLastActivityTime();
 
-        if (elapsedTime > threshold)
+        if (elapsedTime >= threshold)
         {
             expired.push_back(conn);
         }

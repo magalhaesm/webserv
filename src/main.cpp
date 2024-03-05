@@ -5,6 +5,7 @@
 #include "Server.hpp"
 #include "ConfigParser.hpp"
 #include "EventListener.hpp"
+#include "InternalErrorException.hpp"
 
 int main(int argc, char** argv)
 {
@@ -24,6 +25,11 @@ int main(int argc, char** argv)
             listener.subscribe(new Server(specs[idx]));
         }
         listener.start();
+    }
+    catch (const InternalErrorException& e)
+    {
+        Logger::log(e.what());
+        return e.errnum();
     }
     catch (const std::exception& e)
     {

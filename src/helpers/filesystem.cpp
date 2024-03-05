@@ -2,6 +2,7 @@
 #include <cstring>
 #include <dirent.h>
 #include <stdexcept>
+#include <strings.h>
 #include <sys/stat.h>
 
 #include "strings.hpp"
@@ -10,6 +11,7 @@
 bool ft::isDir(const std::string& path)
 {
     struct stat statbuf;
+    bzero(&statbuf, sizeof(statbuf));
     stat(path.c_str(), &statbuf);
     return (statbuf.st_mode & S_IFMT) == S_IFDIR;
 }
