@@ -66,11 +66,11 @@
       <form action="/password_generator.py" method="post",  enctype="application/x-www-form-urlencoded">
         <label for="length">Comprimento da Senha:</label>
         <input type="number" id="length" name="length" min="1" max="20" required>
-        <input type="checkbox" id="special_chars" name="special_chars" value="s">
+        <input type="checkbox" id="special_chars" name="special_chars" value="true">
         <label for="special_chars">Incluir Caracteres Especiais</label>
-        <input type="checkbox" id="digits" name="digits" value="s">
+        <input type="checkbox" id="digits" name="digits" value="true">
         <label for="digits">Incluir Números</label>
-        <input type="checkbox" id="uppercase" name="uppercase" value="s">
+        <input type="checkbox" id="uppercase" name="uppercase" value="true">
         <label for="uppercase">Incluir Letras Maiúsculas</label>
         <input type="submit" value="Gerar Senha" class="button">
       </form>

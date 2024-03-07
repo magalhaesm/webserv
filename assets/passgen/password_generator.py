@@ -1,11 +1,47 @@
 #!/usr/bin/env python3
 
-import cgi
-import random
+import os
 import string
+import random
+from urllib.parse import parse_qs
+
+PAGE_TEMPLATE = """\
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Password Generator</title>
+    </head>
+    <body>
+        <h1>Password Generator</h1>
+        <p>Your password: {}</p>
+    </body>
+</html>
+"""
 
 
-def generate_password(length, use_special_chars, use_digits, use_uppercase):
+def main():
+    password = generate_password(os.environ['QUERY_STRING'])
+    print(PAGE_TEMPLATE.format(password))
+
+
+def has_param(params, param):
+    return params.get(param, ["false"]) == ["true"]
+
+
+def generate_password(query):
+    """
+    Generate a password based on the given query string.
+
+    :param query: The query string containing password parameters.
+    :return: A randomly generated password.
+    """
+    params = parse_qs(query)
+    length = int(params.get("length", [8])[0])
+    use_special_chars = has_param(params, 'special_chars')
+    use_digits = has_param(params, 'digits')
+    use_uppercase = has_param(params, 'uppercase')
+
     characters = string.ascii_lowercase
     if use_special_chars:
         characters += string.punctuation
@@ -19,16 +55,4 @@ def generate_password(length, use_special_chars, use_digits, use_uppercase):
 
 
 if __name__ == "__main__":
-    # Processamento de dados do formulário CGI
-    form = cgi.FieldStorage()
-    length = int(form.getvalue("length", 8))  # Valor padrão é 8 se não especificado
-    use_special_chars = form.getvalue("special_chars", "n").lower() == "s"
-    use_digits = form.getvalue("digits", "n").lower() == "s"
-    use_uppercase = form.getvalue("uppercase", "n").lower() == "s"
-
-    generated_password = generate_password(
-        length, use_special_chars, use_digits, use_uppercase
-    )
-    print("<html><body>")
-    print("<p>Senha gerada: {}</p>".format(generated_password))
-    print("</body></html>")
+    main()
