@@ -1,12 +1,11 @@
-#include <cerrno>
 #include <cstring>
 #include <dirent.h>
-#include <stdexcept>
 #include <strings.h>
 #include <sys/stat.h>
 
 #include "strings.hpp"
 #include "filesystem.hpp"
+#include "InternalErrorException.hpp"
 
 bool ft::isDir(const std::string& path)
 {
@@ -16,12 +15,12 @@ bool ft::isDir(const std::string& path)
     return (statbuf.st_mode & S_IFMT) == S_IFDIR;
 }
 
-ft::Strings ft::listDir(const std::string& dirname)
+ft::Strings ft::scanDir(const std::string& dirname)
 {
     DIR* dir = opendir(dirname.c_str());
     if (dir == NULL)
     {
-        throw std::runtime_error(strerror(errno));
+        throw InternalErrorException("ft::scanDir: " + dirname);
     }
 
     Strings filenames;

@@ -2,12 +2,14 @@
 #include <fstream>
 
 #include "Body.hpp"
+#include "Logger.hpp"
 #include "strings.hpp"
-#include "filesystem.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
+#include "filesystem.hpp"
 #include "HTTPConstants.hpp"
 #include "StaticContentHandler.hpp"
+#include "InternalErrorException.hpp"
 
 const std::string AUTOINDEX_TEMPLATE =
 
@@ -148,8 +150,9 @@ bool StaticContentHandler::sendAutoIndex(Request& req, Response& res, const Conf
         res.setStatus(OK);
         res.setBody(autoindex);
     }
-    catch (...)
+    catch (const InternalErrorException& e)
     {
+        Logger::log(e.what());
         sendStatusPage(INTERNAL_SERVER_ERROR, res, cfg);
     }
     return true;
@@ -157,7 +160,7 @@ bool StaticContentHandler::sendAutoIndex(Request& req, Response& res, const Conf
 
 std::string generateAutoIndex(const Request& req)
 {
-    ft::Strings dir = ft::listDir(req.realPath());
+    ft::Strings dir = ft::scanDir(req.realPath());
 
     std::string listing;
     for (ft::Strings::iterator it = dir.begin(); it != dir.end(); ++it)

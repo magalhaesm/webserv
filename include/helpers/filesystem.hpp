@@ -6,7 +6,7 @@
 namespace ft
 {
     bool isDir(const std::string& path);
-    Strings listDir(const std::string& dirname);
+    Strings scanDir(const std::string& dirname);
 }
 
 #endif // !FILESYSTEM_HPP
