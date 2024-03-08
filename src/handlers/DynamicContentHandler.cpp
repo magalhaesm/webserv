@@ -36,6 +36,20 @@ void DynamicContentHandler::handle(Request& req, Response& res, const ConfigSpec
     }
 }
 
+void setEnvironment(Request& req, const ConfigSpec& cfg)
+{
+    setenv("CONTENT_TYPE", req.getHeader("Content-Type").c_str(), 1);
+    setenv("CONTENT_LENGTH", req.getHeader("Content-Length").c_str(), 1);
+    setenv("HTTP_USER_AGENT", req.getHeader("User-Agent").c_str(), 1);
+    setenv("PATH_INFO", "", 1);
+    setenv("QUERY_STRING", req.query().c_str(), 1);
+    setenv("REMOTE_HOST", req.getHeader("Host").c_str(), 1);
+    setenv("REQUEST_METHOD", req.methodText().c_str(), 1);
+    setenv("SCRIPT_FILENAME", req.realPath().c_str(), 1);
+    setenv("SCRIPT_NAME", req.path().c_str(), 1);
+    setenv("SERVER_NAME", cfg.getServerName().c_str(), 1);
+}
+
 void DynamicContentHandler::handleGet(Request& req, Response& res, const ConfigSpec& cfg)
 {
     int fd[2];
@@ -57,6 +71,7 @@ void DynamicContentHandler::handleGet(Request& req, Response& res, const ConfigS
         close(fd[READ_END]);
         dup2(fd[WRITE_END], STDOUT_FILENO);
 
+        setEnvironment(req, cfg);
         execl(req.realPath().c_str(), "", NULL);
         close(fd[WRITE_END]);
         throw InternalErrorException(req.realPath());
