@@ -18,8 +18,7 @@ vpath %.cpp $(SRC_DIRS)
 
 HEADERS := Server.hpp EventListener.hpp Connection.hpp
 HEADERS += Request.hpp Response.hpp Message.hpp HTTPConstants.hpp
-HEADERS += HTTPParser.hpp ABodyParser.hpp URLEncodedParser.hpp
-HEADERS += FormDataParser.hpp Body.hpp ConfigParser.hpp ConfigSpec.hpp
+HEADERS += HTTPParser.hpp ConfigParser.hpp ConfigSpec.hpp
 HEADERS += Logger.hpp strings.hpp filesystem.hpp
 HEADERS += ARequestHandler.hpp LocationHandler.hpp StaticContentHandler.hpp
 HEADERS += DynamicContentHandler.hpp AccessControlHandler.hpp
@@ -27,8 +26,7 @@ HEADERS += InternalErrorException.hpp
 
 SOURCES := main.cpp Server.cpp EventListener.cpp Connection.cpp
 SOURCES += Request.cpp Response.cpp Message.cpp HTTPConstants.cpp
-SOURCES += HTTPParser.cpp ABodyParser.cpp URLEncodedParser.cpp
-SOURCES += FormDataParser.cpp Body.cpp ConfigParser.cpp ConfigSpec.cpp
+SOURCES += HTTPParser.cpp ConfigParser.cpp ConfigSpec.cpp
 SOURCES += Logger.cpp strings.cpp filesystem.cpp
 SOURCES += ARequestHandler.cpp LocationHandler.cpp StaticContentHandler.cpp
 SOURCES += DynamicContentHandler.cpp AccessControlHandler.cpp
@@ -40,7 +38,7 @@ CXXFLAGS := -Wall -Werror -Wextra -std=c++98 -g $(addprefix -I ,$(INC_DIRS))
 all: $(NAME)
 
 run: $(NAME)
-	@ echo "--> Running $(NAME)"
+	@ echo "==> Running $(NAME)"
 	@ ./$(NAME) server.conf
 
 $(NAME): $(OBJS)

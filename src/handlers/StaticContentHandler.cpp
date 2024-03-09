@@ -1,7 +1,5 @@
-#include <cstdio>
 #include <fstream>
 
-#include "Body.hpp"
 #include "Logger.hpp"
 #include "strings.hpp"
 #include "Request.hpp"
@@ -86,28 +84,10 @@ void StaticContentHandler::handleGet(Request& req, Response& res, const ConfigSp
     sendStatusPage(NOT_FOUND, res, cfg);
 }
 
-void StaticContentHandler::handlePost(Request& req, Response& res, const ConfigSpec& cfg)
+void StaticContentHandler::handlePost(Request&, Response& res, const ConfigSpec& cfg)
 {
-    Body* body = req.body();
-    switch (body->getType())
-    {
-    case FormData:
-    {
-        const std::string filename = body->get("filename");
-        const std::string fullPath = req.realPath() + "/" + filename;
-
-        if (rename(filename.c_str(), fullPath.c_str()) == 0)
-        {
-            sendStatusPage(OK, res, cfg);
-            return;
-        }
-        break;
-    }
-    case URLEncoded:
-        sendStatusPage(NOT_IMPLEMENTED, res, cfg);
-        return;
-    }
-    sendStatusPage(NOT_FOUND, res, cfg);
+    sendStatusPage(NOT_IMPLEMENTED, res, cfg);
+    return;
 }
 
 void StaticContentHandler::handleDelete(Request& req, Response& res, const ConfigSpec& cfg)

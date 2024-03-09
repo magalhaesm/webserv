@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "strings.hpp"
 #include "Request.hpp"
 
@@ -71,9 +73,14 @@ const std::string& Request::getHeader(const std::string& field) const
     return _empty;
 }
 
-Body* Request::body() const
+int Request::body() const
 {
     return _msg.body;
+}
+
+std::string Request::bodyName() const
+{
+    return _msg.bodyFilename;
 }
 
 int Request::error() const

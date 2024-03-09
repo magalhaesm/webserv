@@ -1,6 +1,4 @@
-#include <cstdlib>
-#include <cstring>
-#include <unistd.h>
+#include <fcntl.h>
 #include <sys/wait.h>
 #include <linux/limits.h>
 
@@ -10,6 +8,8 @@
 
 const int READ_END = 0;
 const int WRITE_END = 1;
+
+void setEnvironment(Request& req, const ConfigSpec& cfg);
 
 DynamicContentHandler::DynamicContentHandler()
 {
@@ -23,35 +23,6 @@ void DynamicContentHandler::handle(Request& req, Response& res, const ConfigSpec
         return;
     }
 
-    switch (req.method())
-    {
-    case GET:
-        handleGet(req, res, cfg);
-        break;
-    case POST:
-        handlePost(req, res, cfg);
-        break;
-    default:
-        sendStatusPage(METHOD_NOT_ALLOWED, res, cfg);
-    }
-}
-
-void setEnvironment(Request& req, const ConfigSpec& cfg)
-{
-    setenv("CONTENT_TYPE", req.getHeader("Content-Type").c_str(), 1);
-    setenv("CONTENT_LENGTH", req.getHeader("Content-Length").c_str(), 1);
-    setenv("HTTP_USER_AGENT", req.getHeader("User-Agent").c_str(), 1);
-    setenv("PATH_INFO", "", 1);
-    setenv("QUERY_STRING", req.query().c_str(), 1);
-    setenv("REMOTE_HOST", req.getHeader("Host").c_str(), 1);
-    setenv("REQUEST_METHOD", req.methodText().c_str(), 1);
-    setenv("SCRIPT_FILENAME", req.realPath().c_str(), 1);
-    setenv("SCRIPT_NAME", req.path().c_str(), 1);
-    setenv("SERVER_NAME", cfg.getServerName().c_str(), 1);
-}
-
-void DynamicContentHandler::handleGet(Request& req, Response& res, const ConfigSpec& cfg)
-{
     int fd[2];
     int status;
 
@@ -71,6 +42,9 @@ void DynamicContentHandler::handleGet(Request& req, Response& res, const ConfigS
         close(fd[READ_END]);
         dup2(fd[WRITE_END], STDOUT_FILENO);
 
+        int input = open(req.bodyName().c_str(), O_RDONLY);
+        dup2(input, STDIN_FILENO);
+
         setEnvironment(req, cfg);
         execl(req.realPath().c_str(), "", NULL);
         close(fd[WRITE_END]);
@@ -82,10 +56,10 @@ void DynamicContentHandler::handleGet(Request& req, Response& res, const ConfigS
         char buffer[PIPE_BUF];
         std::string cgiContent;
 
-        int bytesRead;
-        while ((bytesRead = read(fd[READ_END], buffer, PIPE_BUF)))
+        int numRead;
+        while ((numRead = read(fd[READ_END], buffer, PIPE_BUF)))
         {
-            cgiContent.append(buffer, bytesRead);
+            cgiContent.append(buffer, numRead);
         }
         close(fd[READ_END]);
 
@@ -100,7 +74,16 @@ void DynamicContentHandler::handleGet(Request& req, Response& res, const ConfigS
     }
 }
 
-void DynamicContentHandler::handlePost(Request&, Response& res, const ConfigSpec& cfg)
+void setEnvironment(Request& req, const ConfigSpec& cfg)
 {
-    sendStatusPage(NOT_IMPLEMENTED, res, cfg);
+    setenv("CONTENT_TYPE", req.getHeader("Content-Type").c_str(), 1);
+    setenv("CONTENT_LENGTH", req.getHeader("Content-Length").c_str(), 1);
+    setenv("HTTP_USER_AGENT", req.getHeader("User-Agent").c_str(), 1);
+    setenv("PATH_INFO", "", 1);
+    setenv("QUERY_STRING", req.query().c_str(), 1);
+    setenv("REMOTE_HOST", req.getHeader("Host").c_str(), 1);
+    setenv("REQUEST_METHOD", req.methodText().c_str(), 1);
+    setenv("SCRIPT_FILENAME", req.realPath().c_str(), 1);
+    setenv("SCRIPT_NAME", req.path().c_str(), 1);
+    setenv("SERVER_NAME", cfg.getServerName().c_str(), 1);
 }

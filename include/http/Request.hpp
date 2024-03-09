@@ -18,7 +18,8 @@ public:
     const std::string& path() const;
     const std::string& query() const;
     const std::string& getHeader(const std::string& field) const;
-    Body* body() const;
+    int body() const;
+    std::string bodyName() const;
     void setRealPath(const std::string& path);
     const std::string& realPath() const;
     int error() const;

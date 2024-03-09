@@ -7,7 +7,7 @@
 #include "HTTPParser.hpp"
 #include "EventListener.hpp"
 
-const int BUFSIZE = 8192;
+const int BUFSIZE = 4096;
 
 Connection::Connection(EventListener* listener, Server* server)
     : _server(server)
@@ -78,7 +78,8 @@ inline void Connection::processRequest()
 inline void Connection::send(const std::string& response)
 {
     _raw = response;
-    clear(_msg);
+    _msg.clear();
+    // clear(_msg);
 }
 
 bool Connection::close()

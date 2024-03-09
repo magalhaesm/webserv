@@ -1,11 +1,44 @@
+#include <unistd.h>
+
 #include "Message.hpp"
-#include "ABodyParser.hpp"
 
 Message::Message()
-    : body(NULL)
-    , parser(NULL)
+    : body(0)
 {
-    clear(*this);
+    ::clear(*this);
+}
+
+Message::~Message()
+{
+    this->clear();
+}
+
+void Message::clear()
+{
+    method = UNKNOWN;
+    version.clear();
+    path.clear();
+    query.clear();
+    headers.clear();
+    if (body != 0)
+    {
+        close(body);
+        body = 0;
+    }
+    unlink(bodyFilename.c_str());
+    state = HEADERS;
+    chunked = false;
+    cLength = 0;
+    written = 0;
+    error = 0;
+}
+
+void Message::makeBody()
+{
+    char templateName[] = "request.XXXXXX";
+
+    body = mkstemp(templateName);
+    bodyFilename = templateName;
 }
 
 void clear(Message& msg)
@@ -15,18 +48,13 @@ void clear(Message& msg)
     msg.path.clear();
     msg.query.clear();
     msg.headers.clear();
+    if (msg.body != 0)
+    {
+        close(msg.body);
+    }
     msg.state = HEADERS;
-    msg.bodySize = 0;
+    msg.chunked = false;
+    msg.cLength = 0;
+    msg.written = 0;
     msg.error = 0;
-
-    if (msg.body != NULL)
-    {
-        delete msg.body;
-        msg.body = NULL;
-    }
-    if (msg.parser != NULL)
-    {
-        delete msg.parser;
-        msg.parser = NULL;
-    }
 }

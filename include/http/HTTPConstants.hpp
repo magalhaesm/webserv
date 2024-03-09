@@ -36,8 +36,9 @@ enum ParsingState
 {
     HEADERS,
     BODY,
-    BODY_TYPE,
-    BODY_CONTENT,
+    TRANSFER_CONTROL,
+    CONTENT_LENGTH,
+    CHUNKED,
     FINISH
 };
 

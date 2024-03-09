@@ -1,25 +1,24 @@
-#include <cstdlib>
 #include <sstream>
+#include <unistd.h>
 
 #include "HTTPParser.hpp"
-#include "FormDataParser.hpp"
-#include "URLEncodedParser.hpp"
 #include "HTTPConstants.hpp"
 #include "strings.hpp"
 
 const bool AGAIN = false;
 const bool DONE = true;
+const std::string FINAL_CHUNK = "0" + DELIMITER;
 
 bool parseHeader(std::string& raw, Message& msg);
 void readRequestLine(std::istringstream& stream, Message& msg);
 void readHeaders(std::istringstream& stream, Message& msg);
+int parseHex(const std::string& strNum);
 
 void setMethod(const std::string& method, Message& msg);
 void removeCR(std::string& s);
-bool has(const std::string& term, const Headers::const_iterator& it);
 void setBodySize(Message& msg);
 
-bool HTTPParser::parseRequest(std::string& raw, Message& msg, int maxSize)
+bool HTTPParser::parseRequest(std::string& raw, Message& msg, size_t maxSize)
 {
     switch (msg.state)
     {
@@ -47,45 +46,66 @@ bool HTTPParser::parseRequest(std::string& raw, Message& msg, int maxSize)
             msg.state = FINISH;
             break;
         case POST:
-            msg.state = BODY_TYPE;
+            setBodySize(msg);
+            msg.state = TRANSFER_CONTROL;
             break;
         }
         return parseRequest(raw, msg, maxSize);
     }
-    case BODY_TYPE:
+    case TRANSFER_CONTROL:
     {
-        Headers::const_iterator it = msg.headers.find("content-type");
-        if (it != msg.headers.end())
+        if (msg.headers.count("transfer-encoding"))
         {
-            if (has("x-www-form-urlencoded", it))
+            std::string encoding = ft::toLower(msg.headers.at("transfer-encoding"));
+            if (encoding.find("chunked") != std::string::npos)
             {
-                msg.parser = new URLEncodedParser(raw, msg, maxSize);
+                msg.state = CHUNKED;
             }
-            else if (has("multipart/form-data", it))
-            {
-                msg.parser = new FormDataParser(raw, msg, maxSize);
-            }
-            msg.state = BODY_CONTENT;
-            return parseRequest(raw, msg, maxSize);
         }
-        msg.error = BAD_REQUEST;
-        msg.state = FINISH;
-        return DONE;
+        else
+        {
+            msg.state = CONTENT_LENGTH;
+        }
+        msg.makeBody();
+        return parseRequest(raw, msg, maxSize);
     }
-    case BODY_CONTENT:
+    case CONTENT_LENGTH:
     {
-        if (msg.parser->needsMoreContent())
+        msg.written += write(msg.body, raw.data(), raw.size());
+        raw.clear();
+
+        if (msg.written < msg.cLength)
         {
             return AGAIN;
         }
-        msg.body = msg.parser->createBody();
         msg.state = FINISH;
+        return DONE;
+    }
+    case CHUNKED:
+    {
+        if (raw.find(FINAL_CHUNK) == std::string::npos)
+        {
+            return AGAIN;
+        }
+        size_t delim = raw.find(CRLF);
+        size_t contentBegin = delim + CRLF.length();
+        int contentSize = parseHex(raw) + CRLF.length();
+        std::string content = raw.substr(contentBegin, contentSize);
+        msg.written += write(msg.body, content.data(), content.length());
+        raw.erase();
         return DONE;
     }
     case FINISH:
         return DONE;
     }
     return AGAIN;
+}
+
+int parseHex(const std::string& strNum)
+{
+    int decimal;
+    std::istringstream(strNum) >> std::hex >> decimal;
+    return decimal;
 }
 
 bool parseHeader(std::string& raw, Message& msg)
@@ -99,7 +119,6 @@ bool parseHeader(std::string& raw, Message& msg)
     std::istringstream stream(raw.substr(0, end));
     readRequestLine(stream, msg);
     readHeaders(stream, msg);
-    setBodySize(msg);
 
     raw.erase(0, end + DELIMITER.length());
     return DONE;
@@ -109,8 +128,8 @@ void setBodySize(Message& msg)
 {
     if (msg.headers.count("content-length"))
     {
-        int bodySize = std::atoi(msg.headers.at("content-length").c_str());
-        msg.bodySize = bodySize;
+        int clength = std::atoi(msg.headers.at("content-length").c_str());
+        msg.cLength = clength;
     }
 }
 
@@ -127,11 +146,11 @@ inline void readRequestLine(std::istringstream& stream, Message& msg)
     }
 
     setMethod(method, msg);
-    size_t question = msg.path.find("?");
-    if (question != std::string::npos)
+    size_t delim = msg.path.find("?");
+    if (delim != std::string::npos)
     {
-        msg.query = URLEncodedParser::decode(msg.path.substr(question + 1));
-        msg.path = msg.path.substr(0, question);
+        msg.query = msg.path.substr(delim + 1);
+        msg.path.resize(delim);
     }
 }
 
@@ -185,9 +204,4 @@ inline void removeCR(std::string& s)
     {
         s.resize(len);
     }
-}
-
-inline bool has(const std::string& term, const Headers::const_iterator& it)
-{
-    return it->second.find(term) != std::string::npos;
 }
