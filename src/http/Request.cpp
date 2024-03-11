@@ -1,3 +1,4 @@
+#include <fcntl.h>
 #include <unistd.h>
 
 #include "strings.hpp"
@@ -75,12 +76,7 @@ const std::string& Request::getHeader(const std::string& field) const
 
 int Request::body() const
 {
-    return _msg.body;
-}
-
-std::string Request::bodyName() const
-{
-    return _msg.bodyFilename;
+    return open(_msg.bodyFilename.c_str(), O_RDONLY);
 }
 
 int Request::error() const
