@@ -47,6 +47,11 @@ const std::string& ConfigSpec::getIndex() const
     return _directives->index;
 }
 
+bool ConfigSpec::hasIndex() const
+{
+    return !_directives->index.empty();
+}
+
 const std::string ConfigSpec::getRoot() const
 {
     if (_directives->root.empty())
@@ -91,13 +96,16 @@ const Redirect& ConfigSpec::getRedirect() const
     return _directives->redirect;
 }
 
+#include <iostream>
 std::string ConfigSpec::match(const std::string& path) const
 {
+    std::cout << "Path: " << path << '\n';
     Locations::iterator it = _directives->locations.begin();
     for (; it != _directives->locations.end(); ++it)
     {
         if (path.find(it->first) != std::string::npos)
         {
+            std::cout << "Match: " << it->first << '\n';
             return it->first;
         }
     }

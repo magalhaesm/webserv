@@ -60,20 +60,6 @@ void StaticContentHandler::handle(Request& req, Response& res, const ConfigSpec&
 
 void StaticContentHandler::handleGet(Request& req, Response& res, const ConfigSpec& cfg)
 {
-    if (ft::isDir(req.realPath()))
-    {
-        if (sendIndex(req, res, cfg))
-        {
-            return;
-        }
-        if (sendAutoIndex(req, res, cfg))
-        {
-            return;
-        }
-        sendStatusPage(FORBIDDEN, res, cfg);
-        return;
-    }
-
     std::ifstream resource(req.realPath().c_str());
     if (resource.is_open())
     {

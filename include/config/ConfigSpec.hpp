@@ -16,6 +16,7 @@ public:
     int getPort() const;
     const std::string& getServerName() const;
     const std::string& getIndex() const;
+    bool hasIndex() const;
     const std::string getRoot() const;
     bool hasAutoIndex() const;
     bool hasErrorPage(int error) const;
