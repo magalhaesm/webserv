@@ -2,6 +2,7 @@
 #include <csignal>
 #include <iostream>
 #include <sys/socket.h>
+#include <unistd.h>
 
 #include "Connection.hpp"
 #include "EventListener.hpp"
