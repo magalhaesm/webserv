@@ -1,6 +1,7 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <linux/limits.h>
+#include <unistd.h>
 
 #include "Logger.hpp"
 #include "HTTPConstants.hpp"
