@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 
-class InternalErrorException : public std::runtime_error
+class InternalErrorException : public std::invalid_argument
 {
 public:
     InternalErrorException(const std::string& message);

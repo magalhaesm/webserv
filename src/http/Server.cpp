@@ -1,9 +1,7 @@
-#include <cerrno>
 #include <string>
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
-#include <iostream>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -11,6 +9,7 @@
 #include "Server.hpp"
 #include "ConfigSpec.hpp"
 #include "Connection.hpp"
+#include "InternalErrorException.hpp"
 #include "StaticContentHandler.hpp"
 #include "LocationHandler.hpp"
 #include "DynamicContentHandler.hpp"
@@ -18,8 +17,6 @@
 #include "Logger.hpp"
 
 const int BACKLOG = SOMAXCONN;
-
-static void fatalError(const std::string& errMsg);
 
 Server::Server(const ConfigSpec& cfg)
     : _cfg(cfg)
@@ -49,7 +46,7 @@ void Server::listen()
 {
     if (::listen(_socket, BACKLOG) == -1)
     {
-        fatalError("Error while listening");
+        throw InternalErrorException("Error while listening");
     }
 }
 
@@ -73,7 +70,7 @@ int Server::createSocket()
     int fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd == -1)
     {
-        fatalError("Error creating socket");
+        throw InternalErrorException("Error creating socket");
     }
 
     struct sockaddr_in addr = {};
@@ -85,7 +82,7 @@ int Server::createSocket()
     setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
     if (bind(fd, (struct sockaddr*)&addr, sizeof(addr)) == -1)
     {
-        fatalError("Error during socket initialization");
+        throw InternalErrorException("Error during socket initialization");
     }
 
     return fd;
@@ -109,10 +106,4 @@ void Server::setupHandlers()
     location->setNext(access);
     access->setNext(dynamicContent);
     dynamicContent->setNext(staticContent);
-}
-
-void fatalError(const std::string& errMsg)
-{
-    std::cerr << errMsg << ": " << strerror(errno) << std::endl;
-    exit(EXIT_FAILURE);
 }

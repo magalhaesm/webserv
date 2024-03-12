@@ -1,7 +1,9 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <linux/limits.h>
+#include <unistd.h>
 
+#include "Logger.hpp"
 #include "HTTPConstants.hpp"
 #include "DynamicContentHandler.hpp"
 #include "InternalErrorException.hpp"
@@ -10,6 +12,7 @@ const int READ_END = 0;
 const int WRITE_END = 1;
 
 void setEnvironment(Request& req, const ConfigSpec& cfg);
+std::string runCGI(Request& req, const ConfigSpec& cfg);
 
 DynamicContentHandler::DynamicContentHandler()
 {
@@ -22,55 +25,64 @@ void DynamicContentHandler::handle(Request& req, Response& res, const ConfigSpec
         _next->handle(req, res, cfg);
         return;
     }
+    try
+    {
+        std::string response = runCGI(req, cfg);
+        res.setStatus(OK);
+        res.setBody(response);
+    }
+    catch (const std::runtime_error& e)
+    {
+        Logger::log(e.what());
+        sendStatusPage(INTERNAL_SERVER_ERROR, res, cfg);
+    }
+}
 
+std::string runCGI(Request& req, const ConfigSpec& cfg)
+{
     int fd[2];
     int status;
 
     if (pipe(fd) == -1)
     {
-        sendStatusPage(INTERNAL_SERVER_ERROR, res, cfg);
-        return;
+        throw std::runtime_error("pipe");
     }
 
     switch (fork())
     {
     case -1:
-        sendStatusPage(INTERNAL_SERVER_ERROR, res, cfg);
-        return;
+        throw std::runtime_error("fork");
     case 0:
     {
         close(fd[READ_END]);
         dup2(fd[WRITE_END], STDOUT_FILENO);
-
-        int input = open(req.bodyName().c_str(), O_RDONLY);
-        dup2(input, STDIN_FILENO);
+        dup2(req.body(), STDIN_FILENO);
 
         setEnvironment(req, cfg);
         execl(req.realPath().c_str(), "", NULL);
+
         close(fd[WRITE_END]);
         throw InternalErrorException(req.realPath());
     }
     default:
         close(fd[WRITE_END]);
 
-        char buffer[PIPE_BUF];
-        std::string cgiContent;
-
         int numRead;
+        char buffer[PIPE_BUF];
+        std::string response;
         while ((numRead = read(fd[READ_END], buffer, PIPE_BUF)))
         {
-            cgiContent.append(buffer, numRead);
+            response.append(buffer, numRead);
         }
+
         close(fd[READ_END]);
 
         waitpid(0, &status, 0);
         if (WIFEXITED(status) && WEXITSTATUS(status) == 0)
         {
-            res.setStatus(OK);
-            res.setBody(cgiContent);
-            return;
+            return response;
         }
-        sendStatusPage(INTERNAL_SERVER_ERROR, res, cfg);
+        throw std::runtime_error("CGI process exited with non-zero status");
     }
 }
 

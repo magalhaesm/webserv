@@ -309,7 +309,6 @@ void ConfigParser::validateClientBodySize(const Strings& tokens, Directives* dir
     {
         throw ParseException(fmtError("invalid value for 'client_body_size': " + tokens[1]));
     }
-
     directive->client_max_body_size = std::atoi(tokens[1].c_str()) << 20;
 }
 

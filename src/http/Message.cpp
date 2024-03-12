@@ -5,7 +5,7 @@
 Message::Message()
     : body(0)
 {
-    ::clear(*this);
+    this->clear();
 }
 
 Message::~Message()
@@ -27,8 +27,7 @@ void Message::clear()
     }
     unlink(bodyFilename.c_str());
     state = HEADERS;
-    chunked = false;
-    cLength = 0;
+    clength = 0;
     written = 0;
     error = 0;
 }
@@ -39,22 +38,4 @@ void Message::makeBody()
 
     body = mkstemp(templateName);
     bodyFilename = templateName;
-}
-
-void clear(Message& msg)
-{
-    msg.method = UNKNOWN;
-    msg.version.clear();
-    msg.path.clear();
-    msg.query.clear();
-    msg.headers.clear();
-    if (msg.body != 0)
-    {
-        close(msg.body);
-    }
-    msg.state = HEADERS;
-    msg.chunked = false;
-    msg.cLength = 0;
-    msg.written = 0;
-    msg.error = 0;
 }

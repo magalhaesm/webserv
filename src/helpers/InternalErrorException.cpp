@@ -4,7 +4,7 @@
 #include "InternalErrorException.hpp"
 
 InternalErrorException::InternalErrorException(const std::string& message)
-    : std::runtime_error(message + ": " + strerror(errno))
+    : std::invalid_argument(message + ": " + strerror(errno))
     , _errnum(errno)
 {
 }

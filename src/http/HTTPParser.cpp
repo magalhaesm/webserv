@@ -12,11 +12,12 @@ const std::string FINAL_CHUNK = "0" + DELIMITER;
 bool parseHeader(std::string& raw, Message& msg);
 void readRequestLine(std::istringstream& stream, Message& msg);
 void readHeaders(std::istringstream& stream, Message& msg);
+bool isChunkedTransferEncoding(const Message& msg);
 int parseHex(const std::string& strNum);
 
 void setMethod(const std::string& method, Message& msg);
 void removeCR(std::string& s);
-void setBodySize(Message& msg);
+void setContentLength(Message& msg);
 
 bool HTTPParser::parseRequest(std::string& raw, Message& msg, size_t maxSize)
 {
@@ -46,7 +47,6 @@ bool HTTPParser::parseRequest(std::string& raw, Message& msg, size_t maxSize)
             msg.state = FINISH;
             break;
         case POST:
-            setBodySize(msg);
             msg.state = TRANSFER_CONTROL;
             break;
         }
@@ -54,16 +54,13 @@ bool HTTPParser::parseRequest(std::string& raw, Message& msg, size_t maxSize)
     }
     case TRANSFER_CONTROL:
     {
-        if (msg.headers.count("transfer-encoding"))
+        if (isChunkedTransferEncoding(msg))
         {
-            std::string encoding = ft::toLower(msg.headers.at("transfer-encoding"));
-            if (encoding.find("chunked") != std::string::npos)
-            {
-                msg.state = CHUNKED;
-            }
+            msg.state = CHUNKED;
         }
         else
         {
+            setContentLength(msg);
             msg.state = CONTENT_LENGTH;
         }
         msg.makeBody();
@@ -74,7 +71,7 @@ bool HTTPParser::parseRequest(std::string& raw, Message& msg, size_t maxSize)
         msg.written += write(msg.body, raw.data(), raw.size());
         raw.clear();
 
-        if (msg.written < msg.cLength)
+        if (msg.written < msg.clength)
         {
             return AGAIN;
         }
@@ -89,7 +86,7 @@ bool HTTPParser::parseRequest(std::string& raw, Message& msg, size_t maxSize)
         }
         size_t delim = raw.find(CRLF);
         size_t contentBegin = delim + CRLF.length();
-        int contentSize = parseHex(raw) + CRLF.length();
+        int contentSize = parseHex(raw);
         std::string content = raw.substr(contentBegin, contentSize);
         msg.written += write(msg.body, content.data(), content.length());
         raw.erase();
@@ -101,14 +98,34 @@ bool HTTPParser::parseRequest(std::string& raw, Message& msg, size_t maxSize)
     return AGAIN;
 }
 
-int parseHex(const std::string& strNum)
+inline void setContentLength(Message& msg)
+{
+    if (msg.headers.count("content-length"))
+    {
+        int clength = std::atoi(msg.headers.at("content-length").c_str());
+        msg.clength = clength;
+    }
+}
+
+inline bool isChunkedTransferEncoding(const Message& msg)
+{
+    Headers::const_iterator it = msg.headers.find("transfer-encoding");
+    if (it == msg.headers.end())
+    {
+        return false;
+    }
+    std::string encoding = ft::toLower(it->second);
+    return encoding.find("chunked") != std::string::npos;
+}
+
+inline int parseHex(const std::string& strNum)
 {
     int decimal;
     std::istringstream(strNum) >> std::hex >> decimal;
     return decimal;
 }
 
-bool parseHeader(std::string& raw, Message& msg)
+inline bool parseHeader(std::string& raw, Message& msg)
 {
     size_t end = raw.find(DELIMITER);
     if (end == std::string::npos)
@@ -122,15 +139,6 @@ bool parseHeader(std::string& raw, Message& msg)
 
     raw.erase(0, end + DELIMITER.length());
     return DONE;
-}
-
-void setBodySize(Message& msg)
-{
-    if (msg.headers.count("content-length"))
-    {
-        int clength = std::atoi(msg.headers.at("content-length").c_str());
-        msg.cLength = clength;
-    }
 }
 
 inline void readRequestLine(std::istringstream& stream, Message& msg)

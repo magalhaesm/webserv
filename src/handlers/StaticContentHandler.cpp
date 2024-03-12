@@ -87,7 +87,6 @@ void StaticContentHandler::handleGet(Request& req, Response& res, const ConfigSp
 void StaticContentHandler::handlePost(Request&, Response& res, const ConfigSpec& cfg)
 {
     sendStatusPage(NOT_IMPLEMENTED, res, cfg);
-    return;
 }
 
 void StaticContentHandler::handleDelete(Request& req, Response& res, const ConfigSpec& cfg)

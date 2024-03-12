@@ -79,7 +79,6 @@ inline void Connection::send(const std::string& response)
 {
     _raw = response;
     _msg.clear();
-    // clear(_msg);
 }
 
 bool Connection::close()
