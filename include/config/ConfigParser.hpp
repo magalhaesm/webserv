@@ -47,6 +47,7 @@ private:
     ConfigSpecList _specs;
 
     void parse();
+    void ensureEssentialDirectivesExist();
     bool isCommentOrEmpty(const std::string& line);
     void findNewServerBlock(Strings& tokens);
     void parseServerBlock(const Strings& tokens);

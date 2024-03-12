@@ -74,7 +74,23 @@ void ConfigParser::parse()
         }
     }
     checkOpenBlocks();
+    ensureEssentialDirectivesExist();
 }
+
+void ConfigParser::ensureEssentialDirectivesExist() {
+    for (std::vector<Directives>::iterator it = _directives.begin(); it != _directives.end(); ++it)
+    {
+        if (it->listen == 0)
+        {
+            throw ParseException("Missing 'listen' directive in a server block.");
+        }
+        if (it->server_name.empty())
+        {
+            throw ParseException("Missing 'server_name' directive in a server block.");
+        }
+    }
+}
+
 
 inline bool ConfigParser::isCommentOrEmpty(const std::string& line)
 {
@@ -263,6 +279,8 @@ void ConfigParser::validateRedirect(const Strings& tokens, Directives* directive
 
 void ConfigParser::validateMethods(const Strings& tokens, Directives* directive)
 {
+    checkArgCount(tokens, tokens.size() < 2);
+
     static std::set<std::string> methods;
     methods.insert("get");
     methods.insert("post");
@@ -282,9 +300,20 @@ void ConfigParser::validateMethods(const Strings& tokens, Directives* directive)
 void ConfigParser::validateClientBodySize(const Strings& tokens, Directives* directive)
 {
     checkArgCount(tokens, tokens.size() != 2);
+
+    std::istringstream iss(tokens[1]);
+    long int value; 
+    char extraChar;
+
+    if (!(iss >> value) || value < 0 || iss.get(extraChar))
+    {
+        throw ParseException(fmtError("invalid value for 'client_body_size': " + tokens[1]));
+    }
+
     directive->client_max_body_size = std::atoi(tokens[1].c_str()) << 20;
 }
 
+    
 inline void ConfigParser::enterServerContext()
 {
     _directives.push_back(Directives());
