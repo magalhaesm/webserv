@@ -18,6 +18,7 @@ protected:
     ARequestHandler* _next;
 
     void sendStatusPage(int code, Response& res, const ConfigSpec& cfg);
+    bool fileExists(const std::string& filename);
 
 private:
     void sendDefaultErrorPage(int code, Response& res);

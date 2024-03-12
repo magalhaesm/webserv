@@ -1,6 +1,8 @@
 #include "strings.hpp"
 #include "LocationHandler.hpp"
 
+static void setRealPath(Request& req, const ConfigSpec& cfg);
+
 LocationHandler::LocationHandler()
 {
 }
@@ -18,8 +20,7 @@ void LocationHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
         return;
     }
 
-    std::string realPath = cfg.getRoot() + req.path();
-    req.setRealPath(ft::strClean(realPath, '/'));
+    setRealPath(req, cfg);
 
     std::string location = cfg.match(req.path());
     if (!location.empty())
@@ -28,4 +29,10 @@ void LocationHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
         return;
     }
     _next->handle(req, res, cfg);
+}
+
+inline void setRealPath(Request& req, const ConfigSpec& cfg)
+{
+    std::string realPath = cfg.getRoot() + req.path();
+    req.setRealPath(ft::strClean(realPath, '/'));
 }
