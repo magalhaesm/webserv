@@ -47,11 +47,6 @@ const std::string& ConfigSpec::getIndex() const
     return _directives->index;
 }
 
-bool ConfigSpec::hasIndex() const
-{
-    return !_directives->index.empty();
-}
-
 const std::string ConfigSpec::getRoot() const
 {
     if (_directives->root.empty())

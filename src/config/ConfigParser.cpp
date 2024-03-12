@@ -77,7 +77,8 @@ void ConfigParser::parse()
     ensureEssentialDirectivesExist();
 }
 
-void ConfigParser::ensureEssentialDirectivesExist() {
+void ConfigParser::ensureEssentialDirectivesExist()
+{
     for (std::vector<Directives>::iterator it = _directives.begin(); it != _directives.end(); ++it)
     {
         if (it->listen == 0)
@@ -90,7 +91,6 @@ void ConfigParser::ensureEssentialDirectivesExist() {
         }
     }
 }
-
 
 inline bool ConfigParser::isCommentOrEmpty(const std::string& line)
 {
@@ -174,7 +174,7 @@ void ConfigParser::initializeValidationMap()
     _keywords["root"] = &ConfigParser::validateRoot;
     _keywords["autoindex"] = &ConfigParser::validateAutoindex;
     _keywords["error_page"] = &ConfigParser::validateErrorPage;
-    _keywords["cgi"] = &ConfigParser::validateCGI;
+    _keywords["cgi_pass"] = &ConfigParser::validateCGI;
     _keywords["redirect"] = &ConfigParser::validateRedirect;
     _keywords["limit_except"] = &ConfigParser::validateMethods;
     _keywords["client_body_size"] = &ConfigParser::validateClientBodySize;
@@ -302,7 +302,7 @@ void ConfigParser::validateClientBodySize(const Strings& tokens, Directives* dir
     checkArgCount(tokens, tokens.size() != 2);
 
     std::istringstream iss(tokens[1]);
-    long int value; 
+    long int value;
     char extraChar;
 
     if (!(iss >> value) || value < 0 || iss.get(extraChar))
@@ -312,7 +312,6 @@ void ConfigParser::validateClientBodySize(const Strings& tokens, Directives* dir
     directive->client_max_body_size = std::atoi(tokens[1].c_str()) << 20;
 }
 
-    
 inline void ConfigParser::enterServerContext()
 {
     _directives.push_back(Directives());
