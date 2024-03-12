@@ -12,7 +12,13 @@ void AccessControlHandler::handle(Request& req, Response& res, const ConfigSpec&
         sendStatusPage(METHOD_NOT_ALLOWED, res, cfg);
         return;
     }
-
+    if (cfg.hasRedirect())
+    {
+        Redirect redir = cfg.getRedirect();
+        res.setHeader("Location", redir.url);
+        sendStatusPage(redir.code, res, cfg);
+        return;
+    }
     if (_next)
     {
         _next->handle(req, res, cfg);
