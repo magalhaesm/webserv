@@ -6,8 +6,7 @@ CHECK := \342\234\224
 LOG   := printf "[$(CYAN)$(CHECK)$(RESET)] %s\n"
 
 OBJ_DIR  := obj
-DIRS     := http http/parser events config handlers helpers controllers
-DIRS     += logger
+DIRS     := http http/parser events config handlers helpers logger
 SRC_DIRS := $(addprefix src/, $(DIRS))
 SRC_DIRS += src
 INC_DIRS := $(addprefix include/, $(DIRS))
@@ -21,16 +20,10 @@ HEADERS += Request.hpp Response.hpp Message.hpp HTTPConstants.hpp
 HEADERS += HTTPParser.hpp ConfigParser.hpp ConfigSpec.hpp
 HEADERS += Logger.hpp strings.hpp filesystem.hpp
 HEADERS += ARequestHandler.hpp LocationHandler.hpp StaticContentHandler.hpp
-HEADERS += DynamicContentHandler.hpp AccessControlHandler.hpp
+HEADERS += DynamicContentHandler.hpp AccessControlHandler.hpp IndexHandler.hpp
 HEADERS += InternalErrorException.hpp
 
-SOURCES := main.cpp Server.cpp EventListener.cpp Connection.cpp
-SOURCES += Request.cpp Response.cpp Message.cpp HTTPConstants.cpp
-SOURCES += HTTPParser.cpp ConfigParser.cpp ConfigSpec.cpp
-SOURCES += Logger.cpp strings.cpp filesystem.cpp
-SOURCES += ARequestHandler.cpp LocationHandler.cpp StaticContentHandler.cpp
-SOURCES += DynamicContentHandler.cpp AccessControlHandler.cpp
-SOURCES += InternalErrorException.cpp
+SOURCES := main.cpp $(HEADERS:.hpp=.cpp)
 
 OBJS     := $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
 CXXFLAGS := -Wall -Werror -Wextra -std=c++98 -g $(addprefix -I ,$(INC_DIRS))

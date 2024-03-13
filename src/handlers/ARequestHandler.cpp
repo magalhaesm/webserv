@@ -45,6 +45,12 @@ void ARequestHandler::sendStatusPage(int code, Response& res, const ConfigSpec& 
     sendDefaultErrorPage(code, res);
 }
 
+bool ARequestHandler::fileExists(const std::string& filename)
+{
+    std::ifstream file(filename.c_str());
+    return file.good();
+}
+
 void ARequestHandler::sendDefaultErrorPage(int code, Response& res)
 {
     std::string page = ERROR_PAGE_TEMPLATE;

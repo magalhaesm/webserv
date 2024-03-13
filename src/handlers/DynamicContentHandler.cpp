@@ -12,6 +12,7 @@ const int READ_END = 0;
 const int WRITE_END = 1;
 
 void setEnvironment(Request& req, const ConfigSpec& cfg);
+bool isCGI(Request& req, const ConfigSpec& cfg);
 std::string runCGI(Request& req, const ConfigSpec& cfg);
 
 DynamicContentHandler::DynamicContentHandler()
@@ -20,9 +21,17 @@ DynamicContentHandler::DynamicContentHandler()
 
 void DynamicContentHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
 {
-    if (!cfg.hasCGI())
+    if (!isCGI(req, cfg))
     {
-        _next->handle(req, res, cfg);
+        if (_next)
+        {
+            _next->handle(req, res, cfg);
+        }
+        return;
+    }
+    if (!fileExists(req.realPath()))
+    {
+        sendStatusPage(NOT_FOUND, res, cfg);
         return;
     }
     try
@@ -86,8 +95,14 @@ std::string runCGI(Request& req, const ConfigSpec& cfg)
     }
 }
 
+bool isCGI(Request& req, const ConfigSpec& cfg)
+{
+    return cfg.hasCGI() && req.realPath().find(cfg.getCGI()) != std::string::npos;
+}
+
 void setEnvironment(Request& req, const ConfigSpec& cfg)
 {
+    setenv("DOCUMENT_ROOT", cfg.getRoot().c_str(), 1);
     setenv("CONTENT_TYPE", req.getHeader("Content-Type").c_str(), 1);
     setenv("CONTENT_LENGTH", req.getHeader("Content-Length").c_str(), 1);
     setenv("HTTP_USER_AGENT", req.getHeader("User-Agent").c_str(), 1);

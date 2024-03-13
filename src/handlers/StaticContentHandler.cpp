@@ -1,35 +1,10 @@
 #include <fstream>
 
-#include "Logger.hpp"
-#include "strings.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
 #include "filesystem.hpp"
 #include "HTTPConstants.hpp"
 #include "StaticContentHandler.hpp"
-#include "InternalErrorException.hpp"
-
-const std::string AUTOINDEX_TEMPLATE =
-
-    "<!DOCTYPE html>\n"
-    "<html lang=\"en\">\n"
-    "<head>\n"
-    "  <title>Index of TITLE</title>\n"
-    "</head>\n"
-    "<body>\n"
-    "  <h1>Index of TITLE</h1>\n"
-    "  <hr>\n"
-    "  <pre>\n"
-    "    <a href=\"../\">../</a>\n"
-    "LISTING"
-    "  </pre>\n"
-    "  <hr>\n"
-    "</body>\n"
-    "</html>\n";
-
-const std::string A_TAG = "    <a href=\"CONTENT\">CONTENT</a>\n";
-
-static std::string generateAutoIndex(const Request& req);
 
 StaticContentHandler::StaticContentHandler()
 {
@@ -60,20 +35,6 @@ void StaticContentHandler::handle(Request& req, Response& res, const ConfigSpec&
 
 void StaticContentHandler::handleGet(Request& req, Response& res, const ConfigSpec& cfg)
 {
-    if (ft::isDir(req.realPath()))
-    {
-        if (sendIndex(req, res, cfg))
-        {
-            return;
-        }
-        if (sendAutoIndex(req, res, cfg))
-        {
-            return;
-        }
-        sendStatusPage(FORBIDDEN, res, cfg);
-        return;
-    }
-
     std::ifstream resource(req.realPath().c_str());
     if (resource.is_open())
     {
@@ -102,55 +63,4 @@ void StaticContentHandler::handleDelete(Request& req, Response& res, const Confi
         return;
     }
     sendStatusPage(OK, res, cfg);
-}
-
-bool StaticContentHandler::sendIndex(Request& req, Response& res, const ConfigSpec& cfg)
-{
-    std::string index = req.realPath() + '/' + cfg.getIndex();
-    std::ifstream page(index.c_str());
-    if (page.is_open())
-    {
-        res.setStatus(OK);
-        res.setBody(page);
-        return true;
-    }
-    return false;
-}
-
-bool StaticContentHandler::sendAutoIndex(Request& req, Response& res, const ConfigSpec& cfg)
-{
-    if (!cfg.hasAutoIndex())
-    {
-        return false;
-    }
-    try
-    {
-        std::string autoindex = generateAutoIndex(req);
-        res.setStatus(OK);
-        res.setBody(autoindex);
-    }
-    catch (const InternalErrorException& e)
-    {
-        Logger::log(e.what());
-        sendStatusPage(INTERNAL_SERVER_ERROR, res, cfg);
-    }
-    return true;
-}
-
-std::string generateAutoIndex(const Request& req)
-{
-    ft::Strings dir = ft::scanDir(req.realPath());
-
-    std::string listing;
-    for (ft::Strings::iterator it = dir.begin(); it != dir.end(); ++it)
-    {
-        std::string tag = A_TAG;
-        ft::replace(tag, "CONTENT", *it);
-        listing.append(tag);
-    }
-
-    std::string page = AUTOINDEX_TEMPLATE;
-    ft::replace(page, "TITLE", req.path());
-    ft::replace(page, "LISTING", listing);
-    return page;
 }

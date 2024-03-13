@@ -9,6 +9,7 @@
 #include "Server.hpp"
 #include "ConfigSpec.hpp"
 #include "Connection.hpp"
+#include "IndexHandler.hpp"
 #include "InternalErrorException.hpp"
 #include "StaticContentHandler.hpp"
 #include "LocationHandler.hpp"
@@ -96,6 +97,9 @@ void Server::setupHandlers()
     ARequestHandler* access = new AccessControlHandler();
     _handlers.push_back(access);
 
+    ARequestHandler* index = new IndexContentHandler();
+    _handlers.push_back(index);
+
     ARequestHandler* dynamicContent = new DynamicContentHandler();
     _handlers.push_back(dynamicContent);
 
@@ -104,6 +108,7 @@ void Server::setupHandlers()
 
     _initHandler = location;
     location->setNext(access);
-    access->setNext(dynamicContent);
+    access->setNext(index);
+    index->setNext(dynamicContent);
     dynamicContent->setNext(staticContent);
 }
