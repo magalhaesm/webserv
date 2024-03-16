@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import warnings
 
@@ -28,20 +29,30 @@ PAGE_TEMPLATE = """\
 </html>
 """
 
+
 def main():
     form = cgi.FieldStorage()
     if "fileToUpload" in form:
-        content = form["fileToUpload"]
-        file_content = form["fileToUpload"].file.read()
-        file_path = os.environ["DOCUMENT_ROOT"] + "/" + content.filename
+        handle_uploaded_file(form["fileToUpload"])
+    else:
+        print("Content-Type: text/html\r\n")
+        print("<h1>Error: File not uploaded</h1>")
 
-        directory = os.path.dirname(file_path)
-        if not os.path.exists(directory):
-            os.makedirs(directory)
 
-        with open(file_path, "wb") as f:
-            f.write(file_content)
-        print(PAGE_TEMPLATE.format(content.filename))
+def handle_uploaded_file(file_item):
+    """Handle the uploaded file."""
+    content = file_item
+    file_content = file_item.file.read()
+    file_path = os.path.join(os.environ.get("DOCUMENT_ROOT", ""), content.filename)
+
+    directory = os.path.dirname(file_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    with open(file_path, "wb") as f:
+        f.write(file_content)
+    print("Content-Type: text/html\r\n")
+    print(PAGE_TEMPLATE.format(content.filename), end="")
 
 
 if __name__ == "__main__":
