@@ -1,79 +1,87 @@
 <!DOCTYPE html>
-<html>
-  <head>
+<html lang="pt-BR">
+<head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Senhas CGI</title>
     <style>
-    * {
-      overflow: hidden;
-      margin: 0;
-    }
-
-    body {
-      background: #000;
-    }
-
-    .content {
-      max-width: 1000px;
-      margin: 0 auto;
-      text-align: justify;
-      color: #fff;
-      font-family: "Lucida Console", monospace;
-      position: relative;
-      z-index: 1;
-      background-color: rgba(0, 0, 0, 0.8);
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-      position: absolute;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    h1 {
-      margin-bottom: 20px;
-    }
-
-    form {
-      margin-bottom: 20px;
-    }
-
-    label, input, .button {
-      display: block;
-      margin-bottom: 10px;
-    }
-
-    .button {
-      padding: 10px 20px;
-      background-color: rgb(0, 104, 136);
-      color: #fff;
-      font-size: 20px;
-      text-decoration: none;
-      border-radius: 4px;
-      text-align: center;
-      cursor: pointer;
-    }
-
-    .button:hover {
-      background-color: rgb(0, 186, 188);
-    }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #FAFAFA;
+            color: #080808;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+        .content {
+            max-width: 800px;
+            width: 95%;
+            padding: 20px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: auto; /* Centraliza na vertical se necessário */
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .form-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .form-group input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        input[type="number"] {
+          width: 60px;
+          margin-left: 10px;;
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <div class="content">
-      <h1>Gerador de Senhas CGI</h1>
-      <form action="/password_generator.py" method="get">
-        <label for="length">Comprimento da Senha:</label>
-        <input type="number" id="length" name="length" min="1" max="20" required>
-        <input type="checkbox" id="special_chars" name="special_chars" value="true">
-        <label for="special_chars">Incluir Caracteres Especiais</label>
-        <input type="checkbox" id="digits" name="digits" value="true">
-        <label for="digits">Incluir Números</label>
-        <input type="checkbox" id="uppercase" name="uppercase" value="true">
-        <label for="uppercase">Incluir Letras Maiúsculas</label>
-        <input type="submit" value="Gerar Senha" class="button">
-      </form>
+        <h1>Gerador de Senhas CGI</h1><br>
+        <form action="/password_generator.py" method="get">
+            <div class="form-group">
+                <label for="length">Comprimento da Senha: </label>
+                <input type="number" id="length" name="length" min="1" max="20" required>
+            </div>
+            <div class="form-group">
+                <input type="checkbox" id="special_chars" name="special_chars" value="true">
+                <label for="special_chars">Incluir Caracteres Especiais</label>
+            </div>
+            <div class="form-group">
+                <input type="checkbox" id="digits" name="digits" value="true">
+                <label for="digits">Incluir Números</label>
+            </div>
+            <div class="form-group">
+                <input type="checkbox" id="uppercase" name="uppercase" value="true">
+                <label for="uppercase">Incluir Letras Maiúsculas</label>
+            </div>
+            <br>
+            <input type="submit" value="Gerar Senha" class="button">
+        </form>
     </div>
-  </body>
+</body>
 </html>
