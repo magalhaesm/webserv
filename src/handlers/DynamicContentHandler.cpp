@@ -104,6 +104,7 @@ bool isCGI(Request& req, const ConfigSpec& cfg)
 void setEnvironment(Request& req, const ConfigSpec& cfg)
 {
     setenv("DOCUMENT_ROOT", cfg.getRoot().c_str(), 1);
+    setenv("UPLOAD_DIR", cfg.getUploadDir().c_str(), 1);
     setenv("CONTENT_TYPE", req.getHeader("Content-Type").c_str(), 1);
     setenv("CONTENT_LENGTH", req.getHeader("Content-Length").c_str(), 1);
     setenv("HTTP_USER_AGENT", req.getHeader("User-Agent").c_str(), 1);

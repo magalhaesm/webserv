@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Welcome to Vault</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.9.4/css/bulma.min.css">
+  </head>
+  <body>
+
+    <section class="section">
+      <div class="container">
+
+        <div class="columns">
+          <div class="column is-three-quarters">
+            <h1 class="title">Lista de Arquivos</h1>
+          </div>
+          <div class="column">
+            <form id="uploadForm" action="upload.py" method="post" enctype="multipart/form-data">
+              <label class="file-label">
+                <input id="fileInput" class="file-input" type="file" name="fileToUpload">
+                <span class="file-cta">
+                  <span class="file-icon">
+                    <i class="fas fa-upload"></i>
+                  </span>
+                  <span class="file-label">
+                    Escolher arquivo…
+                  </span>
+                </span>
+              </label>
+            </form>
+          </div>
+        </div>
+
+        <script>
+        document.getElementById('fileInput').addEventListener('change', function() {
+          document.getElementById('uploadForm').submit();
+        });
+        </script>
+
+        <table class="table is-fullwidth">
+          <thead>
+            <tr>
+              <th>Nome do Arquivo</th>
+              <th>Tamanho</th>
+              <th>Data de Modificação</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            $FILE_LISTING
+
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+    <script>
+    function deleteFile(fileName) {
+      var confirmed = confirm("Tem certeza de que deseja excluir este arquivo?");
+      if (!confirmed) {
+        return;
+      }
+
+      var xhr = new XMLHttpRequest();
+      xhr.open("DELETE", fileName, true);
+      xhr.addEventListener('readystatechange', function() {
+        if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+          window.location.href = "/";
+        }
+      });
+      xhr.send();
+    }
+    </script>
+  </body>
+</html>
