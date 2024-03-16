@@ -8,6 +8,7 @@
 #include "DynamicContentHandler.hpp"
 #include "InternalErrorException.hpp"
 
+const bool CGI = true;
 const int READ_END = 0;
 const int WRITE_END = 1;
 
@@ -38,7 +39,7 @@ void DynamicContentHandler::handle(Request& req, Response& res, const ConfigSpec
     {
         std::string response = runCGI(req, cfg);
         res.setStatus(OK);
-        res.setBody(response);
+        res.setBody(response, CGI);
     }
     catch (const std::runtime_error& e)
     {
@@ -113,4 +114,5 @@ void setEnvironment(Request& req, const ConfigSpec& cfg)
     setenv("SCRIPT_FILENAME", req.realPath().c_str(), 1);
     setenv("SCRIPT_NAME", req.path().c_str(), 1);
     setenv("SERVER_NAME", cfg.getServerName().c_str(), 1);
+    setenv("HTTP_COOKIE", req.getHeader("Cookie").c_str(), 1);
 }
