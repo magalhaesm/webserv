@@ -7,6 +7,13 @@
 #include "EventListener.hpp"
 #include "InternalErrorException.hpp"
 
+const char* ascii_art = "\
+,--.   ,--.       ,--.    ,---.\n\
+|  |   |  | ,---. |  |-. '   .-'  ,---. ,--.--.,--.  ,--.\n\
+|  |.'.|  || .-. :| .-. '`.  `-. | .-. :|  .--' \\  `'  /\n\
+|   ,'.   |\\   --.| `-' |.-'    |\\   --.|  |     \\    /\n\
+'--'   '--' `----' `---' `-----'  `----'`--'      `--'\n";
+
 int main(int argc, char** argv)
 {
     if (argc != 2)
@@ -18,6 +25,7 @@ int main(int argc, char** argv)
     try
     {
         ConfigParser parser(argv[1]);
+        std::cout << ascii_art << '\n';
         ConfigSpecList specs = parser.getSpecs();
         EventListener listener;
         for (size_t idx = 0; idx < specs.size(); ++idx)
