@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
+#include <iostream>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -19,6 +20,9 @@
 
 const int BACKLOG = SOMAXCONN;
 
+const std::string RESET = "\033[0m";
+const std::string GREEN = "\033[36m";
+
 Server::Server(const ConfigSpec& cfg)
     : _cfg(cfg)
     , _name(cfg.getServerName())
@@ -26,6 +30,9 @@ Server::Server(const ConfigSpec& cfg)
 {
     _socket = createSocket();
     setupHandlers();
+
+    std::cout << "==> http server \"" << _cfg.getServerName() << "\" started on " << GREEN << ":"
+              << _cfg.getPort() << RESET << '\n';
 }
 
 Server::~Server()
@@ -40,6 +47,7 @@ Server::~Server()
 void Server::handleRequest(Request& req, Response& res)
 {
     _initHandler->handle(req, res, _cfg);
+    res.setHeader("Server", "Webserv-42SP");
     Logger::log(req, res, _cfg);
 }
 
