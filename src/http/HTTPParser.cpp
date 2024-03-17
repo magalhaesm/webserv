@@ -210,6 +210,7 @@ inline void setMethod(const std::string& method, Message& msg)
     else
     {
         msg.method = UNKNOWN;
+        msg.error = NOT_IMPLEMENTED;
     }
 }
 

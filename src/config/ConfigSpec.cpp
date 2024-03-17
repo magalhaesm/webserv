@@ -1,5 +1,6 @@
 #include "ConfigSpec.hpp"
 #include "Directives.hpp"
+#include "strings.hpp"
 
 ConfigSpec::ConfigSpec(Directives* directives, const std::string& location)
     : _directives(directives)
@@ -137,5 +138,6 @@ const std::string& ConfigSpec::getUploadDir() const
 
 bool ConfigSpec::isMethodAllowed(const std::string& method) const
 {
-    return _directives->limit_except.empty() || _directives->limit_except.count(method);
+    return _directives->limit_except.empty()
+           || _directives->limit_except.count(ft::toLower(method));
 }
