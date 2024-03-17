@@ -68,6 +68,7 @@ private:
     void validateRedirect(const Strings& tokens, Directives* directive);
     void validateMethods(const Strings& tokens, Directives* directive);
     void validateClientBodySize(const Strings& tokens, Directives* directive);
+    void validateUploadDir(const Strings& tokens, Directives* directive);
 
     void enterServerContext();
     void enterLocationContext(const std::string& location);

@@ -26,6 +26,7 @@ struct Directives
     Redirect redirect;
     std::set<std::string> limit_except;
     int client_max_body_size;
+    std::string upload_dir;
     Locations locations;
 };
 

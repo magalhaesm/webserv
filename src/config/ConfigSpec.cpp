@@ -130,6 +130,11 @@ int ConfigSpec::getClientBodySize() const
     return _directives->client_max_body_size;
 }
 
+const std::string& ConfigSpec::getUploadDir() const
+{
+    return _directives->upload_dir;
+}
+
 bool ConfigSpec::isMethodAllowed(const std::string& method) const
 {
     return _directives->limit_except.empty() || _directives->limit_except.count(method);

@@ -1,9 +1,11 @@
 #include <fstream>
 #include <sstream>
+#include <string>
 
 #include "strings.hpp"
 #include "Connection.hpp"
 #include "Response.hpp"
+#include "HTTPConstants.hpp"
 
 Response::Response()
     : _statusCode(0)
@@ -33,6 +35,35 @@ void Response::setBody(const std::string& body)
 {
     _body = body;
     setHeader("Content-Length", _body.size());
+}
+
+void Response::setBody(const std::string& body, bool)
+{
+    size_t headerEnd = body.find(CRLF);
+    if (headerEnd == std::string::npos)
+    {
+        setBody(body);
+        return;
+    }
+
+    std::string line;
+    std::istringstream iss(body.substr(0, headerEnd));
+    while (std::getline(iss, line))
+    {
+        size_t colonPos = line.find(": ");
+        if (colonPos != std::string::npos)
+        {
+            std::string key = line.substr(0, colonPos);
+            std::string value = line.substr(colonPos + 2);
+            if (ft::toLower(key) == "status")
+            {
+                setStatus(std::atoi(value.c_str()));
+                continue;
+            }
+            setHeader(key, value);
+        }
+    }
+    setBody(body.c_str() + headerEnd + CRLF.length());
 }
 
 void Response::setBody(const std::ifstream& body)

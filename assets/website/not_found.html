@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fluxo do Webserv</title>
+    <title>Not Found :(</title>
     <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,15 +11,20 @@
       color: #080808;
       margin: 0;
       padding: 0;
-      text-align: center; /* Alinha todo o texto ao centro, que será herdado por todos os elementos */
+      text-align: center; /* Centraliza o texto */
+      height: 100vh; /* 100% da altura da viewport */
+      display: flex;
+      flex-direction: column;
+      justify-content: center; /* Alinha verticalmente ao centro */
+      align-items: center; /* Alinha horizontalmente ao centro */
     }
     .container {
-      max-width: 800px; /* Largura máxima do contêiner para dispositivos grandes */
-      width: 95%; /* Largura como porcentagem para ser responsiva */
-      margin: 20px auto; /* Centraliza o contêiner */
+      max-width: 800px;
+      width: 95%;
+      margin: 20px;
       padding: 20px;
     }
-    .container img {
+    img {
       max-width: 100%; /* A imagem nunca será maior que o contêiner */
       height: auto; /* Mantém a proporção da imagem */
     }
@@ -30,12 +35,8 @@
   </head>
   <body>
     <div class="container">
-      <h2>Fluxo Resumido do Webserv</h2>
-      <img src="/img/fluxo-webserver.svg" alt="Fluxo do Webserv" />
-    </div>
-    <div class="container">
-      <h2>Socket para conexão servidor-cliente</h2>
-      <img src="/img/socket.gif" alt="Fluxo no Socket" />
+      <img src="/img/not-found.webp" alt="Página Não Encontrada" />
+      <br><br>
       <footer>Feito por Marcelo, Alexandre e Jorge</footer>
     </div>
   </body>

@@ -178,6 +178,7 @@ void ConfigParser::initializeValidationMap()
     _keywords["redirect"] = &ConfigParser::validateRedirect;
     _keywords["limit_except"] = &ConfigParser::validateMethods;
     _keywords["client_body_size"] = &ConfigParser::validateClientBodySize;
+    _keywords["upload_dir"] = &ConfigParser::validateUploadDir;
 }
 
 std::string ConfigParser::fmtError(const std::string& message)
@@ -310,6 +311,12 @@ void ConfigParser::validateClientBodySize(const Strings& tokens, Directives* dir
         throw ParseException(fmtError("invalid value for 'client_body_size': " + tokens[1]));
     }
     directive->client_max_body_size = std::atoi(tokens[1].c_str()) << 20;
+}
+
+void ConfigParser::validateUploadDir(const Strings& tokens, Directives* directive)
+{
+    checkArgCount(tokens, tokens.size() != 2);
+    directive->upload_dir = tokens[1];
 }
 
 inline void ConfigParser::enterServerContext()

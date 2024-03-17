@@ -15,6 +15,7 @@ public:
     void setHeader(const std::string& field, const std::string& value);
     void setHeader(const std::string& field, int value);
     void setBody(const std::string& body);
+    void setBody(const std::string& body, bool cgi);
     void setBody(const std::ifstream& body);
 
     int getStatus();

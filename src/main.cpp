@@ -7,6 +7,8 @@
 #include "EventListener.hpp"
 #include "InternalErrorException.hpp"
 
+void show_banner();
+
 int main(int argc, char** argv)
 {
     if (argc != 2)
@@ -20,6 +22,7 @@ int main(int argc, char** argv)
         ConfigParser parser(argv[1]);
         ConfigSpecList specs = parser.getSpecs();
         EventListener listener;
+        show_banner();
         for (size_t idx = 0; idx < specs.size(); ++idx)
         {
             listener.subscribe(new Server(specs[idx]));
@@ -35,4 +38,15 @@ int main(int argc, char** argv)
     {
         Logger::log(e.what());
     }
+}
+
+void show_banner()
+{
+    const char* asciiArt = "\
+,--.   ,--.       ,--.    ,---.\n\
+|  |   |  | ,---. |  |-. '   .-'  ,---. ,--.--.,--.  ,--.\n\
+|  |.'.|  || .-. :| .-. '`.  `-. | .-. :|  .--' \\  `'  /\n\
+|   ,'.   |\\   --.| `-' |.-'    |\\   --.|  |     \\    /\n\
+'--'   '--' `----' `---' `-----'  `----'`--'      `--'\n";
+    std::cout << asciiArt << '\n';
 }

@@ -22,10 +22,9 @@ const std::string AUTOINDEX_TEMPLATE =
     "</body>\n"
     "</html>\n";
 
-const std::string A_TAG = "    <a href=\"CONTENT\">CONTENT</a>\n";
+const std::string A_TAG = "    <a href=\"PATH\">CONTENT</a>\n";
 
 static std::string generateAutoIndex(const Request& req);
-static bool isLastCharacterSlash(const std::string& str);
 
 IndexContentHandler::IndexContentHandler()
 {
@@ -33,7 +32,7 @@ IndexContentHandler::IndexContentHandler()
 
 void IndexContentHandler::handle(Request& req, Response& res, const ConfigSpec& cfg)
 {
-    if (!isLastCharacterSlash(req.realPath()))
+    if (!ft::isDir(req.realPath().c_str()))
     {
         if (_next)
         {
@@ -69,17 +68,6 @@ void IndexContentHandler::handle(Request& req, Response& res, const ConfigSpec& 
     sendStatusPage(NOT_FOUND, res, cfg);
 }
 
-inline bool isLastCharacterSlash(const std::string& str)
-{
-    if (str.empty())
-    {
-        return false;
-    }
-
-    char lastChar = str[str.length() - 1];
-    return lastChar == '/';
-}
-
 std::string generateAutoIndex(const Request& req)
 {
     ft::Strings dir = ft::scanDir(req.realPath());
@@ -88,6 +76,8 @@ std::string generateAutoIndex(const Request& req)
     for (ft::Strings::iterator it = dir.begin(); it != dir.end(); ++it)
     {
         std::string tag = A_TAG;
+        std::string path = req.path() == "/" ? "" : req.path() + '/';
+        ft::replace(tag, "PATH", path + *it);
         ft::replace(tag, "CONTENT", *it);
         listing.append(tag);
     }

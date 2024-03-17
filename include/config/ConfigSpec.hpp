@@ -28,6 +28,7 @@ public:
     ConfigSpec getContext(const std::string& path) const;
     std::string getLocation() const;
     int getClientBodySize() const;
+    const std::string& getUploadDir() const;
     bool isMethodAllowed(const std::string& method) const;
 
 private:
