@@ -7,6 +7,7 @@ const std::string& statusText(int code)
     status[100] = "Continue";
     status[200] = "OK";
     status[301] = "Moved Permanently";
+    status[302] = "Found";
     status[400] = "Bad Request";
     status[403] = "Forbidden";
     status[404] = "Not Found";
