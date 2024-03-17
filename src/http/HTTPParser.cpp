@@ -68,6 +68,10 @@ bool HTTPParser::parseRequest(std::string& raw, Message& msg, size_t maxSize)
     }
     case CONTENT_LENGTH:
     {
+        if (msg.written > maxSize)
+        {
+            msg.error = REQUEST_ENTITY_TOO_LARGE;
+        }
         msg.written += write(msg.body, raw.data(), raw.size());
         raw.clear();
 
@@ -80,6 +84,10 @@ bool HTTPParser::parseRequest(std::string& raw, Message& msg, size_t maxSize)
     }
     case CHUNKED:
     {
+        if (msg.written > maxSize)
+        {
+            msg.error = REQUEST_ENTITY_TOO_LARGE;
+        }
         if (raw.find(FINAL_CHUNK) == std::string::npos)
         {
             return AGAIN;
