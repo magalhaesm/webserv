@@ -26,9 +26,7 @@ HEADERS += InternalErrorException.hpp
 SOURCES := main.cpp $(HEADERS:.hpp=.cpp)
 
 OBJS     := $(addprefix $(OBJ_DIR)/, $(SOURCES:.cpp=.o))
-CXXFLAGS := -Wall -Werror -Wextra -std=c++98 -g $(addprefix -I ,$(INC_DIRS))
-
-all: $(NAME)
+CXXFLAGS := -Wall -Werror -Wextra -std=c++98 -O2 $(addprefix -I ,$(INC_DIRS))
 
 run: $(NAME)
 	@ echo "==> Running $(NAME)"
@@ -46,9 +44,6 @@ $(OBJ_DIR):
 	@$(LOG) "Creating objects directory"
 	@mkdir $@
 
-test: $(NAME)
-	@make -C test --no-print-directory
-
 leak: $(NAME)
 	valgrind --leak-check=full --show-leak-kinds=all --track-fds=yes \
 		./$(NAME) server.conf
@@ -65,4 +60,4 @@ fclean: clean
 
 re: clean all
 
-.PHONY: all clean fclean re test
+.PHONY: all clean fclean re run
